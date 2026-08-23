@@ -20,4 +20,7 @@ public sealed class CreditOptions
 
     /// <summary>Credits charged per AI parse. Kept configurable for future tuning.</summary>
     public int CostPerParse { get; set; } = 1;
+
+    /// <summary>Free AI Smart Credits seeded to every new device on first contact.</summary>
+    public int FreeCredits { get; set; } = 10;
 }

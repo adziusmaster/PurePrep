@@ -1,13 +1,21 @@
 ﻿using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.EntityFrameworkCore;
 using PurePrep.Application;
 using PurePrep.Infrastructure;
 using PurePrep.Presentation;
+using PurePrep.Services;
 
 namespace PurePrep;
 
 public static class MauiProgram
 {
+	// Backend base URL for the AI Smart Parser + credit endpoints.
+	// - Android emulator: 10.0.2.2 routes to the host machine running the local server.
+	// - Real device / release: point this at your deployed backend, e.g. https://api.yourdomain.com/
+	//   (use HTTPS in production; cleartext HTTP on Android needs a network-security-config exception).
+	private const string BackendBaseUrl = "http://10.0.2.2:5299/";
+
 	public static MauiApp CreateMauiApp()
 	{
 		var builder = MauiApp.CreateBuilder();
@@ -21,17 +29,25 @@ public static class MauiProgram
 
 		var databasePath = Path.Combine(FileSystem.AppDataDirectory, "pureprep.db");
 		builder.Services.AddDbContextFactory<PurePrepDbContext>(options => options.UseSqlite($"Data Source={databasePath}"));
-		builder.Services.AddSingleton(_ =>
-		{
-			var client = new HttpClient { Timeout = TimeSpan.FromSeconds(20) };
-			// Many recipe sites reject requests without a browser-like User-Agent (HTTP 403).
-			client.DefaultRequestHeaders.UserAgent.ParseAdd("Mozilla/5.0 (Linux; Android 14) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Mobile Safari/537.36");
-			client.DefaultRequestHeaders.Accept.ParseAdd("text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8");
-			client.DefaultRequestHeaders.AcceptLanguage.ParseAdd("en-US,en;q=0.9");
-			return client;
-		});
-		builder.Services.AddSingleton<IRecipeParser, RecipeParser>();
 		builder.Services.AddSingleton<IRecipeRepository, SqliteRecipeRepository>();
+
+		// Anonymous device identity + in-app billing (Google Play). Billing is stubbed until the
+		// Play-signed build; the paywall degrades gracefully when it is unsupported.
+		builder.Services.AddSingleton<IDeviceIdentity, SecureStorageDeviceIdentity>();
+		builder.Services.AddSingleton<IBillingService, PlayBillingService>();
+
+		// Link import is powered by the backend AI Smart Parser and is gated by server-side credits.
+		builder.Services.AddHttpClient<IRecipeParser, AiProxyRecipeParser>(client =>
+		{
+			client.BaseAddress = new Uri(BackendBaseUrl);
+			client.Timeout = TimeSpan.FromSeconds(30);
+		});
+		builder.Services.AddHttpClient<ISmartCreditsClient, HttpSmartCreditsClient>(client =>
+		{
+			client.BaseAddress = new Uri(BackendBaseUrl);
+			client.Timeout = TimeSpan.FromSeconds(15);
+		});
+
 		builder.Services.AddTransient<RecipeLibraryViewModel>();
 
 #if DEBUG

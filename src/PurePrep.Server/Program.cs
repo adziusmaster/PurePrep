@@ -40,8 +40,9 @@ var app = builder.Build();
 
 app.MapPost("/api/ai/parse", ParseEndpoint.Parse);
 app.MapPost("/api/billing/redeem", BillingEndpoint.Redeem);
-app.MapGet("/api/credits/{deviceId:guid}", async (Guid deviceId, ICreditStore credits, CancellationToken ct) =>
-    Results.Ok(new { balance = await credits.GetBalanceAsync(deviceId, ct) }));
+app.MapGet("/api/credits/{deviceId:guid}", async (Guid deviceId, ICreditStore credits,
+    Microsoft.Extensions.Options.IOptions<CreditOptions> creditOptions, CancellationToken ct) =>
+    Results.Ok(new { balance = await credits.EnsureDeviceAsync(deviceId, creditOptions.Value.FreeCredits, ct) }));
 
 app.MapPost("/api/dev/grant", DevEndpoint.Grant).AddEndpointFilter(DevEndpoint.SecretFilter);
 

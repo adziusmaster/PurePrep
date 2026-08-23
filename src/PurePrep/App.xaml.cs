@@ -1,5 +1,5 @@
-﻿using Microsoft.Extensions.DependencyInjection;
-using PurePrep.Application;
+using Microsoft.Extensions.DependencyInjection;
+using PurePrep.Presentation;
 
 namespace PurePrep;
 
@@ -15,8 +15,7 @@ public partial class App : Microsoft.Maui.Controls.Application
 
 	protected override Window CreateWindow(IActivationState? activationState)
 	{
-		var parser = _services.GetRequiredService<IRecipeParser>();
-		var repository = _services.GetRequiredService<IRecipeRepository>();
-		return new Window(new NavigationPage(new MainPage(parser, repository)));
+		var viewModel = _services.GetRequiredService<RecipeLibraryViewModel>();
+		return new Window(new NavigationPage(new MainPage(viewModel)));
 	}
 }

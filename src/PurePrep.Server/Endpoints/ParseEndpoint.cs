@@ -27,6 +27,9 @@ public static class ParseEndpoint
         if (!await urlGuard.IsPublicHttpAsync(url, ct))
             return Results.BadRequest(new { error = "URL is not an allowed public http(s) address." });
 
+        // Seed the 10 free credits the first time we ever see this device.
+        await credits.EnsureDeviceAsync(request.DeviceId, creditOptions.Value.FreeCredits, ct);
+
         var cost = creditOptions.Value.CostPerParse;
         if (!await credits.TrySpendAsync(request.DeviceId, cost, ct))
             return Results.Json(new { error = "Insufficient credits." }, statusCode: StatusCodes.Status402PaymentRequired);

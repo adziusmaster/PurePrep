@@ -58,7 +58,7 @@
                         <Label Text="You're out of Smart Credits." TextColor="#F5F4EE" FontSize="15" FontAttributes="Bold" />
                         <Label Text="Top up to import recipes by link. Manual add is always free." TextColor="#B9C9A6" FontSize="12" />
                     </VerticalStackLayout>
-                    <Button Grid.Column="1" Text="Top up" Command="{Binding UpgradeCommand}" BackgroundColor="#A7D46F" TextColor="#172013" FontAttributes="Bold" Padding="15,8" />
+                    <Button Grid.Column="1" Text="Top up" Command="{Binding TopUpCommand}" BackgroundColor="#A7D46F" TextColor="#172013" FontAttributes="Bold" Padding="15,8" />
                 </Grid>
             </Border>
         </Grid>

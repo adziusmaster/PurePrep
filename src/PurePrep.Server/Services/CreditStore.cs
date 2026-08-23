@@ -7,6 +7,12 @@ public interface ICreditStore
 {
     Task<int> GetBalanceAsync(Guid deviceId, CancellationToken ct = default);
 
+    /// <summary>
+    /// Ensures a credit row exists for the device, seeding it with <paramref name="initialCredits"/>
+    /// free credits on first contact. Returns the current balance. Safe to call repeatedly.
+    /// </summary>
+    Task<int> EnsureDeviceAsync(Guid deviceId, int initialCredits, CancellationToken ct = default);
+
     /// <summary>Atomically deducts <paramref name="amount"/> credits. Returns false if insufficient.</summary>
     Task<bool> TrySpendAsync(Guid deviceId, int amount, CancellationToken ct = default);
 
@@ -25,6 +31,27 @@ public sealed class SqliteCreditStore(IDbContextFactory<ServerDbContext> factory
         await db.Database.EnsureCreatedAsync(ct);
         var row = await db.Credits.AsNoTracking().FirstOrDefaultAsync(x => x.DeviceId == deviceId, ct);
         return row?.Balance ?? 0;
+    }
+
+    public async Task<int> EnsureDeviceAsync(Guid deviceId, int initialCredits, CancellationToken ct = default)
+    {
+        await using var db = await factory.CreateDbContextAsync(ct);
+        await db.Database.EnsureCreatedAsync(ct);
+        var existing = await db.Credits.AsNoTracking().FirstOrDefaultAsync(x => x.DeviceId == deviceId, ct);
+        if (existing is not null) return existing.Balance;
+
+        var now = DateTimeOffset.UtcNow;
+        db.Credits.Add(new DeviceCredit { DeviceId = deviceId, Balance = initialCredits, CreatedAt = now, UpdatedAt = now });
+        try
+        {
+            await db.SaveChangesAsync(ct);
+            return initialCredits;
+        }
+        catch (DbUpdateException)
+        {
+            // A concurrent request already seeded this device; return the persisted balance.
+            return await GetBalanceAsync(deviceId, ct);
+        }
     }
 
     public async Task<bool> TrySpendAsync(Guid deviceId, int amount, CancellationToken ct = default)

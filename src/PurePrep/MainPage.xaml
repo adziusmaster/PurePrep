@@ -1,0 +1,66 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="PurePrep.MainPage"
+             Shell.NavBarIsVisible="False"
+             BackgroundColor="#111411">
+    <Grid RowDefinitions="Auto,Auto,*" Padding="24,28,24,18" RowSpacing="22">
+        <Grid ColumnDefinitions="*,Auto">
+            <VerticalStackLayout Spacing="4">
+                <Label Text="PUREPREP" TextColor="#A7D46F" FontSize="12" CharacterSpacing="2.4" FontAttributes="Bold" />
+                <Label Text="Your kitchen, focused." TextColor="#F5F4EE" FontSize="29" FontAttributes="Bold" />
+            </VerticalStackLayout>
+            <Border Grid.Column="1" BackgroundColor="#20261F" Stroke="#354332" StrokeThickness="1" Padding="12,8" StrokeShape="RoundRectangle 14">
+                <Label Text="{Binding QuotaSummary}" TextColor="#C8E994" FontSize="12" VerticalOptions="Center" />
+            </Border>
+        </Grid>
+
+        <Border Grid.Row="1" BackgroundColor="#1A211A" Stroke="#344631" StrokeThickness="1" Padding="16,8" StrokeShape="RoundRectangle 16">
+            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10">
+                <Entry Text="{Binding UrlInput}" Placeholder="Paste a recipe URL" TextColor="#F5F4EE" PlaceholderColor="#798176" Keyboard="Url" ClearButtonVisibility="WhileEditing" />
+                <Button Grid.Column="1" Text="Import" Command="{Binding ImportCommand}" BackgroundColor="#A7D46F" TextColor="#172013" FontAttributes="Bold" Padding="18,10" />
+            </Grid>
+        </Border>
+
+            <Grid Grid.Row="2" RowDefinitions="Auto,Auto,Auto,*" RowSpacing="14">
+            <Grid ColumnDefinitions="*,Auto">
+                <VerticalStackLayout Spacing="2">
+                    <Label Text="Your recipes" TextColor="#F5F4EE" FontSize="21" FontAttributes="Bold" />
+                    <Label Text="Only the good part." TextColor="#879184" FontSize="14" />
+                </VerticalStackLayout>
+                <Button Grid.Column="1" Text="Premium  ›" Command="{Binding UpgradeCommand}" BackgroundColor="Transparent" TextColor="#A7D46F" Padding="8,4" />
+            </Grid>
+
+            <Label Grid.Row="1" Text="{Binding ErrorMessage}" TextColor="#FFB4A9" FontSize="13" IsVisible="{Binding ErrorMessage, Converter={StaticResource StringNotNullOrEmptyConverter}}" />
+
+            <CollectionView Grid.Row="3" ItemsSource="{Binding Recipes}" SelectionMode="None">
+                <CollectionView.ItemTemplate>
+                    <DataTemplate>
+                        <Border Margin="0,0,0,12" Padding="16" BackgroundColor="#1B211B" Stroke="#2B352A" StrokeThickness="1" StrokeShape="RoundRectangle 18">
+                            <Grid RowDefinitions="Auto,Auto" ColumnDefinitions="*,Auto" RowSpacing="11">
+                                    <Label Text="{Binding Title}" TextColor="#F5F4EE" FontSize="18" FontAttributes="Bold" />
+                                    <Grid.GestureRecognizers>
+                                        <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.OpenFocusCommand}" CommandParameter="{Binding .}" />
+                                    </Grid.GestureRecognizers>
+                                <Label Grid.Row="1" Text="{Binding Steps.Count, StringFormat='{0} steps  ·  ready to cook'}" TextColor="#8E9A8B" FontSize="13" />
+                                <Border Grid.Column="1" Grid.RowSpan="2" BackgroundColor="#2A3825" StrokeThickness="0" Padding="13,8" StrokeShape="RoundRectangle 12">
+                                    <Label Text="FOCUS" TextColor="#C8E994" FontSize="11" FontAttributes="Bold" VerticalOptions="Center" />
+                                </Border>
+                            </Grid>
+                        </Border>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+
+            <Border Grid.Row="2" BackgroundColor="#25321F" Stroke="#52663B" StrokeThickness="1" Padding="16" IsVisible="{Binding IsUpgradePromptVisible}" StrokeShape="RoundRectangle 16">
+                <Grid ColumnDefinitions="*,Auto" ColumnSpacing="14">
+                    <VerticalStackLayout Spacing="3">
+                        <Label Text="You have room to cook more." TextColor="#F5F4EE" FontSize="15" FontAttributes="Bold" />
+                        <Label Text="Premium unlocks unlimited saves and Focus Mode." TextColor="#B9C9A6" FontSize="12" />
+                    </VerticalStackLayout>
+                    <Button Grid.Column="1" Text="Unlock" Command="{Binding UpgradeCommand}" BackgroundColor="#A7D46F" TextColor="#172013" FontAttributes="Bold" Padding="15,8" />
+                </Grid>
+            </Border>
+        </Grid>
+    </Grid>
+</ContentPage>

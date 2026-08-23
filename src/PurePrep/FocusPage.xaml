@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="PurePrep.FocusPage"
+             Shell.NavBarIsVisible="False"
+             BackgroundColor="#0E100E">
+    <Grid Padding="24,28,24,22" RowDefinitions="Auto,Auto,*,Auto" RowSpacing="24">
+        <Grid ColumnDefinitions="Auto,*,Auto">
+            <Button Text="‹" Clicked="OnBackClicked" BackgroundColor="Transparent" TextColor="#D7E5C7" FontSize="32" Padding="0" WidthRequest="42" HeightRequest="42" />
+            <Label Grid.Column="1" Text="FOCUS MODE" TextColor="#A7D46F" FontSize="12" CharacterSpacing="2.2" FontAttributes="Bold" VerticalOptions="Center" HorizontalOptions="Center" />
+            <Label Grid.Column="2" Text="ON" TextColor="#A7D46F" FontSize="12" FontAttributes="Bold" VerticalOptions="Center" />
+        </Grid>
+
+        <VerticalStackLayout Grid.Row="1" Spacing="4">
+            <Label Text="{Binding Recipe.Title}" TextColor="#F5F4EE" FontSize="27" FontAttributes="Bold" />
+            <Label Text="{Binding StepLabel}" TextColor="#83917C" FontSize="12" CharacterSpacing="1.6" FontAttributes="Bold" />
+        </VerticalStackLayout>
+
+        <Border Grid.Row="2" BackgroundColor="#1A2119" Stroke="#3A4D31" StrokeThickness="1" Padding="24" StrokeShape="RoundRectangle 22" VerticalOptions="Center">
+            <VerticalStackLayout Spacing="22">
+                <Label Text="{Binding CurrentStep.Instruction}" TextColor="#F5F4EE" FontSize="29" FontAttributes="Bold" LineHeight="1.15" />
+                <BoxView HeightRequest="2" Color="#3A4D31" />
+                <Label Text="Keep the screen open while you cook. Tap next when you are ready." TextColor="#91A08C" FontSize="14" />
+            </VerticalStackLayout>
+        </Border>
+
+        <Grid Grid.Row="3" ColumnDefinitions="*,*" ColumnSpacing="12">
+            <Button Text="BACK" Command="{Binding PreviousCommand}" BackgroundColor="#202820" TextColor="#AEBBA5" FontAttributes="Bold" CornerRadius="14" HeightRequest="54" />
+            <Button Grid.Column="1" Text="NEXT  ›" Command="{Binding NextCommand}" BackgroundColor="#A7D46F" TextColor="#172013" FontAttributes="Bold" CornerRadius="14" HeightRequest="54" />
+        </Grid>
+    </Grid>
+</ContentPage>

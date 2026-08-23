@@ -31,7 +31,7 @@
 		<ApplicationTitle>PurePrep</ApplicationTitle>
 
 		<!-- App Identifier -->
-		<ApplicationId>com.companyname.pureprep</ApplicationId>
+		<ApplicationId>com.adziusmaster.pureprep</ApplicationId>
 
 		<!-- Versions -->
 		<ApplicationDisplayVersion>1.0</ApplicationDisplayVersion>
@@ -45,6 +45,24 @@
 		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">21.0</SupportedOSPlatformVersion>
 		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">10.0.17763.0</SupportedOSPlatformVersion>
 		<TargetPlatformMinVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">10.0.17763.0</TargetPlatformMinVersion>
+	</PropertyGroup>
+
+	<!--
+		Android release signing. Kept out of source control: the keystore lives outside the repo
+		and the password is read from the PUREPREP_KEYSTORE_PASS environment variable.
+		Activates only for Release Android builds when the env var is set, e.g.:
+			PUREPREP_KEYSTORE_PASS=... dotnet publish src/PurePrep/PurePrep.csproj -c Release -f net10.0-android
+		Override the keystore path/alias with the PurePrepKeystore / PurePrepKeyAlias properties if needed.
+	-->
+	<PropertyGroup Condition="'$(Configuration)' == 'Release' And $([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android' And '$(PUREPREP_KEYSTORE_PASS)' != ''">
+		<PurePrepKeystore Condition="'$(PurePrepKeystore)' == ''">$(HOME)/keystores/pureprep-upload.jks</PurePrepKeystore>
+		<PurePrepKeystore Condition="'$(PurePrepKeystore)' == ''">$(USERPROFILE)/keystores/pureprep-upload.jks</PurePrepKeystore>
+		<PurePrepKeyAlias Condition="'$(PurePrepKeyAlias)' == ''">pureprep</PurePrepKeyAlias>
+		<AndroidKeyStore>true</AndroidKeyStore>
+		<AndroidSigningKeyStore>$(PurePrepKeystore)</AndroidSigningKeyStore>
+		<AndroidSigningKeyAlias>$(PurePrepKeyAlias)</AndroidSigningKeyAlias>
+		<AndroidSigningStorePass>$(PUREPREP_KEYSTORE_PASS)</AndroidSigningStorePass>
+		<AndroidSigningKeyPass>$(PUREPREP_KEYSTORE_PASS)</AndroidSigningKeyPass>
 	</PropertyGroup>
 
 	<ItemGroup>

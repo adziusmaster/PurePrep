@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>PurePrep | Privacy Policy</title>
+  <meta name="description" content="Privacy Policy for the PurePrep recipe app.">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@400;600;700;800&display=swap');
+    :root { --ink:#f4f1e8; --muted:#8e9a8b; --line:#30402d; --panel:#182018; --lime:#b7df78; --lime-dark:#172313; }
+    * { box-sizing:border-box; }
+    body { margin:0; min-height:100vh; background:#0c100d; color:var(--ink); font-family:Manrope, sans-serif; line-height:1.7; }
+    body:before { content:""; position:fixed; inset:0; pointer-events:none; opacity:.18; background-image:linear-gradient(rgba(183,223,120,.06) 1px, transparent 1px),linear-gradient(90deg,rgba(183,223,120,.06) 1px,transparent 1px); background-size:48px 48px; mask-image:linear-gradient(to bottom,black,transparent 75%); }
+    .wrap { position:relative; max-width:760px; margin:auto; padding:48px 26px 96px; }
+    .eyebrow { font:500 11px 'DM Mono', monospace; letter-spacing:.16em; text-transform:uppercase; color:var(--lime); }
+    h1 { margin:12px 0 4px; font-size:clamp(30px,5vw,46px); line-height:1.05; letter-spacing:-.03em; }
+    .updated { color:var(--muted); font:500 12px 'DM Mono',monospace; letter-spacing:.06em; margin-bottom:36px; }
+    h2 { margin:38px 0 10px; font-size:20px; letter-spacing:-.01em; }
+    p { color:#d7e2cf; margin:10px 0; }
+    ul { margin:10px 0; padding-left:20px; color:#d7e2cf; }
+    li { margin:7px 0; }
+    a { color:var(--lime); }
+    strong { color:var(--ink); }
+    .lead { font-size:17px; color:#e4ecdc; border-left:2px solid var(--lime); padding-left:16px; }
+    .back { display:inline-block; margin-bottom:30px; color:var(--lime); font:600 13px 'DM Mono',monospace; text-decoration:none; letter-spacing:.06em; }
+    .card { border:1px solid var(--line); background:var(--panel); padding:20px 22px; margin-top:14px; }
+    footer { margin-top:54px; padding-top:20px; border-top:1px solid var(--line); color:var(--muted); font-size:13px; }
+  </style>
+</head>
+<body>
+  <main class="wrap">
+    <a class="back" href="/">&larr; Back to PurePrep</a>
+    <div class="eyebrow">PurePrep / legal</div>
+    <h1>Privacy Policy</h1>
+    <div class="updated">Last updated: 24 August 2026</div>
+
+    <p class="lead">PurePrep is a minimalist, offline-first recipe app. We built it to be quiet: no accounts, no advertising, and no tracking. This policy explains the small amount of data the app handles and why.</p>
+
+    <h2>Who we are</h2>
+    <p>PurePrep ("the app", "we", "us") is developed by <strong>adziusmaster</strong>. If you have any questions about this policy or your data, contact us at <a href="mailto:adzius.lech@gmail.com">adzius.lech@gmail.com</a>.</p>
+
+    <h2>No account required</h2>
+    <p>PurePrep does not ask you to sign up, log in, or provide a name, email address, or password. We do not know who you are, and we do not build a profile of you.</p>
+
+    <h2>Data stored on your device</h2>
+    <p>The recipes you save &mdash; their titles, ingredients, and steps &mdash; are stored <strong>locally on your device</strong> in a private database. This data never leaves your phone except in the specific cases described below. Uninstalling the app removes this data.</p>
+
+    <h2>Anonymous device identifier</h2>
+    <p>The first time you open the app, PurePrep generates a random identifier (a GUID) and stores it securely on your device. This identifier is not linked to your identity, your Google account, or any advertising ID. It is used only to keep track of your available Smart Credits on our server, so that your balance is remembered between sessions.</p>
+
+    <h2>Importing a recipe by link (AI Smart Parser)</h2>
+    <p>When you choose to import a recipe from a URL, the app sends the following to our backend service so the recipe can be extracted:</p>
+    <ul>
+      <li>the <strong>recipe URL</strong> you pasted;</li>
+      <li>your <strong>anonymous device identifier</strong> (to check and deduct one Smart Credit).</li>
+    </ul>
+    <p>Our backend fetches the public web page at that URL and sends its content to <strong>Google's Gemini API</strong>, which extracts a clean title, ingredient list, and steps. The cleaned recipe is returned to your device and saved locally. We do not sell this data, and we do not use it for advertising. Google's handling of the request is governed by the <a href="https://ai.google.dev/gemini-api/terms" target="_blank" rel="noopener">Google Gemini API terms</a> and <a href="https://policies.google.com/privacy" target="_blank" rel="noopener">Google Privacy Policy</a>.</p>
+    <p>If you prefer not to send any data off your device, you can add and edit recipes manually instead of importing by link.</p>
+
+    <h2>Purchases (Smart Credits)</h2>
+    <p>Smart Credits let you import more recipes by link. Purchases are processed by <strong>Google Play Billing</strong> &mdash; we never see or store your payment card details. To add the credits you bought to your balance, the app sends your <strong>Google Play purchase token</strong> and your <strong>anonymous device identifier</strong> to our backend, which verifies the purchase with Google. Google's processing of your payment is governed by the <a href="https://policies.google.com/privacy" target="_blank" rel="noopener">Google Privacy Policy</a>.</p>
+
+    <h2>What we do not do</h2>
+    <ul>
+      <li>We do not show advertisements.</li>
+      <li>We do not use third-party analytics or tracking SDKs.</li>
+      <li>We do not sell or share your data with data brokers.</li>
+      <li>We do not collect your location, contacts, photos, or microphone.</li>
+    </ul>
+
+    <h2>Data retention</h2>
+    <p>Your recipes remain on your device until you delete them or uninstall the app. On our server we retain only your anonymous device identifier and its Smart Credit balance and purchase records, for as long as needed to provide the credit system and to comply with our obligations (for example, handling refunds or fraud).</p>
+
+    <h2>Children</h2>
+    <p>PurePrep is not directed to children under 13, and we do not knowingly collect personal information from children.</p>
+
+    <h2>Your rights</h2>
+    <p>Because we hold no personal information that identifies you, we cannot look you up by name or email. You can remove all locally stored data at any time by deleting recipes or uninstalling the app. For questions about the anonymous data tied to your device identifier, contact us at <a href="mailto:adzius.lech@gmail.com">adzius.lech@gmail.com</a>.</p>
+
+    <h2>Changes to this policy</h2>
+    <p>We may update this policy as the app evolves. When we do, we will revise the "Last updated" date at the top of this page.</p>
+
+    <div class="card">
+      <strong>Summary:</strong>
+      <p style="margin:8px 0 0">No accounts. Recipes stay on your device. Link import sends the URL and page content to Google's Gemini API to extract the recipe. Purchases go through Google Play. No ads, no tracking.</p>
+    </div>
+
+    <footer>&copy; 2026 PurePrep &middot; <a href="mailto:adzius.lech@gmail.com">adzius.lech@gmail.com</a></footer>
+  </main>
+</body>
+</html>

@@ -37,6 +37,10 @@ var app = builder.Build();
 app.UseDefaultFiles();
 app.UseStaticFiles();
 
+// Clean URL for the Play Store-required privacy policy (also reachable at /privacy.html).
+app.MapGet("/privacy", (IWebHostEnvironment env) =>
+    Results.File(Path.Combine(env.WebRootPath, "privacy.html"), "text/html; charset=utf-8"));
+
 // --- API: connects the browser preview to the real parser + repository ---
 var api = app.MapGroup("/api");
 

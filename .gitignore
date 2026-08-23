@@ -56,3 +56,6 @@ CodeCoverage/
 *.VisualState.xml
 TestResult.xml
 nunit-*.xml
+
+# PurePrep.Web runtime SQLite database
+src/PurePrep.Web/pureprep.web.db*

@@ -60,18 +60,100 @@
   </main>
   <section class="focus" id="focus"><div class="focus-top"><button class="close" id="close" aria-label="Close focus mode">&larr;</button><span class="eyebrow">Focus mode</span><span class="eyebrow">Screen on</span></div><div class="focus-body"><div class="eyebrow" id="step-label"></div><h2 id="step-text"></h2><div class="rule"></div><div class="hint">Move at your own pace. Your screen stays open while you cook.</div><div class="controls"><button id="back">Back</button><button id="next">Next &rarr;</button></div></div></section>
   <script>
-    const seed = [
-      { title:'Miso butter mushrooms', ingredients:4, steps:['Wipe the mushrooms clean and tear any large ones in half.','Sear in a hot pan until deeply golden, 6 to 8 minutes.','Lower the heat. Add butter, miso, and sesame oil, then toss.'] },
-      { title:'Weeknight tomato orzo', ingredients:4, steps:['Toast the orzo in olive oil for 2 minutes.','Stir in tomatoes and stock. Simmer until tender.','Finish with lemon zest, juice, and black pepper.'] },
-      { title:'Crisp-edged potato frittata', ingredients:4, steps:['Boil sliced potatoes until just tender, then drain.','Soften the onion in an oven-safe skillet.','Add potatoes and beaten eggs. Cook until set around the edge.'] }
-    ];
-    let recipes = [...seed], saves = 0, active = null, step = 0;
+    // Browser preview wired to the REAL PurePrep app logic (parser + repository) via /api.
     const $ = id => document.getElementById(id);
-    function render() { $('recipes').innerHTML = recipes.map((r,i) => `<button class="recipe" data-index="${i}"><div><span class="focus-tag">READY TO COOK</span><h3>${r.title}</h3></div><span class="meta">${r.steps.length} steps &middot; ${r.ingredients} ingredients</span></button>`).join(''); $('quota').textContent = `${Math.max(0,10-saves)} free saves remaining`; document.querySelectorAll('.recipe').forEach(b => b.onclick=()=>openFocus(recipes[+b.dataset.index])); }
-    function openFocus(recipe) { active=recipe; step=0; $('focus').classList.add('show'); document.body.style.overflow='hidden'; renderFocus(); }
-    function renderFocus() { $('step-label').textContent=`Step ${step+1} of ${active.steps.length}`; $('step-text').textContent=active.steps[step]; $('back').disabled=step===0; $('next').textContent=step===active.steps.length-1?'Done →':'Next →'; }
-    $('import').onsubmit=e=>{ e.preventDefault(); if(saves>=10){ $('notice').classList.add('show'); return; } const value=$('url').value.trim(); if(!value) return; recipes.unshift({title:'New recipe from your link',ingredients:0,steps:['Recipe steps will appear here after parsing.']}); saves++; $('url').value=''; render(); };
-    $('premium').onclick=()=>$('notice').classList.toggle('show'); $('upgrade').onclick=()=>alert('Premium billing will be connected here.'); $('close').onclick=()=>{ $('focus').classList.remove('show'); document.body.style.overflow=''; }; $('back').onclick=()=>{if(step>0){step--;renderFocus();}}; $('next').onclick=()=>{if(step<active.steps.length-1){step++;renderFocus();}else $('close').click();}; render();
+    let recipes = [], quota = { remaining: 10, isPremium: false, canUseFocusMode: false }, active = null, step = 0;
+
+    const api = async (path, method = 'GET', body) => {
+      const res = await fetch(`/api${path}`, {
+        method,
+        headers: body ? { 'Content-Type': 'application/json' } : undefined,
+        body: body ? JSON.stringify(body) : undefined
+      });
+      return res.json();
+    };
+
+    function applyQuota(q) {
+      if (!q) return;
+      quota = q;
+      $('quota').textContent = q.isPremium ? 'Premium — unlimited saves' : `${q.remaining} free saves remaining`;
+      $('premium').textContent = q.isPremium ? 'Premium active' : 'Premium →';
+    }
+
+    function renderLibrary() {
+      $('recipes').innerHTML = recipes.map((r, i) => `
+        <button class="recipe" data-index="${i}">
+          <div><span class="focus-tag">READY TO COOK</span><h3>${escapeHtml(r.title)}</h3></div>
+          <span class="meta">${r.steps.length} steps &middot; ${r.ingredients.length} ingredients</span>
+        </button>`).join('');
+      document.querySelectorAll('.recipe').forEach(b => b.onclick = () => openFocus(recipes[+b.dataset.index]));
+    }
+
+    function escapeHtml(s) { const d = document.createElement('div'); d.textContent = s ?? ''; return d.innerHTML; }
+
+    function notify(message) {
+      const notice = $('notice');
+      notice.querySelector('strong').textContent = message || 'Make room for more cooking.';
+      notice.querySelector('span').textContent = 'Premium unlocks unlimited saves and Focus Mode.';
+      notice.classList.add('show');
+    }
+
+    function openFocus(recipe) {
+      if (!quota.isPremium) { notify('Focus Mode is a Premium feature.'); return; }
+      active = recipe; step = 0;
+      $('focus').classList.add('show');
+      document.body.style.overflow = 'hidden';
+      renderFocus();
+    }
+
+    function renderFocus() {
+      $('step-label').textContent = `Step ${step + 1} of ${active.steps.length}`;
+      $('step-text').textContent = active.steps[step];
+      $('back').disabled = step === 0;
+      $('next').textContent = step === active.steps.length - 1 ? 'Done →' : 'Next →';
+    }
+
+    async function load() {
+      const state = await api('/state');
+      recipes = state.recipes;
+      applyQuota(state.quota);
+      renderLibrary();
+    }
+
+    $('import').onsubmit = async e => {
+      e.preventDefault();
+      const value = $('url').value.trim();
+      if (!value) return;
+      const btn = e.target.querySelector('button');
+      btn.disabled = true; btn.textContent = 'Parsing…';
+      try {
+        const result = await api('/parse', 'POST', { url: value });
+        if (result.error) { notify(result.message); }
+        else {
+          $('url').value = '';
+          $('notice').classList.remove('show');
+          applyQuota(result.quota);
+          await load();
+        }
+      } catch { notify('Something went wrong reaching the parser.'); }
+      finally { btn.disabled = false; btn.textContent = 'Import'; }
+    };
+
+    $('premium').onclick = async () => {
+      const result = await api('/premium', 'POST', { isPremium: !quota.isPremium });
+      applyQuota(result.quota);
+      if (quota.isPremium) $('notice').classList.remove('show'); else notify();
+    };
+    $('upgrade').onclick = async () => {
+      const result = await api('/premium', 'POST', { isPremium: true });
+      applyQuota(result.quota);
+      $('notice').classList.remove('show');
+    };
+    $('close').onclick = () => { $('focus').classList.remove('show'); document.body.style.overflow = ''; };
+    $('back').onclick = () => { if (step > 0) { step--; renderFocus(); } };
+    $('next').onclick = () => { if (step < active.steps.length - 1) { step++; renderFocus(); } else $('close').click(); };
+
+    load();
   </script>
 </body>
 </html>

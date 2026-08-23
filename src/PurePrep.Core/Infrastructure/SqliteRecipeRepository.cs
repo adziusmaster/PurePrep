@@ -11,8 +11,8 @@ public sealed class SqliteRecipeRepository(IDbContextFactory<PurePrepDbContext> 
     {
         await using var db = await contextFactory.CreateDbContextAsync(cancellationToken);
         await db.Database.EnsureCreatedAsync(cancellationToken);
-        var records = await db.Recipes.AsNoTracking().OrderByDescending(x => x.SavedAt).ToListAsync(cancellationToken);
-        return records.Select(ToDomain).ToArray();
+        var records = await db.Recipes.AsNoTracking().ToListAsync(cancellationToken);
+        return records.OrderByDescending(x => x.SavedAt).Select(ToDomain).ToArray();
     }
 
     public async Task SaveAsync(ParsedRecipe recipe, CancellationToken cancellationToken = default)

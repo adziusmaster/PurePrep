@@ -23,19 +23,6 @@ builder.Services.AddSingleton<QuotaState>();
 
 var app = builder.Build();
 
-// Ensure the database exists and seed a few sample recipes on first run so the
-// browser preview shows content, just like the MAUI app's starter library.
-await using (var scope = app.Services.CreateAsyncScope())
-{
-    var repository = scope.ServiceProvider.GetRequiredService<IRecipeRepository>();
-    var existing = await repository.GetAllAsync();
-    if (existing.Count == 0)
-    {
-        foreach (var recipe in SampleRecipes.Create())
-            await repository.SaveAsync(recipe);
-    }
-}
-
 app.UseDefaultFiles();
 app.UseStaticFiles();
 
@@ -68,6 +55,42 @@ api.MapPost("/parse", async (ParseRequest request, IRecipeParser parser, IRecipe
     {
         return Results.Ok(new { error = "parse", message = $"Could not parse recipe: {ex.Message}" });
     }
+});
+
+api.MapPost("/recipe", async (RecipeInput input, IRecipeRepository repository, QuotaState quota) =>
+{
+    var existing = await repository.GetAllAsync();
+    if (!quota.CanSave(existing.Count))
+        return Results.Ok(new { error = "quota", message = "Free limit reached. Upgrade to Premium for unlimited saves." });
+
+    var recipe = input.ToDomain();
+    if (string.IsNullOrWhiteSpace(recipe.Title))
+        return Results.Ok(new { error = "title", message = "Give your recipe a title." });
+
+    await repository.SaveAsync(recipe);
+    return Results.Ok(new { recipe = RecipeDto.From(recipe), quota = quota.Snapshot(existing.Count + 1) });
+});
+
+api.MapPut("/recipe/{id:guid}", async (Guid id, RecipeInput input, IRecipeRepository repository, QuotaState quota) =>
+{
+    var existing = await repository.GetAllAsync();
+    var current = existing.FirstOrDefault(r => r.Id == id);
+    if (current is null)
+        return Results.Ok(new { error = "notfound", message = "That recipe no longer exists." });
+
+    var recipe = input.ToDomain(id, current.SourceUrl, current.SavedAt);
+    if (string.IsNullOrWhiteSpace(recipe.Title))
+        return Results.Ok(new { error = "title", message = "Give your recipe a title." });
+
+    await repository.UpdateAsync(recipe);
+    return Results.Ok(new { recipe = RecipeDto.From(recipe), quota = quota.Snapshot(existing.Count) });
+});
+
+api.MapDelete("/recipe/{id:guid}", async (Guid id, IRecipeRepository repository, QuotaState quota) =>
+{
+    await repository.DeleteAsync(id);
+    var count = (await repository.GetAllAsync()).Count;
+    return Results.Ok(new { quota = quota.Snapshot(count) });
 });
 
 api.MapPost("/premium", async (PremiumRequest request, IRecipeRepository repository, QuotaState quota) =>
@@ -103,51 +126,31 @@ public sealed class QuotaState
 public sealed record ParseRequest(string? Url);
 public sealed record PremiumRequest(bool IsPremium);
 
+public sealed record RecipeInput(string? Title, string[]? Ingredients, string[]? Steps)
+{
+    public ParsedRecipe ToDomain() => Build(Guid.NewGuid(), null, DateTimeOffset.UtcNow);
+    public ParsedRecipe ToDomain(Guid id, string? sourceUrl, DateTimeOffset savedAt) => Build(id, sourceUrl, savedAt);
+
+    private ParsedRecipe Build(Guid id, string? sourceUrl, DateTimeOffset savedAt) => new()
+    {
+        Id = id,
+        Title = (Title ?? string.Empty).Trim(),
+        SourceUrl = sourceUrl,
+        SavedAt = savedAt,
+        Ingredients = (Ingredients ?? [])
+            .Select(x => x?.Trim() ?? string.Empty)
+            .Where(x => x.Length > 0)
+            .ToArray(),
+        Steps = (Steps ?? [])
+            .Select(x => x?.Trim() ?? string.Empty)
+            .Where(x => x.Length > 0)
+            .Select((text, index) => new RecipeStep { Order = index + 1, Instruction = text })
+            .ToArray()
+    };
+}
+
 public sealed record RecipeDto(Guid Id, string Title, string? SourceUrl, IReadOnlyList<string> Ingredients, IReadOnlyList<string> Steps)
 {
     public static RecipeDto From(ParsedRecipe r) =>
         new(r.Id, r.Title, r.SourceUrl, r.Ingredients, r.Steps.OrderBy(s => s.Order).Select(s => s.Instruction).ToArray());
-}
-
-public static class SampleRecipes
-{
-    public static IEnumerable<ParsedRecipe> Create() =>
-    [
-        new()
-        {
-            Title = "Miso butter mushrooms",
-            SourceUrl = "https://pureprep.local/recipes/miso-mushrooms",
-            Ingredients = ["450 g mushrooms", "2 tbsp butter", "1 tbsp white miso", "1 tsp sesame oil"],
-            Steps =
-            [
-                new RecipeStep { Order = 1, Instruction = "Wipe the mushrooms clean and tear any large ones in half." },
-                new RecipeStep { Order = 2, Instruction = "Sear in a hot pan until deeply golden, 6 to 8 minutes." },
-                new RecipeStep { Order = 3, Instruction = "Lower the heat. Add butter, miso, and sesame oil, then toss." }
-            ]
-        },
-        new()
-        {
-            Title = "Weeknight tomato orzo",
-            SourceUrl = "https://pureprep.local/recipes/tomato-orzo",
-            Ingredients = ["250 g orzo", "400 g chopped tomatoes", "700 ml vegetable stock", "1 lemon"],
-            Steps =
-            [
-                new RecipeStep { Order = 1, Instruction = "Toast the orzo in olive oil for 2 minutes." },
-                new RecipeStep { Order = 2, Instruction = "Stir in tomatoes and stock. Simmer until tender." },
-                new RecipeStep { Order = 3, Instruction = "Finish with lemon zest, juice, and black pepper." }
-            ]
-        },
-        new()
-        {
-            Title = "Crisp-edged potato frittata",
-            SourceUrl = "https://pureprep.local/recipes/potato-frittata",
-            Ingredients = ["500 g potatoes", "6 eggs", "1 small onion", "80 g cheddar"],
-            Steps =
-            [
-                new RecipeStep { Order = 1, Instruction = "Boil sliced potatoes until just tender, then drain." },
-                new RecipeStep { Order = 2, Instruction = "Soften the onion in an oven-safe skillet." },
-                new RecipeStep { Order = 3, Instruction = "Add potatoes and beaten eggs. Cook until set around the edge." }
-            ]
-        }
-    ];
 }

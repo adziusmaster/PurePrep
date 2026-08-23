@@ -31,6 +31,31 @@ public sealed class SqliteRecipeRepository(IDbContextFactory<PurePrepDbContext> 
         await db.SaveChangesAsync(cancellationToken);
     }
 
+    public async Task UpdateAsync(ParsedRecipe recipe, CancellationToken cancellationToken = default)
+    {
+        await using var db = await contextFactory.CreateDbContextAsync(cancellationToken);
+        await db.Database.EnsureCreatedAsync(cancellationToken);
+        var record = await db.Recipes.FirstOrDefaultAsync(x => x.Id == recipe.Id, cancellationToken);
+        if (record is null)
+            return;
+        record.Title = recipe.Title;
+        record.SourceUrl = recipe.SourceUrl;
+        record.IngredientsJson = JsonSerializer.Serialize(recipe.Ingredients);
+        record.StepsJson = JsonSerializer.Serialize(recipe.Steps);
+        await db.SaveChangesAsync(cancellationToken);
+    }
+
+    public async Task DeleteAsync(Guid id, CancellationToken cancellationToken = default)
+    {
+        await using var db = await contextFactory.CreateDbContextAsync(cancellationToken);
+        await db.Database.EnsureCreatedAsync(cancellationToken);
+        var record = await db.Recipes.FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
+        if (record is null)
+            return;
+        db.Recipes.Remove(record);
+        await db.SaveChangesAsync(cancellationToken);
+    }
+
     private static ParsedRecipe ToDomain(RecipeRecord record) => new()
     {
         Id = record.Id,

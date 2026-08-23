@@ -111,6 +111,10 @@ public sealed class RecipeLibraryViewModel : INotifyPropertyChanged
             UrlInput = string.Empty;
             OnPropertyChanged(nameof(QuotaSummary));
         }
+        catch (Exception ex)
+        {
+            ErrorMessage = $"Could not parse recipe: {ex.Message}";
+        }
         finally
         {
             IsImporting = false;

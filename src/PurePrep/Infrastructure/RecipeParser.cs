@@ -90,7 +90,17 @@ public sealed class RecipeParser(HttpClient httpClient) : IRecipeParser
     private static void AddInstructions(JsonElement value, List<string> steps)
     {
         if (value.ValueKind == JsonValueKind.String) { steps.Add(value.GetString()!); return; }
-        if (value.ValueKind != JsonValueKind.Array) { if (value.ValueKind == JsonValueKind.Object && value.TryGetProperty("text", out var text)) AddInstructions(text, steps); return; }
+        if (value.ValueKind != JsonValueKind.Array)
+        {
+            if (value.ValueKind == JsonValueKind.Object)
+            {
+                if (value.TryGetProperty("text", out var text))
+                    AddInstructions(text, steps);
+                else if (value.TryGetProperty("itemListElement", out var items))
+                    AddInstructions(items, steps);
+            }
+            return;
+        }
         foreach (var item in value.EnumerateArray()) AddInstructions(item, steps);
     }
 

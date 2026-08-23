@@ -77,10 +77,15 @@ public static class UnitConverter
     public static IReadOnlyList<string> ConvertLines(IEnumerable<string> lines, MeasurementSystem from, MeasurementSystem to) =>
         lines.Select(line => ConvertText(line, from, to)).ToArray();
 
-    /// <summary>Rewrites every measurement token found in <paramref name="text"/> into the target system.</summary>
+    /// <summary>
+    /// Rewrites every measurement token found in <paramref name="text"/> into the target system.
+    /// The <paramref name="from"/> hint is advisory only: conversion is idempotent (tokens already in
+    /// <paramref name="to"/> are left untouched), so mixed-unit recipes are fully normalised to the
+    /// display system even when it matches the detected source system.
+    /// </summary>
     public static string ConvertText(string text, MeasurementSystem from, MeasurementSystem to)
     {
-        if (from == to || string.IsNullOrWhiteSpace(text)) return text;
+        if (string.IsNullOrWhiteSpace(text)) return text;
         text = Normalize(text);
         return Token.Replace(text, match =>
         {
@@ -147,7 +152,7 @@ public static class UnitConverter
             (Dimension.Length, MeasurementSystem.Metric) => baseValue >= 10
                 ? (10, "cm", v => Trim(Math.Round(v * 2, MidpointRounding.AwayFromZero) / 2))
                 : (1, "mm", v => Trim(Math.Round(v))),
-            (Dimension.Length, MeasurementSystem.Imperial) => (25.4, "inch", Fraction),
+            (Dimension.Length, MeasurementSystem.Imperial) => (25.4, "inch", FractionEighths),
 
             _ => (1, string.Empty, v => Trim(v)),
         };
@@ -173,6 +178,22 @@ public static class UnitConverter
         var whole = (int)(quarters / 4);
         var remainder = (int)(quarters - whole * 4);
         var frac = remainder switch { 1 => "¼", 2 => "½", 3 => "¾", _ => string.Empty };
+        if (frac.Length == 0) return whole.ToString(CultureInfo.InvariantCulture);
+        return whole > 0 ? $"{whole}{frac}" : frac;
+    }
+
+    // Formats to the nearest eighth (how recipes express inches, e.g. 1/8", 3/8"). A small positive
+    // value never collapses to "0": it is clamped up to the smallest eighth so "3 mm" -> "⅛ inch".
+    private static string FractionEighths(double value)
+    {
+        var eighths = (int)Math.Round(value * 8, MidpointRounding.AwayFromZero);
+        if (eighths == 0 && value > 0) eighths = 1;
+        var whole = eighths / 8;
+        var remainder = eighths - whole * 8;
+        var frac = remainder switch
+        {
+            1 => "⅛", 2 => "¼", 3 => "⅜", 4 => "½", 5 => "⅝", 6 => "¾", 7 => "⅞", _ => string.Empty,
+        };
         if (frac.Length == 0) return whole.ToString(CultureInfo.InvariantCulture);
         return whole > 0 ? $"{whole}{frac}" : frac;
     }

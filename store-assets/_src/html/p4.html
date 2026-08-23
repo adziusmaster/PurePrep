@@ -1,0 +1,45 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@400;600;700;800&display=swap');
+:root{--ink:#f4f1e8;--muted:#8e9a8b;--line:#30402d;--panel:#182018;--panel2:#202b1e;--lime:#b7df78;--lime-dark:#172313;--orange:#ee9b5a;}
+*{box-sizing:border-box;-webkit-font-smoothing:antialiased;}
+html,body{margin:0;padding:0;}
+body{background:#0c100d;color:var(--ink);font-family:Manrope,sans-serif;overflow:hidden;}
+.grid-bg:before{content:"";position:fixed;inset:0;pointer-events:none;opacity:.16;
+  background-image:linear-gradient(rgba(183,223,120,.06) 1px,transparent 1px),linear-gradient(90deg,rgba(183,223,120,.06) 1px,transparent 1px);
+  background-size:56px 56px;mask-image:linear-gradient(to bottom,black,transparent 82%);}
+.eyebrow{font:500 clamp(11px,1.5vw,15px) 'DM Mono',monospace;letter-spacing:.18em;text-transform:uppercase;color:var(--lime);}
+.mono{font-family:'DM Mono',monospace;}
+
+html,body{width:1080px;height:1920px;}
+
+</style></head><body class="grid-bg">
+<div style="padding:96px 72px;height:1920px;display:flex;flex-direction:column;justify-content:center;">
+  
+<div style="margin-bottom:44px;">
+  <div class="eyebrow">Metric ⇄ Imperial</div>
+  <div style="font-size:56px;font-weight:800;line-height:1.03;letter-spacing:-.03em;margin-top:14px;max-width:900px;">Convert units<br>in one tap.</div>
+</div>
+  <div style="display:flex;gap:16px;margin-bottom:44px;">
+<div style="display:inline-flex;border:1px solid #30402d;overflow:hidden;border-radius:2px;">
+  <div class="mono" style="padding:12px 20px;font-weight:600;font-size:15px;letter-spacing:.08em;background:#b7df78;color:#172313;">Metric</div>
+  <div class="mono" style="padding:12px 20px;font-weight:600;font-size:15px;letter-spacing:.08em;background:transparent;color:#8e9a8b;">Imperial</div>
+</div>
+<div style="display:inline-flex;border:1px solid #30402d;overflow:hidden;border-radius:2px;">
+  <div class="mono" style="padding:12px 20px;font-weight:600;font-size:15px;letter-spacing:.08em;background:transparent;color:#8e9a8b;">Metric</div>
+  <div class="mono" style="padding:12px 20px;font-weight:600;font-size:15px;letter-spacing:.08em;background:#b7df78;color:#172313;">Imperial</div>
+</div></div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px;">
+    <div style="background:#182018;border:1px solid #263426;padding:26px;">
+      <div class="mono eyebrow" style="margin-bottom:18px;">Metric</div>
+      <ul style="list-style:none;margin:0;padding:0;color:#d7e2cf;font-size:22px;line-height:2.1;">
+        <li>500 g mushrooms</li><li>250 g mushrooms</li><li>44 ml olive oil</li><li>1 tsp salt</li></ul>
+    </div>
+    <div style="background:#182018;border:1px solid #263426;padding:26px;">
+      <div class="mono eyebrow" style="margin-bottom:18px;">Imperial</div>
+      <ul style="list-style:none;margin:0;padding:0;color:#d7e2cf;font-size:22px;line-height:2.1;">
+        <li>1.1 lb mushrooms</li><li>8¾ oz mushrooms</li><li>3 tbsp olive oil</li><li>1 tsp salt</li></ul>
+    </div>
+  </div>
+  <div style="color:#8e9a8b;font-size:21px;line-height:1.6;margin-top:40px;">PurePrep detects the recipe's units on import and converts everything back and forth — amounts stay accurate.</div>
+</div></body></html>

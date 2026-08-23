@@ -1,0 +1,57 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@400;600;700;800&display=swap');
+:root{--ink:#f4f1e8;--muted:#8e9a8b;--line:#30402d;--panel:#182018;--panel2:#202b1e;--lime:#b7df78;--lime-dark:#172313;--orange:#ee9b5a;}
+*{box-sizing:border-box;-webkit-font-smoothing:antialiased;}
+html,body{margin:0;padding:0;}
+body{background:#0c100d;color:var(--ink);font-family:Manrope,sans-serif;overflow:hidden;}
+.grid-bg:before{content:"";position:fixed;inset:0;pointer-events:none;opacity:.16;
+  background-image:linear-gradient(rgba(183,223,120,.06) 1px,transparent 1px),linear-gradient(90deg,rgba(183,223,120,.06) 1px,transparent 1px);
+  background-size:56px 56px;mask-image:linear-gradient(to bottom,black,transparent 82%);}
+.eyebrow{font:500 clamp(11px,1.5vw,15px) 'DM Mono',monospace;letter-spacing:.18em;text-transform:uppercase;color:var(--lime);}
+.mono{font-family:'DM Mono',monospace;}
+
+html,body{width:1080px;height:1920px;}
+
+</style></head><body class="grid-bg">
+<div style="padding:96px 72px;height:1920px;display:flex;flex-direction:column;justify-content:center;">
+  
+<div style="margin-bottom:44px;">
+  <div class="eyebrow">Your recipes</div>
+  <div style="font-size:56px;font-weight:800;line-height:1.03;letter-spacing:-.03em;margin-top:14px;max-width:900px;">Saved. Sorted.<br>Ready to cook.</div>
+</div>
+  <div style="display:grid;grid-template-columns:1fr;gap:20px;">
+    
+<div style="background:#182018;border:1px solid #263426;padding:24px;display:flex;flex-direction:column;justify-content:space-between;min-height:200px;border-radius:2px;">
+  <div class="mono" style="color:#b7df78;font-size:12px;letter-spacing:.14em;">READY TO COOK</div>
+  <div>
+    <div style="font-size:24px;font-weight:700;line-height:1.15;margin-bottom:10px;">Mushroom Risotto</div>
+    <div style="color:#8e9a8b;font-size:15px;">14 steps · 18 ingredients</div>
+  </div>
+</div>
+    
+<div style="background:#182018;border:1px solid #263426;padding:24px;display:flex;flex-direction:column;justify-content:space-between;min-height:200px;border-radius:2px;">
+  <div class="mono" style="color:#b7df78;font-size:12px;letter-spacing:.14em;">READY TO COOK</div>
+  <div>
+    <div style="font-size:24px;font-weight:700;line-height:1.15;margin-bottom:10px;">Air-fryer Arancini</div>
+    <div style="color:#8e9a8b;font-size:15px;">4 steps · 10 ingredients</div>
+  </div>
+</div>
+    
+<div style="background:#182018;border:1px solid #263426;padding:24px;display:flex;flex-direction:column;justify-content:space-between;min-height:200px;border-radius:2px;">
+  <div class="mono" style="color:#b7df78;font-size:12px;letter-spacing:.14em;">READY TO COOK</div>
+  <div>
+    <div style="font-size:24px;font-weight:700;line-height:1.15;margin-bottom:10px;">Basic Risotto</div>
+    <div style="color:#8e9a8b;font-size:15px;">9 steps · 8 ingredients</div>
+  </div>
+</div>
+    
+<div style="background:#182018;border:1px solid #263426;padding:24px;display:flex;flex-direction:column;justify-content:space-between;min-height:200px;border-radius:2px;">
+  <div class="mono" style="color:#b7df78;font-size:12px;letter-spacing:.14em;">READY TO COOK</div>
+  <div>
+    <div style="font-size:24px;font-weight:700;line-height:1.15;margin-bottom:10px;">Truffle Tagliatelle</div>
+    <div style="color:#8e9a8b;font-size:15px;">7 steps · 11 ingredients</div>
+  </div>
+</div>
+  </div>
+</div></body></html>

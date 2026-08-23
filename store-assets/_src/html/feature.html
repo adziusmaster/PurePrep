@@ -1,0 +1,42 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@400;600;700;800&display=swap');
+:root{--ink:#f4f1e8;--muted:#8e9a8b;--line:#30402d;--panel:#182018;--panel2:#202b1e;--lime:#b7df78;--lime-dark:#172313;--orange:#ee9b5a;}
+*{box-sizing:border-box;-webkit-font-smoothing:antialiased;}
+html,body{margin:0;padding:0;}
+body{background:#0c100d;color:var(--ink);font-family:Manrope,sans-serif;overflow:hidden;}
+.grid-bg:before{content:"";position:fixed;inset:0;pointer-events:none;opacity:.16;
+  background-image:linear-gradient(rgba(183,223,120,.06) 1px,transparent 1px),linear-gradient(90deg,rgba(183,223,120,.06) 1px,transparent 1px);
+  background-size:56px 56px;mask-image:linear-gradient(to bottom,black,transparent 82%);}
+.eyebrow{font:500 clamp(11px,1.5vw,15px) 'DM Mono',monospace;letter-spacing:.18em;text-transform:uppercase;color:var(--lime);}
+.mono{font-family:'DM Mono',monospace;}
+
+html,body{width:1024px;height:500px;}
+.grid-bg:before{opacity:.14;}
+</style></head><body class="grid-bg">
+<div style="position:absolute;inset:0;background:radial-gradient(90% 140% at 78% 20%, #16210f 0%, #0c100d 62%);"></div>
+<div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:space-between;padding:0 70px;">
+  <div style="max-width:560px;">
+    <div class="eyebrow">PurePrep / kitchen utility</div>
+    <div style="font-size:74px;font-weight:800;line-height:.98;letter-spacing:-.03em;margin:16px 0 18px;">Your kitchen,<br>focused.</div>
+    <div style="color:#8e9a8b;font-size:21px;line-height:1.5;max-width:440px;">Paste a recipe link. Keep the ingredients and steps. Lose the ads, pop-ups and life stories.</div>
+  </div>
+  <div style="display:flex;flex-direction:column;gap:16px;transform:rotate(-4deg);">
+    
+<div style="background:#182018;border:1px solid #263426;padding:24px;display:flex;flex-direction:column;justify-content:space-between;min-height:200px;border-radius:2px;">
+  <div class="mono" style="color:#b7df78;font-size:12px;letter-spacing:.14em;">READY TO COOK</div>
+  <div>
+    <div style="font-size:24px;font-weight:700;line-height:1.15;margin-bottom:10px;">Mushroom Risotto</div>
+    <div style="color:#8e9a8b;font-size:15px;">14 steps · 18 ingredients</div>
+  </div>
+</div>
+    
+<div style="background:#182018;border:1px solid #263426;padding:24px;display:flex;flex-direction:column;justify-content:space-between;min-height:200px;border-radius:2px;">
+  <div class="mono" style="color:#b7df78;font-size:12px;letter-spacing:.14em;">READY TO COOK</div>
+  <div>
+    <div style="font-size:24px;font-weight:700;line-height:1.15;margin-bottom:10px;">Air-fryer Arancini</div>
+    <div style="color:#8e9a8b;font-size:15px;">4 steps · 10 ingredients</div>
+  </div>
+</div>
+  </div>
+</div></body></html>

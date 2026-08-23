@@ -2,19 +2,24 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Windows.Input;
+using PurePrep.Application;
 using PurePrep.Domain;
 
 namespace PurePrep.Presentation;
 
 public sealed class RecipeLibraryViewModel : INotifyPropertyChanged
 {
+    private readonly IRecipeParser _parser;
+    private readonly IRecipeRepository _repository;
     private string _urlInput = string.Empty;
     private bool _isImporting;
     private bool _isUpgradePromptVisible;
     private string? _errorMessage;
 
-    public RecipeLibraryViewModel()
+    public RecipeLibraryViewModel(IRecipeParser parser, IRecipeRepository repository)
     {
+        _parser = parser;
+        _repository = repository;
         Recipes = new ObservableCollection<ParsedRecipe>
         {
             new()
@@ -99,14 +104,9 @@ public sealed class RecipeLibraryViewModel : INotifyPropertyChanged
         IsImporting = true;
         try
         {
-            await Task.Delay(650);
-            Recipes.Insert(0, new ParsedRecipe
-            {
-                Title = "New recipe from your link",
-                SourceUrl = source.ToString(),
-                Ingredients = new[] { "Recipe ingredients will appear here" },
-                Steps = new[] { new RecipeStep { Order = 1, Instruction = "Parsed recipe steps will appear here." } }
-            });
+            var recipe = await _parser.ParseAsync(source);
+            await _repository.SaveAsync(recipe);
+            Recipes.Insert(0, recipe);
             Quota.RecordRecipeSaved();
             UrlInput = string.Empty;
             OnPropertyChanged(nameof(QuotaSummary));

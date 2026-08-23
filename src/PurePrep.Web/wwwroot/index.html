@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>PurePrep | Your kitchen, focused.</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@400;600;700;800&display=swap');
+    :root { --ink:#f4f1e8; --muted:#8e9a8b; --line:#30402d; --panel:#182018; --panel2:#202b1e; --lime:#b7df78; --lime-dark:#172313; --orange:#ee9b5a; }
+    * { box-sizing:border-box; }
+    body { margin:0; min-height:100vh; background:#0c100d; color:var(--ink); font-family:Manrope, sans-serif; }
+    body:before { content:""; position:fixed; inset:0; pointer-events:none; opacity:.18; background-image:linear-gradient(rgba(183,223,120,.06) 1px, transparent 1px),linear-gradient(90deg,rgba(183,223,120,.06) 1px,transparent 1px); background-size:48px 48px; mask-image:linear-gradient(to bottom,black,transparent 75%); }
+    button, input { font:inherit; }
+    button { cursor:pointer; border:0; }
+    .app { position:relative; max-width:1180px; margin:auto; padding:38px 34px 64px; }
+    header { display:flex; justify-content:space-between; align-items:flex-start; gap:24px; margin-bottom:54px; }
+    .eyebrow,.mono { font:500 11px 'DM Mono', monospace; letter-spacing:.16em; text-transform:uppercase; }
+    .eyebrow { color:var(--lime); }
+    h1 { margin:10px 0 0; font-size:clamp(30px,5vw,54px); line-height:1.02; letter-spacing:-.03em; max-width:560px; }
+    .quota { border:1px solid var(--line); padding:12px 15px; color:var(--lime); background:rgba(32,43,30,.75); font-size:12px; white-space:nowrap; }
+    .hero { display:grid; grid-template-columns:1.15fr .85fr; gap:64px; align-items:end; margin-bottom:58px; }
+    .intro { color:var(--muted); max-width:430px; line-height:1.7; font-size:15px; }
+    .import { display:flex; border-bottom:1px solid #779b50; padding-bottom:11px; }
+    .import input { min-width:0; flex:1; border:0; outline:0; background:transparent; color:var(--ink); font-size:15px; }
+    .import input::placeholder { color:#687466; }
+    .import button,.upgrade { background:var(--lime); color:var(--lime-dark); font-weight:800; padding:11px 18px; }
+    .section-head { display:flex; justify-content:space-between; align-items:end; margin-bottom:18px; }
+    h2 { margin:0; font-size:23px; letter-spacing:-.02em; }
+    .section-head p { color:var(--muted); margin:6px 0 0; font-size:13px; }
+    .premium-link { color:var(--lime); background:none; font-size:13px; font-weight:700; }
+    .recipes { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; }
+    .recipe { text-align:left; color:var(--ink); background:var(--panel); border:1px solid #263426; min-height:190px; padding:21px; display:flex; flex-direction:column; justify-content:space-between; transition:transform .2s,border-color .2s,background .2s; }
+    .recipe:hover { transform:translateY(-4px); border-color:#719553; background:var(--panel2); }
+    .recipe h3 { font-size:19px; line-height:1.2; margin:12px 0 0; }
+    .recipe .meta { color:var(--muted); font-size:12px; }
+    .focus-tag { color:var(--lime); font:500 10px 'DM Mono',monospace; letter-spacing:.13em; }
+    .notice { display:none; margin-top:18px; border:1px solid #536e3c; background:#25341f; padding:18px 20px; justify-content:space-between; align-items:center; gap:20px; }
+    .notice.show { display:flex; }
+    .notice strong { display:block; font-size:14px; }
+    .notice span { display:block; color:#b9c9a6; font-size:12px; margin-top:4px; }
+    .focus { display:none; position:fixed; inset:0; z-index:5; background:#0c100d; padding:28px max(24px, calc((100vw - 900px)/2)); }
+    .focus.show { display:block; }
+    .focus-top { display:flex; justify-content:space-between; align-items:center; }
+    .close { color:var(--ink); background:none; font-size:30px; line-height:1; }
+    .focus-body { max-width:700px; margin:13vh auto 0; }
+    .focus-body h2 { font-size:clamp(29px,6vw,62px); line-height:1.08; margin:12px 0 38px; }
+    .focus-body .rule { height:1px; background:var(--line); margin-bottom:22px; }
+    .focus-body .hint { color:var(--muted); font-size:13px; }
+    .controls { display:flex; gap:12px; margin-top:40px; }
+    .controls button { padding:15px 22px; background:#202b1e; color:#b9c9a6; font-weight:800; }
+    .controls button:last-child { margin-left:auto; background:var(--lime); color:var(--lime-dark); }
+    @media (max-width:760px) { .app { padding:25px 20px 45px; } header { margin-bottom:42px; } .quota { font-size:10px; } .hero { display:block; } .intro { margin-bottom:30px; } .recipes { grid-template-columns:1fr; } .recipe { min-height:145px; } .section-head { align-items:start; } .section-head p { display:none; } }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <header><div><div class="eyebrow">PurePrep / kitchen utility</div><h1>Your kitchen,<br>focused.</h1></div><div class="quota" id="quota">10 free saves remaining</div></header>
+    <section class="hero"><div><p class="intro">Recipe pages are noisy. PurePrep keeps the useful part: ingredients, steps, and nothing that gets in the way.</p></div><form class="import" id="import"><input id="url" type="url" placeholder="Paste a recipe URL" aria-label="Recipe URL" required><button type="submit">Import</button></form></section>
+    <section><div class="section-head"><div><h2>Your recipes</h2><p>Tap any recipe to enter Focus Mode.</p></div><button class="premium-link" id="premium">Premium &rarr;</button></div><div class="recipes" id="recipes"></div><div class="notice" id="notice"><div><strong>Make room for more cooking.</strong><span>Premium unlocks unlimited saves and Focus Mode.</span></div><button class="upgrade" id="upgrade">Unlock</button></div></section>
+  </main>
+  <section class="focus" id="focus"><div class="focus-top"><button class="close" id="close" aria-label="Close focus mode">&larr;</button><span class="eyebrow">Focus mode</span><span class="eyebrow">Screen on</span></div><div class="focus-body"><div class="eyebrow" id="step-label"></div><h2 id="step-text"></h2><div class="rule"></div><div class="hint">Move at your own pace. Your screen stays open while you cook.</div><div class="controls"><button id="back">Back</button><button id="next">Next &rarr;</button></div></div></section>
+  <script>
+    const seed = [
+      { title:'Miso butter mushrooms', ingredients:4, steps:['Wipe the mushrooms clean and tear any large ones in half.','Sear in a hot pan until deeply golden, 6 to 8 minutes.','Lower the heat. Add butter, miso, and sesame oil, then toss.'] },
+      { title:'Weeknight tomato orzo', ingredients:4, steps:['Toast the orzo in olive oil for 2 minutes.','Stir in tomatoes and stock. Simmer until tender.','Finish with lemon zest, juice, and black pepper.'] },
+      { title:'Crisp-edged potato frittata', ingredients:4, steps:['Boil sliced potatoes until just tender, then drain.','Soften the onion in an oven-safe skillet.','Add potatoes and beaten eggs. Cook until set around the edge.'] }
+    ];
+    let recipes = [...seed], saves = 0, active = null, step = 0;
+    const $ = id => document.getElementById(id);
+    function render() { $('recipes').innerHTML = recipes.map((r,i) => `<button class="recipe" data-index="${i}"><div><span class="focus-tag">READY TO COOK</span><h3>${r.title}</h3></div><span class="meta">${r.steps.length} steps &middot; ${r.ingredients} ingredients</span></button>`).join(''); $('quota').textContent = `${Math.max(0,10-saves)} free saves remaining`; document.querySelectorAll('.recipe').forEach(b => b.onclick=()=>openFocus(recipes[+b.dataset.index])); }
+    function openFocus(recipe) { active=recipe; step=0; $('focus').classList.add('show'); document.body.style.overflow='hidden'; renderFocus(); }
+    function renderFocus() { $('step-label').textContent=`Step ${step+1} of ${active.steps.length}`; $('step-text').textContent=active.steps[step]; $('back').disabled=step===0; $('next').textContent=step===active.steps.length-1?'Done →':'Next →'; }
+    $('import').onsubmit=e=>{ e.preventDefault(); if(saves>=10){ $('notice').classList.add('show'); return; } const value=$('url').value.trim(); if(!value) return; recipes.unshift({title:'New recipe from your link',ingredients:0,steps:['Recipe steps will appear here after parsing.']}); saves++; $('url').value=''; render(); };
+    $('premium').onclick=()=>$('notice').classList.toggle('show'); $('upgrade').onclick=()=>alert('Premium billing will be connected here.'); $('close').onclick=()=>{ $('focus').classList.remove('show'); document.body.style.overflow=''; }; $('back').onclick=()=>{if(step>0){step--;renderFocus();}}; $('next').onclick=()=>{if(step<active.steps.length-1){step++;renderFocus();}else $('close').click();}; render();
+  </script>
+</body>
+</html>

@@ -48,14 +48,15 @@ public sealed class UserQuota
     public bool IsPremium { get; private set; }
     public int RemainingFreeRecipes => IsPremium ? int.MaxValue : Math.Max(0, FreeRecipeLimit - SavedRecipeCount);
     public bool CanSaveRecipe   => IsPremium || SavedRecipeCount < FreeRecipeLimit;
-    public bool CanUseFocusMode => IsPremium;   // Focus Mode is a Premium feature
+    public bool CanUseFocusMode => true;         // Focus Mode is free for everyone
     public void RecordRecipeSaved();             // throws if quota exceeded
     public void SetPremiumStatus(bool isPremium);
 }
 ```
 
-- **Free tier:** up to `10` saved recipes; Focus Mode locked.
-- **Premium tier:** unlimited saves + Focus Mode (entitlement from Google Play Billing).
+- **Free tier:** up to `10` saved recipes.
+- **Premium tier:** unlimited recipe storage (entitlement from Google Play Billing).
+- **Focus Mode is free on both tiers** — the only paid benefit is unlimited storage.
 - The quota is the single source of truth; ViewModels only *read* derived flags.
 
 ---
@@ -135,9 +136,9 @@ resets it on disappear, so the screen never sleeps while cooking.
 Surfaced through `RecipeLibraryViewModel` (`Quota`, `IsUpgradePromptVisible`,
 `UpgradeCommand`) rather than a separate blocking page:
 - Quota badge always visible (remaining free saves).
-- On limit reached or Focus-Mode tap without Premium → reveal the inline upgrade banner
+- On the 11th save attempt (free limit reached) → reveal the inline upgrade banner
   (no pop-ups). `UpgradeCommand` will invoke Google Play Billing; a successful purchase
-  calls `Quota.SetPremiumStatus(true)`.
+  calls `Quota.SetPremiumStatus(true)` to unlock unlimited storage. Focus Mode is never gated.
 
 ---
 

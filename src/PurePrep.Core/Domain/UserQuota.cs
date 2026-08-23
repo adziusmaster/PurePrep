@@ -7,7 +7,8 @@ public sealed class UserQuota
     public bool IsPremium { get; private set; }
     public int RemainingFreeRecipes => IsPremium ? int.MaxValue : Math.Max(0, FreeRecipeLimit - SavedRecipeCount);
     public bool CanSaveRecipe => IsPremium || SavedRecipeCount < FreeRecipeLimit;
-    public bool CanUseFocusMode => IsPremium;
+    // Focus Mode is free for everyone; the paid tier only unlocks unlimited recipe storage.
+    public bool CanUseFocusMode => true;
 
     public void RecordRecipeSaved()
     {

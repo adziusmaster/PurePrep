@@ -49,6 +49,12 @@
     .controls { display:flex; gap:12px; margin-top:40px; }
     .controls button { padding:15px 22px; background:#202b1e; color:#b9c9a6; font-weight:800; }
     .controls button:last-child { margin-left:auto; background:var(--lime); color:var(--lime-dark); }
+    .detail h3 { font:500 11px 'DM Mono',monospace; letter-spacing:.16em; text-transform:uppercase; color:var(--lime); margin:30px 0 12px; }
+    .detail ul,.detail ol { margin:0; padding-left:20px; line-height:1.9; color:#d7e2cf; font-size:16px; }
+    .detail ol { counter-reset:step; list-style:none; padding-left:0; }
+    .detail ol li { position:relative; padding:0 0 14px 44px; }
+    .detail ol li:before { counter-increment:step; content:counter(step); position:absolute; left:0; top:0; width:28px; height:28px; display:flex; align-items:center; justify-content:center; background:#26331f; color:var(--lime); border:1px solid #3a4d31; font:600 12px 'DM Mono',monospace; }
+    .gate { color:var(--muted); font-size:12px; margin-top:10px; }
     @media (max-width:760px) { .app { padding:25px 20px 45px; } header { margin-bottom:42px; } .quota { font-size:10px; } .hero { display:block; } .intro { margin-bottom:30px; } .recipes { grid-template-columns:1fr; } .recipe { min-height:145px; } .section-head { align-items:start; } .section-head p { display:none; } }
   </style>
 </head>
@@ -56,13 +62,37 @@
   <main class="app">
     <header><div><div class="eyebrow">PurePrep / kitchen utility</div><h1>Your kitchen,<br>focused.</h1></div><div class="quota" id="quota">10 free saves remaining</div></header>
     <section class="hero"><div><p class="intro">Recipe pages are noisy. PurePrep keeps the useful part: ingredients, steps, and nothing that gets in the way.</p></div><form class="import" id="import"><input id="url" type="url" placeholder="Paste a recipe URL" aria-label="Recipe URL" required><button type="submit">Import</button></form></section>
-    <section><div class="section-head"><div><h2>Your recipes</h2><p>Tap any recipe to enter Focus Mode.</p></div><button class="premium-link" id="premium">Premium &rarr;</button></div><div class="recipes" id="recipes"></div><div class="notice" id="notice"><div><strong>Make room for more cooking.</strong><span>Premium unlocks unlimited saves and Focus Mode.</span></div><button class="upgrade" id="upgrade">Unlock</button></div></section>
+    <section><div class="section-head"><div><h2>Your recipes</h2><p>Tap any recipe to open it, then enter Focus Mode.</p></div><button class="premium-link" id="premium">Premium &rarr;</button></div><div class="recipes" id="recipes"></div><div class="notice" id="notice"><div><strong>Make room for more cooking.</strong><span>Premium unlocks unlimited recipe storage.</span></div><button class="upgrade" id="upgrade">Unlock</button></div></section>
   </main>
-  <section class="focus" id="focus"><div class="focus-top"><button class="close" id="close" aria-label="Close focus mode">&larr;</button><span class="eyebrow">Focus mode</span><span class="eyebrow">Screen on</span></div><div class="focus-body"><div class="eyebrow" id="step-label"></div><h2 id="step-text"></h2><div class="rule"></div><div class="hint">Move at your own pace. Your screen stays open while you cook.</div><div class="controls"><button id="back">Back</button><button id="next">Next &rarr;</button></div></div></section>
+  <section class="focus" id="focus">
+    <div class="focus-top">
+      <button class="close" id="close" aria-label="Close">&larr;</button>
+      <span class="eyebrow" id="overlay-kicker">Recipe</span>
+      <span class="eyebrow" id="overlay-status">&nbsp;</span>
+    </div>
+    <div class="focus-body">
+      <div class="detail" id="detail">
+        <div class="eyebrow">Only the good part</div>
+        <h2 id="detail-title"></h2>
+        <h3>Ingredients</h3>
+        <ul id="detail-ingredients"></ul>
+        <h3>Method</h3>
+        <ol id="detail-steps"></ol>
+        <div class="controls"><button id="start-focus">Enter Focus Mode &rarr;</button></div>
+      </div>
+      <div id="cook" style="display:none">
+        <div class="eyebrow" id="step-label"></div>
+        <h2 id="step-text"></h2>
+        <div class="rule"></div>
+        <div class="hint">Move at your own pace. Your screen stays open while you cook.</div>
+        <div class="controls"><button id="back">Back</button><button id="next">Next &rarr;</button></div>
+      </div>
+    </div>
+  </section>
   <script>
     // Browser preview wired to the REAL PurePrep app logic (parser + repository) via /api.
     const $ = id => document.getElementById(id);
-    let recipes = [], quota = { remaining: 10, isPremium: false, canUseFocusMode: false }, active = null, step = 0;
+    let recipes = [], quota = { remaining: 10, isPremium: false, canUseFocusMode: true }, active = null, step = 0;
 
     const api = async (path, method = 'GET', body) => {
       const res = await fetch(`/api${path}`, {
@@ -86,7 +116,7 @@
           <div><span class="focus-tag">READY TO COOK</span><h3>${escapeHtml(r.title)}</h3></div>
           <span class="meta">${r.steps.length} steps &middot; ${r.ingredients.length} ingredients</span>
         </button>`).join('');
-      document.querySelectorAll('.recipe').forEach(b => b.onclick = () => openFocus(recipes[+b.dataset.index]));
+      document.querySelectorAll('.recipe').forEach(b => b.onclick = () => openRecipe(recipes[+b.dataset.index]));
     }
 
     function escapeHtml(s) { const d = document.createElement('div'); d.textContent = s ?? ''; return d.innerHTML; }
@@ -94,15 +124,29 @@
     function notify(message) {
       const notice = $('notice');
       notice.querySelector('strong').textContent = message || 'Make room for more cooking.';
-      notice.querySelector('span').textContent = 'Premium unlocks unlimited saves and Focus Mode.';
+      notice.querySelector('span').textContent = 'Premium unlocks unlimited recipe storage.';
       notice.classList.add('show');
     }
 
-    function openFocus(recipe) {
-      if (!quota.isPremium) { notify('Focus Mode is a Premium feature.'); return; }
+    function openRecipe(recipe) {
       active = recipe; step = 0;
+      $('detail-title').textContent = recipe.title;
+      $('detail-ingredients').innerHTML = recipe.ingredients.map(i => `<li>${escapeHtml(i)}</li>`).join('') || '<li>No ingredients found.</li>';
+      $('detail-steps').innerHTML = recipe.steps.map(s => `<li>${escapeHtml(s)}</li>`).join('') || '<li>No steps found.</li>';
+      $('overlay-kicker').textContent = 'Recipe';
+      $('overlay-status').innerHTML = '&nbsp;';
+      $('detail').style.display = 'block';
+      $('cook').style.display = 'none';
       $('focus').classList.add('show');
       document.body.style.overflow = 'hidden';
+    }
+
+    function enterFocus() {
+      step = 0;
+      $('detail').style.display = 'none';
+      $('cook').style.display = 'block';
+      $('overlay-kicker').textContent = 'Focus mode';
+      $('overlay-status').textContent = 'Screen on';
       renderFocus();
     }
 
@@ -112,6 +156,8 @@
       $('back').disabled = step === 0;
       $('next').textContent = step === active.steps.length - 1 ? 'Done →' : 'Next →';
     }
+
+    function closeOverlay() { $('focus').classList.remove('show'); document.body.style.overflow = ''; }
 
     async function load() {
       const state = await api('/state');
@@ -149,9 +195,10 @@
       applyQuota(result.quota);
       $('notice').classList.remove('show');
     };
-    $('close').onclick = () => { $('focus').classList.remove('show'); document.body.style.overflow = ''; };
+    $('close').onclick = closeOverlay;
+    $('start-focus').onclick = enterFocus;
     $('back').onclick = () => { if (step > 0) { step--; renderFocus(); } };
-    $('next').onclick = () => { if (step < active.steps.length - 1) { step++; renderFocus(); } else $('close').click(); };
+    $('next').onclick = () => { if (step < active.steps.length - 1) { step++; renderFocus(); } else closeOverlay(); };
 
     load();
   </script>

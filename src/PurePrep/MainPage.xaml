@@ -56,7 +56,7 @@
                 <Grid ColumnDefinitions="*,Auto" ColumnSpacing="14">
                     <VerticalStackLayout Spacing="3">
                         <Label Text="You have room to cook more." TextColor="#F5F4EE" FontSize="15" FontAttributes="Bold" />
-                        <Label Text="Premium unlocks unlimited saves and Focus Mode." TextColor="#B9C9A6" FontSize="12" />
+                        <Label Text="Premium unlocks unlimited recipe storage." TextColor="#B9C9A6" FontSize="12" />
                     </VerticalStackLayout>
                     <Button Grid.Column="1" Text="Unlock" Command="{Binding UpgradeCommand}" BackgroundColor="#A7D46F" TextColor="#172013" FontAttributes="Bold" Padding="15,8" />
                 </Grid>

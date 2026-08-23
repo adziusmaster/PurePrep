@@ -7,6 +7,7 @@ public sealed class ParsedRecipe
     public string? SourceUrl { get; init; }
     public IReadOnlyList<string> Ingredients { get; init; } = Array.Empty<string>();
     public IReadOnlyList<RecipeStep> Steps { get; init; } = Array.Empty<RecipeStep>();
+    public MeasurementSystem SourceSystem { get; init; } = MeasurementSystem.Metric;
     public DateTimeOffset SavedAt { get; init; } = DateTimeOffset.UtcNow;
 }
 

@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using PurePrep.Domain;
 
 namespace PurePrep.Infrastructure;
 
@@ -14,5 +15,6 @@ public sealed class RecipeRecord
     public string? SourceUrl { get; set; }
     public required string IngredientsJson { get; set; }
     public required string StepsJson { get; set; }
+    public string SourceSystem { get; set; } = nameof(MeasurementSystem.Metric);
     public DateTimeOffset SavedAt { get; set; }
 }

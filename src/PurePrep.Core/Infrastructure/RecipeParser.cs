@@ -115,7 +115,7 @@ public sealed class RecipeParser(HttpClient httpClient) : IRecipeParser
 
     private static string? FirstText(HtmlDocument document, params string[] selectors) => selectors.SelectMany(selector => document.DocumentNode.SelectNodes(selector) ?? Enumerable.Empty<HtmlNode>()).Select(n => Clean(n.GetAttributeValue("content", n.InnerText))).FirstOrDefault(x => x.Length > 0);
     private static IReadOnlyList<string> Texts(HtmlDocument document, params string[] selectors) => selectors.SelectMany(selector => document.DocumentNode.SelectNodes(selector) ?? Enumerable.Empty<HtmlNode>()).Select(n => Clean(n.InnerText)).Where(x => x.Length > 0).Distinct().ToArray();
-    private static ParsedRecipe CreateRecipe(string title, IReadOnlyList<string> ingredients, IReadOnlyList<RecipeStep> steps, Uri source) => new() { Title = Clean(title), Ingredients = ingredients, Steps = steps, SourceUrl = source.ToString() };
+    private static ParsedRecipe CreateRecipe(string title, IReadOnlyList<string> ingredients, IReadOnlyList<RecipeStep> steps, Uri source) => new() { Title = Clean(title), Ingredients = ingredients, Steps = steps, SourceUrl = source.ToString(), SourceSystem = Units.UnitConverter.Detect(ingredients.Concat(steps.Select(s => s.Instruction))) };
     private static string GetString(JsonElement element, string property) => element.TryGetProperty(property, out var value) && value.ValueKind == JsonValueKind.String ? value.GetString() ?? "" : "";
     private static string Clean(string value) => WebUtility.HtmlDecode(HtmlEntity.DeEntitize(value)).Replace("\n", " ").Replace("\r", " ").Trim();
 }

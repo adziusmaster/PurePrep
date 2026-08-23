@@ -26,6 +26,7 @@ public sealed class SqliteRecipeRepository(IDbContextFactory<PurePrepDbContext> 
             SourceUrl = recipe.SourceUrl,
             IngredientsJson = JsonSerializer.Serialize(recipe.Ingredients),
             StepsJson = JsonSerializer.Serialize(recipe.Steps),
+            SourceSystem = recipe.SourceSystem.ToString(),
             SavedAt = recipe.SavedAt
         });
         await db.SaveChangesAsync(cancellationToken);
@@ -42,6 +43,7 @@ public sealed class SqliteRecipeRepository(IDbContextFactory<PurePrepDbContext> 
         record.SourceUrl = recipe.SourceUrl;
         record.IngredientsJson = JsonSerializer.Serialize(recipe.Ingredients);
         record.StepsJson = JsonSerializer.Serialize(recipe.Steps);
+        record.SourceSystem = recipe.SourceSystem.ToString();
         await db.SaveChangesAsync(cancellationToken);
     }
 
@@ -63,6 +65,7 @@ public sealed class SqliteRecipeRepository(IDbContextFactory<PurePrepDbContext> 
         SourceUrl = record.SourceUrl,
         Ingredients = JsonSerializer.Deserialize<string[]>(record.IngredientsJson) ?? [],
         Steps = JsonSerializer.Deserialize<RecipeStep[]>(record.StepsJson) ?? [],
+        SourceSystem = Enum.TryParse<MeasurementSystem>(record.SourceSystem, out var system) ? system : MeasurementSystem.Metric,
         SavedAt = record.SavedAt
     };
 }

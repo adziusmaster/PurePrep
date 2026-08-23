@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using PurePrep.Application;
 using PurePrep.Domain;
 using PurePrep.Infrastructure;
+using PurePrep.Units;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -29,13 +30,14 @@ app.UseStaticFiles();
 // --- API: connects the browser preview to the real parser + repository ---
 var api = app.MapGroup("/api");
 
-api.MapGet("/state", async (IRecipeRepository repository, QuotaState quota) =>
+api.MapGet("/state", async (string? units, IRecipeRepository repository, QuotaState quota) =>
 {
+    var display = ParseSystem(units);
     var recipes = await repository.GetAllAsync();
-    return Results.Ok(new { recipes = recipes.Select(RecipeDto.From), quota = quota.Snapshot(recipes.Count) });
+    return Results.Ok(new { recipes = recipes.Select(r => RecipeDto.From(r, display)), quota = quota.Snapshot(recipes.Count) });
 });
 
-api.MapPost("/parse", async (ParseRequest request, IRecipeParser parser, IRecipeRepository repository, QuotaState quota) =>
+api.MapPost("/parse", async (ParseRequest request, string? units, IRecipeParser parser, IRecipeRepository repository, QuotaState quota) =>
 {
     var existing = await repository.GetAllAsync();
     if (!quota.CanSave(existing.Count))
@@ -49,7 +51,7 @@ api.MapPost("/parse", async (ParseRequest request, IRecipeParser parser, IRecipe
     {
         var recipe = await parser.ParseAsync(source);
         await repository.SaveAsync(recipe);
-        return Results.Ok(new { recipe = RecipeDto.From(recipe), quota = quota.Snapshot(existing.Count + 1) });
+        return Results.Ok(new { recipe = RecipeDto.From(recipe, ParseSystem(units)), quota = quota.Snapshot(existing.Count + 1) });
     }
     catch (Exception ex)
     {
@@ -57,7 +59,7 @@ api.MapPost("/parse", async (ParseRequest request, IRecipeParser parser, IRecipe
     }
 });
 
-api.MapPost("/recipe", async (RecipeInput input, IRecipeRepository repository, QuotaState quota) =>
+api.MapPost("/recipe", async (RecipeInput input, string? units, IRecipeRepository repository, QuotaState quota) =>
 {
     var existing = await repository.GetAllAsync();
     if (!quota.CanSave(existing.Count))
@@ -68,22 +70,23 @@ api.MapPost("/recipe", async (RecipeInput input, IRecipeRepository repository, Q
         return Results.Ok(new { error = "title", message = "Give your recipe a title." });
 
     await repository.SaveAsync(recipe);
-    return Results.Ok(new { recipe = RecipeDto.From(recipe), quota = quota.Snapshot(existing.Count + 1) });
+    return Results.Ok(new { recipe = RecipeDto.From(recipe, ParseSystem(units)), quota = quota.Snapshot(existing.Count + 1) });
 });
 
-api.MapPut("/recipe/{id:guid}", async (Guid id, RecipeInput input, IRecipeRepository repository, QuotaState quota) =>
+api.MapPut("/recipe/{id:guid}", async (Guid id, RecipeInput input, string? units, IRecipeRepository repository, QuotaState quota) =>
 {
     var existing = await repository.GetAllAsync();
     var current = existing.FirstOrDefault(r => r.Id == id);
     if (current is null)
         return Results.Ok(new { error = "notfound", message = "That recipe no longer exists." });
 
+    // The editor shows values in the user's chosen display system, so re-detect from what they saved.
     var recipe = input.ToDomain(id, current.SourceUrl, current.SavedAt);
     if (string.IsNullOrWhiteSpace(recipe.Title))
         return Results.Ok(new { error = "title", message = "Give your recipe a title." });
 
     await repository.UpdateAsync(recipe);
-    return Results.Ok(new { recipe = RecipeDto.From(recipe), quota = quota.Snapshot(existing.Count) });
+    return Results.Ok(new { recipe = RecipeDto.From(recipe, ParseSystem(units)), quota = quota.Snapshot(existing.Count) });
 });
 
 api.MapDelete("/recipe/{id:guid}", async (Guid id, IRecipeRepository repository, QuotaState quota) =>
@@ -103,6 +106,13 @@ api.MapPost("/premium", async (PremiumRequest request, IRecipeRepository reposit
 app.MapFallbackToFile("index.html");
 
 app.Run();
+
+static MeasurementSystem? ParseSystem(string? units) => units?.Trim().ToLowerInvariant() switch
+{
+    "metric" => MeasurementSystem.Metric,
+    "imperial" => MeasurementSystem.Imperial,
+    _ => null
+};
 
 // Singleton premium flag + quota derivation using the real domain rules (UserQuota.FreeRecipeLimit).
 public sealed class QuotaState
@@ -131,26 +141,37 @@ public sealed record RecipeInput(string? Title, string[]? Ingredients, string[]?
     public ParsedRecipe ToDomain() => Build(Guid.NewGuid(), null, DateTimeOffset.UtcNow);
     public ParsedRecipe ToDomain(Guid id, string? sourceUrl, DateTimeOffset savedAt) => Build(id, sourceUrl, savedAt);
 
-    private ParsedRecipe Build(Guid id, string? sourceUrl, DateTimeOffset savedAt) => new()
+    private ParsedRecipe Build(Guid id, string? sourceUrl, DateTimeOffset savedAt)
     {
-        Id = id,
-        Title = (Title ?? string.Empty).Trim(),
-        SourceUrl = sourceUrl,
-        SavedAt = savedAt,
-        Ingredients = (Ingredients ?? [])
+        var ingredients = (Ingredients ?? [])
             .Select(x => x?.Trim() ?? string.Empty)
             .Where(x => x.Length > 0)
-            .ToArray(),
-        Steps = (Steps ?? [])
+            .ToArray();
+        var steps = (Steps ?? [])
             .Select(x => x?.Trim() ?? string.Empty)
             .Where(x => x.Length > 0)
             .Select((text, index) => new RecipeStep { Order = index + 1, Instruction = text })
-            .ToArray()
-    };
+            .ToArray();
+        return new()
+        {
+            Id = id,
+            Title = (Title ?? string.Empty).Trim(),
+            SourceUrl = sourceUrl,
+            SavedAt = savedAt,
+            Ingredients = ingredients,
+            Steps = steps,
+            SourceSystem = UnitConverter.Detect(ingredients.Concat(steps.Select(s => s.Instruction)))
+        };
+    }
 }
 
-public sealed record RecipeDto(Guid Id, string Title, string? SourceUrl, IReadOnlyList<string> Ingredients, IReadOnlyList<string> Steps)
+public sealed record RecipeDto(Guid Id, string Title, string? SourceUrl, string SourceSystem, string DisplaySystem, IReadOnlyList<string> Ingredients, IReadOnlyList<string> Steps)
 {
-    public static RecipeDto From(ParsedRecipe r) =>
-        new(r.Id, r.Title, r.SourceUrl, r.Ingredients, r.Steps.OrderBy(s => s.Order).Select(s => s.Instruction).ToArray());
+    public static RecipeDto From(ParsedRecipe r, MeasurementSystem? display = null)
+    {
+        var target = display ?? r.SourceSystem;
+        var ingredients = UnitConverter.ConvertLines(r.Ingredients, r.SourceSystem, target);
+        var steps = UnitConverter.ConvertLines(r.Steps.OrderBy(s => s.Order).Select(s => s.Instruction), r.SourceSystem, target);
+        return new(r.Id, r.Title, r.SourceUrl, r.SourceSystem.ToString(), target.ToString(), ingredients, steps);
+    }
 }

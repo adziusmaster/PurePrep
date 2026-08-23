@@ -29,14 +29,25 @@ public sealed class RecipeParser(HttpClient httpClient) : IRecipeParser
         {
             try
             {
-                using var json = JsonDocument.Parse(WebUtility.HtmlDecode(node.InnerText));
+                using var json = JsonDocument.Parse(node.InnerText);
                 var recipe = FindRecipe(json.RootElement, source);
                 if (recipe is not null)
                     return recipe;
             }
             catch (JsonException)
             {
-                // Some publishers emit malformed JSON-LD; semantic HTML can still work.
+                // Raw parse failed — a few publishers HTML-encode the whole blob. Retry decoded.
+                try
+                {
+                    using var json = JsonDocument.Parse(WebUtility.HtmlDecode(node.InnerText));
+                    var recipe = FindRecipe(json.RootElement, source);
+                    if (recipe is not null)
+                        return recipe;
+                }
+                catch (JsonException)
+                {
+                    // Some publishers emit malformed JSON-LD; semantic HTML can still work.
+                }
             }
         }
         return null;

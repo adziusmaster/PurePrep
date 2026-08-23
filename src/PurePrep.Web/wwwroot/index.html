@@ -18,6 +18,7 @@
     .eyebrow { color:var(--lime); }
     h1 { margin:10px 0 0; font-size:clamp(30px,5vw,54px); line-height:1.02; letter-spacing:-.03em; max-width:560px; }
     .quota { border:1px solid var(--line); padding:12px 15px; color:var(--lime); background:rgba(32,43,30,.75); font-size:12px; white-space:nowrap; }
+    .import.disabled { opacity:.55; }
     .units { display:inline-flex; border:1px solid var(--line); overflow:hidden; }
     .units button { background:transparent; color:var(--muted); padding:9px 14px; font:600 12px 'DM Mono',monospace; letter-spacing:.08em; }
     .units button.active { background:var(--lime); color:var(--lime-dark); }
@@ -75,9 +76,9 @@
 </head>
 <body>
   <main class="app">
-    <header><div><div class="eyebrow">PurePrep / kitchen utility</div><h1>Your kitchen,<br>focused.</h1></div><div class="head-right"><div class="units" id="units"><button data-units="metric" class="active">Metric</button><button data-units="imperial">Imperial</button></div><div class="quota" id="quota">10 free saves remaining</div></div></header>
+    <header><div><div class="eyebrow">PurePrep / kitchen utility</div><h1>Your kitchen,<br>focused.</h1></div><div class="head-right"><div class="units" id="units"><button data-units="metric" class="active">Metric</button><button data-units="imperial">Imperial</button></div><div class="quota" id="quota">10 smart credits left</div></div></header>
     <section class="hero"><div><p class="intro">Recipe pages are noisy. PurePrep keeps the useful part: ingredients, steps, and nothing that gets in the way.</p></div><form class="import" id="import"><input id="url" type="url" placeholder="Paste a recipe URL" aria-label="Recipe URL" required><button type="submit">Import</button></form></section>
-    <section><div class="section-head"><div><h2>Your recipes</h2><p>Tap any recipe to open it, then enter Focus Mode.</p></div><div><button class="add-link" id="add-manual">+ Add manually</button><button class="premium-link" id="premium">Premium &rarr;</button></div></div><div class="recipes" id="recipes"></div><div class="notice" id="notice"><div><strong>Make room for more cooking.</strong><span>Premium unlocks unlimited recipe storage.</span></div><button class="upgrade" id="upgrade">Unlock</button></div></section>
+    <section><div class="section-head"><div><h2>Your recipes</h2><p>Tap any recipe to open it, then enter Focus Mode.</p></div><div><button class="add-link" id="add-manual">+ Add manually</button><button class="premium-link" id="premium">Buy credits &rarr;</button></div></div><div class="recipes" id="recipes"></div><div class="notice" id="notice"><div><strong>You're out of Smart Credits.</strong><span>Top up to import by link. Manual add is always free.</span></div><button class="upgrade" id="upgrade">Top up +10</button></div></section>
   </main>
   <section class="focus" id="focus">
     <div class="focus-top">
@@ -126,7 +127,7 @@
   <script>
     // Browser preview wired to the REAL PurePrep app logic (parser + repository) via /api.
     const $ = id => document.getElementById(id);
-    let recipes = [], quota = { remaining: 10, isPremium: false, canUseFocusMode: true }, active = null, step = 0;
+    let recipes = [], credits = { balance: 10, freeAllowance: 10, canImport: true }, active = null, step = 0;
     let units = localStorage.getItem('pureprep-units') || 'metric';
 
     const api = async (path, method = 'GET', body) => {
@@ -139,11 +140,19 @@
       return res.json();
     };
 
-    function applyQuota(q) {
-      if (!q) return;
-      quota = q;
-      $('quota').textContent = q.isPremium ? 'Premium — unlimited saves' : `${q.remaining} free saves remaining`;
-      $('premium').textContent = q.isPremium ? 'Premium active' : 'Premium →';
+    function applyCredits(c) {
+      if (!c) return;
+      credits = c;
+      $('quota').textContent = c.balance > 0
+        ? `${c.balance} smart credit${c.balance === 1 ? '' : 's'} left`
+        : 'Out of credits — add manually';
+      // Link import is powered by AI and gated by credits; disable it when the balance hits zero.
+      const url = $('url'), btn = $('import').querySelector('button');
+      const canImport = c.canImport;
+      url.disabled = !canImport;
+      btn.disabled = !canImport;
+      url.placeholder = canImport ? 'Paste a recipe URL' : 'Out of credits — add recipes manually';
+      $('import').classList.toggle('disabled', !canImport);
     }
 
     function renderLibrary() {
@@ -163,8 +172,8 @@
 
     function notify(message) {
       const notice = $('notice');
-      notice.querySelector('strong').textContent = message || 'Make room for more cooking.';
-      notice.querySelector('span').textContent = 'Premium unlocks unlimited recipe storage.';
+      notice.querySelector('strong').textContent = message || "You're out of Smart Credits.";
+      notice.querySelector('span').textContent = 'Top up to import by link. Manual add is always free.';
       notice.classList.add('show');
     }
 
@@ -211,7 +220,7 @@
           ? await api(`/recipe/${active.id}`, 'PUT', payload)
           : await api('/recipe', 'POST', payload);
         if (result.error) { notify(result.message); closeOverlay(); }
-        else { applyQuota(result.quota); await load(); closeOverlay(); }
+        else { applyCredits(result.credits); await load(); closeOverlay(); }
       } catch { notify('Could not save the recipe.'); }
       finally { btn.disabled = false; btn.textContent = 'Save recipe'; }
     }
@@ -219,7 +228,7 @@
     async function deleteActive() {
       if (!active || !confirm(`Delete “${active.title}”?`)) return;
       const result = await api(`/recipe/${active.id}`, 'DELETE');
-      applyQuota(result.quota);
+      applyCredits(result.credits);
       await load();
       closeOverlay();
     }
@@ -245,7 +254,7 @@
     async function load() {
       const state = await api('/state');
       recipes = state.recipes;
-      applyQuota(state.quota);
+      applyCredits(state.credits);
       renderLibrary();
     }
 
@@ -270,27 +279,24 @@
       btn.disabled = true; btn.textContent = 'Parsing…';
       try {
         const result = await api('/parse', 'POST', { url: value });
+        if (result.credits) applyCredits(result.credits);
         if (result.error) { notify(result.message); }
         else {
           $('url').value = '';
           $('notice').classList.remove('show');
-          applyQuota(result.quota);
           await load();
         }
-      } catch { notify('Something went wrong reaching the parser.'); }
-      finally { btn.disabled = false; btn.textContent = 'Import'; }
+      } catch { notify('Something went wrong reaching the AI parser.'); }
+      finally { btn.textContent = 'Import'; btn.disabled = !credits.canImport; }
     };
 
-    $('premium').onclick = async () => {
-      const result = await api('/premium', 'POST', { isPremium: !quota.isPremium });
-      applyQuota(result.quota);
-      if (quota.isPremium) $('notice').classList.remove('show'); else notify();
-    };
-    $('upgrade').onclick = async () => {
-      const result = await api('/premium', 'POST', { isPremium: true });
-      applyQuota(result.quota);
+    async function topUp() {
+      const result = await api('/credits/grant', 'POST', { amount: 10 });
+      applyCredits(result.credits);
       $('notice').classList.remove('show');
-    };
+    }
+    $('premium').onclick = topUp;
+    $('upgrade').onclick = topUp;
     $('close').onclick = closeOverlay;
     $('start-focus').onclick = enterFocus;
     $('add-manual').onclick = () => openEditor(null);

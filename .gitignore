@@ -59,3 +59,5 @@ nunit-*.xml
 
 # PurePrep.Web runtime SQLite database
 src/PurePrep.Web/pureprep.web.db*
+
+src/PurePrep.Server/pureprep.server.db*

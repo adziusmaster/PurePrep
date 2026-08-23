@@ -60,9 +60,10 @@ public static class UnitConverter
     public static MeasurementSystem Detect(IEnumerable<string> segments)
     {
         int metric = 0, imperial = 0;
-        foreach (var segment in segments)
+        foreach (var raw in segments)
         {
-            if (string.IsNullOrWhiteSpace(segment)) continue;
+            if (string.IsNullOrWhiteSpace(raw)) continue;
+            var segment = Normalize(raw);
             foreach (Match match in Token.Matches(segment))
             {
                 if (!TryResolveUnit(match.Groups["unit"].Value, out var unit)) continue;
@@ -80,6 +81,7 @@ public static class UnitConverter
     public static string ConvertText(string text, MeasurementSystem from, MeasurementSystem to)
     {
         if (from == to || string.IsNullOrWhiteSpace(text)) return text;
+        text = Normalize(text);
         return Token.Replace(text, match =>
         {
             if (!TryResolveUnit(match.Groups["unit"].Value, out var unit))
@@ -152,7 +154,7 @@ public static class UnitConverter
 
     private static (double factor, string suffix, Func<double, string> format) SelectImperialVolume(double ml) => ml switch
     {
-        < 15 => (4.9289216, "tsp", Fraction),
+        < 14 => (4.9289216, "tsp", Fraction),
         < 45 => (14.7867648, "tbsp", Fraction),
         < 946.352946 => (236.588236, "cup", Fraction),
         < 3785.411784 => (946.352946, "quart", v => Trim(Math.Round(v, 2))),
@@ -180,6 +182,10 @@ public static class UnitConverter
         var rounded = Math.Round(value, 2);
         return rounded.ToString("0.##", CultureInfo.InvariantCulture);
     }
+
+    // Normalises the masculine-ordinal indicator (º, U+00BA) often used for degrees to the
+    // real degree sign (°, U+00B0) so "200ºC" is recognised as a temperature.
+    private static string Normalize(string text) => text.Replace('\u00BA', '\u00B0');
 
     private static bool TryParseQuantity(string text, out double value)
     {

@@ -10,7 +10,7 @@ public sealed class SqliteRecipeRepository(IDbContextFactory<PurePrepDbContext> 
     public async Task<IReadOnlyList<ParsedRecipe>> GetAllAsync(CancellationToken cancellationToken = default)
     {
         await using var db = await contextFactory.CreateDbContextAsync(cancellationToken);
-        await db.Database.EnsureCreatedAsync(cancellationToken);
+        await EnsureReadyAsync(db, cancellationToken);
         var records = await db.Recipes.AsNoTracking().ToListAsync(cancellationToken);
         return records.OrderByDescending(x => x.SavedAt).Select(ToDomain).ToArray();
     }
@@ -18,7 +18,7 @@ public sealed class SqliteRecipeRepository(IDbContextFactory<PurePrepDbContext> 
     public async Task SaveAsync(ParsedRecipe recipe, CancellationToken cancellationToken = default)
     {
         await using var db = await contextFactory.CreateDbContextAsync(cancellationToken);
-        await db.Database.EnsureCreatedAsync(cancellationToken);
+        await EnsureReadyAsync(db, cancellationToken);
         db.Recipes.Add(new RecipeRecord
         {
             Id = recipe.Id,
@@ -35,7 +35,7 @@ public sealed class SqliteRecipeRepository(IDbContextFactory<PurePrepDbContext> 
     public async Task UpdateAsync(ParsedRecipe recipe, CancellationToken cancellationToken = default)
     {
         await using var db = await contextFactory.CreateDbContextAsync(cancellationToken);
-        await db.Database.EnsureCreatedAsync(cancellationToken);
+        await EnsureReadyAsync(db, cancellationToken);
         var record = await db.Recipes.FirstOrDefaultAsync(x => x.Id == recipe.Id, cancellationToken);
         if (record is null)
             return;
@@ -50,12 +50,26 @@ public sealed class SqliteRecipeRepository(IDbContextFactory<PurePrepDbContext> 
     public async Task DeleteAsync(Guid id, CancellationToken cancellationToken = default)
     {
         await using var db = await contextFactory.CreateDbContextAsync(cancellationToken);
-        await db.Database.EnsureCreatedAsync(cancellationToken);
+        await EnsureReadyAsync(db, cancellationToken);
         var record = await db.Recipes.FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
         if (record is null)
             return;
         db.Recipes.Remove(record);
         await db.SaveChangesAsync(cancellationToken);
+    }
+
+    private static async Task EnsureReadyAsync(PurePrepDbContext db, CancellationToken cancellationToken)
+    {
+        await db.Database.EnsureCreatedAsync(cancellationToken);
+        var columns = await db.Database
+            .SqlQueryRaw<string>("SELECT name FROM pragma_table_info('Recipes')")
+            .ToListAsync(cancellationToken);
+        if (!columns.Contains("SourceSystem"))
+        {
+            await db.Database.ExecuteSqlRawAsync(
+                "ALTER TABLE Recipes ADD COLUMN SourceSystem TEXT NOT NULL DEFAULT 'Metric'",
+                cancellationToken);
+        }
     }
 
     private static ParsedRecipe ToDomain(RecipeRecord record) => new()

@@ -28,7 +28,7 @@
                     <Label Text="Your recipes" TextColor="#F5F4EE" FontSize="21" FontAttributes="Bold" />
                     <Label Text="Only the good part." TextColor="#879184" FontSize="14" />
                 </VerticalStackLayout>
-                <Button Grid.Column="1" Text="Premium  ›" Command="{Binding UpgradeCommand}" BackgroundColor="Transparent" TextColor="#A7D46F" Padding="8,4" />
+                <Button Grid.Column="1" Text="Buy credits  ›" Command="{Binding UpgradeCommand}" BackgroundColor="Transparent" TextColor="#A7D46F" Padding="8,4" />
             </Grid>
 
             <Label Grid.Row="1" Text="{Binding ErrorMessage}" TextColor="#FFB4A9" FontSize="13" IsVisible="{Binding ErrorMessage, Converter={StaticResource StringNotNullOrEmptyConverter}}" />
@@ -55,10 +55,10 @@
             <Border Grid.Row="2" BackgroundColor="#25321F" Stroke="#52663B" StrokeThickness="1" Padding="16" IsVisible="{Binding IsUpgradePromptVisible}" StrokeShape="RoundRectangle 16">
                 <Grid ColumnDefinitions="*,Auto" ColumnSpacing="14">
                     <VerticalStackLayout Spacing="3">
-                        <Label Text="You have room to cook more." TextColor="#F5F4EE" FontSize="15" FontAttributes="Bold" />
-                        <Label Text="Premium unlocks unlimited recipe storage." TextColor="#B9C9A6" FontSize="12" />
+                        <Label Text="You're out of Smart Credits." TextColor="#F5F4EE" FontSize="15" FontAttributes="Bold" />
+                        <Label Text="Top up to import recipes by link. Manual add is always free." TextColor="#B9C9A6" FontSize="12" />
                     </VerticalStackLayout>
-                    <Button Grid.Column="1" Text="Unlock" Command="{Binding UpgradeCommand}" BackgroundColor="#A7D46F" TextColor="#172013" FontAttributes="Bold" Padding="15,8" />
+                    <Button Grid.Column="1" Text="Top up" Command="{Binding UpgradeCommand}" BackgroundColor="#A7D46F" TextColor="#172013" FontAttributes="Bold" Padding="15,8" />
                 </Grid>
             </Border>
         </Grid>

@@ -1,4 +1,5 @@
 using PurePrep.Domain;
+using PurePrep.Localization;
 using PurePrep.Presentation;
 
 namespace PurePrep;
@@ -42,8 +43,11 @@ public partial class RecipeDetailPage : ContentPage
 
     private async void OnDeleteTapped(object? sender, EventArgs e)
     {
-        var confirmed = await DisplayAlert("Delete recipe",
-            $"Remove \u201c{_recipe.Title}\u201d from your library?", "Delete", "Cancel");
+        var confirmed = await DisplayAlert(
+            AppResources.Get("DeleteRecipeTitle"),
+            AppResources.Format("DeleteRecipeBodyFormat", _recipe.Title),
+            AppResources.Get("Delete"),
+            AppResources.Get("Cancel"));
         if (!confirmed)
             return;
 

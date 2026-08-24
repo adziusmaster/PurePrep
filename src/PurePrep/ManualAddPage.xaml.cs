@@ -1,4 +1,5 @@
 using PurePrep.Domain;
+using PurePrep.Localization;
 using PurePrep.Presentation;
 
 namespace PurePrep;
@@ -21,9 +22,9 @@ public partial class ManualAddPage : ContentPage
 
         if (editing is not null)
         {
-            HeaderTitle.Text = "Edit recipe";
-            HeaderSubtitle.Text = "Free to change — no Smart Credits used.";
-            SaveButton.Text = "Save changes";
+            HeaderTitle.Text = AppResources.Get("EditRecipeTitle");
+            HeaderSubtitle.Text = AppResources.Get("EditRecipeSubtitle");
+            SaveButton.Text = AppResources.Get("SaveChanges");
             TitleEntry.Text = editing.Title;
             IngredientsEditor.Text = string.Join(Environment.NewLine, editing.Ingredients);
             StepsEditor.Text = string.Join(Environment.NewLine, editing.Steps.Select(s => s.Instruction));
@@ -39,13 +40,13 @@ public partial class ManualAddPage : ContentPage
 
         if (string.IsNullOrWhiteSpace(title))
         {
-            ShowError("Give your recipe a title.");
+            ShowError(AppResources.Get("ErrTitleRequired"));
             return;
         }
 
         if (steps.Length == 0)
         {
-            ShowError("Add at least one step in the method.");
+            ShowError(AppResources.Get("ErrStepsRequired"));
             return;
         }
 
@@ -61,7 +62,7 @@ public partial class ManualAddPage : ContentPage
         }
         catch (Exception ex)
         {
-            ShowError($"Could not save: {ex.Message}");
+            ShowError(AppResources.Format("ErrCouldNotSaveFormat", ex.Message));
             SaveButton.IsEnabled = true;
         }
     }

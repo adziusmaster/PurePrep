@@ -1,6 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:loc="clr-namespace:PurePrep.Localization"
              x:Class="PurePrep.ManualAddPage"
              Shell.NavBarIsVisible="False"
              NavigationPage.HasNavigationBar="False"
@@ -20,8 +21,8 @@
                        HorizontalOptions="Center" VerticalOptions="Center" />
             </Border>
             <VerticalStackLayout Grid.Column="1" Spacing="1">
-                <Label x:Name="HeaderTitle" Text="Add a recipe" TextColor="{DynamicResource Ink}" FontSize="20" FontAttributes="Bold" />
-                <Label x:Name="HeaderSubtitle" Text="Always free — no Smart Credits used." TextColor="{DynamicResource Muted}" FontSize="13" />
+                <Label x:Name="HeaderTitle" Text="{loc:Translate AddRecipeTitle}" TextColor="{DynamicResource Ink}" FontSize="20" FontAttributes="Bold" />
+                <Label x:Name="HeaderSubtitle" Text="{loc:Translate AddRecipeSubtitle}" TextColor="{DynamicResource Muted}" FontSize="13" />
             </VerticalStackLayout>
         </Grid>
 
@@ -29,35 +30,35 @@
         <ScrollView Grid.Row="1">
             <VerticalStackLayout Spacing="16">
                 <VerticalStackLayout Spacing="7">
-                    <Label Text="TITLE" TextColor="{DynamicResource Muted}" FontSize="11.5"
+                    <Label Text="{loc:Translate FieldTitle}" TextColor="{DynamicResource Muted}" FontSize="11.5"
                            CharacterSpacing="1.6" FontAttributes="Bold" />
                     <Border BackgroundColor="{DynamicResource Surface}" Stroke="{DynamicResource Line}"
                             StrokeThickness="1" Padding="14,2" StrokeShape="RoundRectangle 15">
-                        <Entry x:Name="TitleEntry" Placeholder="e.g. Mushroom Risotto"
+                        <Entry x:Name="TitleEntry" Placeholder="{loc:Translate TitlePlaceholder}"
                                TextColor="{DynamicResource Ink}" PlaceholderColor="{DynamicResource Faint}" />
                     </Border>
                 </VerticalStackLayout>
 
                 <VerticalStackLayout Spacing="7">
-                    <Label Text="INGREDIENTS" TextColor="{DynamicResource Muted}" FontSize="11.5"
+                    <Label Text="{loc:Translate SectionIngredients}" TextColor="{DynamicResource Muted}" FontSize="11.5"
                            CharacterSpacing="1.6" FontAttributes="Bold" />
-                    <Label Text="One per line." TextColor="{DynamicResource Faint}" FontSize="12.5" />
+                    <Label Text="{loc:Translate OnePerLine}" TextColor="{DynamicResource Faint}" FontSize="12.5" />
                     <Border BackgroundColor="{DynamicResource Surface}" Stroke="{DynamicResource Line}"
                             StrokeThickness="1" Padding="12,6" StrokeShape="RoundRectangle 15">
                         <Editor x:Name="IngredientsEditor" AutoSize="TextChanges" HeightRequest="150"
-                                Placeholder="250g arborio rice&#10;1 onion, finely chopped&#10;1L vegetable stock"
+                                Placeholder="{loc:Translate IngredientsPlaceholder}"
                                 TextColor="{DynamicResource Ink}" PlaceholderColor="{DynamicResource Faint}" />
                     </Border>
                 </VerticalStackLayout>
 
                 <VerticalStackLayout Spacing="7">
-                    <Label Text="METHOD" TextColor="{DynamicResource Muted}" FontSize="11.5"
+                    <Label Text="{loc:Translate SectionMethod}" TextColor="{DynamicResource Muted}" FontSize="11.5"
                            CharacterSpacing="1.6" FontAttributes="Bold" />
-                    <Label Text="One step per line." TextColor="{DynamicResource Faint}" FontSize="12.5" />
+                    <Label Text="{loc:Translate OneStepPerLine}" TextColor="{DynamicResource Faint}" FontSize="12.5" />
                     <Border BackgroundColor="{DynamicResource Surface}" Stroke="{DynamicResource Line}"
                             StrokeThickness="1" Padding="12,6" StrokeShape="RoundRectangle 15">
                         <Editor x:Name="StepsEditor" AutoSize="TextChanges" HeightRequest="200"
-                                Placeholder="Soften the onion in oil.&#10;Toast the rice for a minute.&#10;Add stock a ladle at a time, stirring."
+                                Placeholder="{loc:Translate StepsPlaceholder}"
                                 TextColor="{DynamicResource Ink}" PlaceholderColor="{DynamicResource Faint}" />
                     </Border>
                 </VerticalStackLayout>
@@ -67,7 +68,7 @@
         </ScrollView>
 
         <!-- Save -->
-        <Button Grid.Row="2" x:Name="SaveButton" Text="Save recipe" Clicked="OnSaveClicked"
+        <Button Grid.Row="2" x:Name="SaveButton" Text="{loc:Translate SaveRecipe}" Clicked="OnSaveClicked"
                 BackgroundColor="{DynamicResource Lime}" TextColor="{DynamicResource LimeInk}"
                 FontAttributes="Bold" FontSize="16" HeightRequest="54" CornerRadius="16" />
     </Grid>

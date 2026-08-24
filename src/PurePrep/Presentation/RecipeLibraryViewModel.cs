@@ -4,6 +4,7 @@ using System.Runtime.CompilerServices;
 using System.Windows.Input;
 using PurePrep.Application;
 using PurePrep.Domain;
+using PurePrep.Localization;
 
 namespace PurePrep.Presentation;
 
@@ -66,12 +67,20 @@ public sealed class RecipeLibraryViewModel : INotifyPropertyChanged
             {
                 ApplyFilter();
                 OnPropertyChanged(nameof(HasRecipes));
+                OnPropertyChanged(nameof(IsSearching));
+                OnPropertyChanged(nameof(NoSearchMatches));
             }
         }
     }
 
     /// <summary>True when the full library has any recipes (used to show the search box).</summary>
     public bool HasRecipes => _all.Count > 0;
+
+    /// <summary>True when a search query is active.</summary>
+    public bool IsSearching => !string.IsNullOrWhiteSpace(_searchText);
+
+    /// <summary>True when a search is active but no recipe matched (drives the empty-state copy).</summary>
+    public bool NoSearchMatches => IsSearching && Recipes.Count == 0;
     public bool IsImporting { get => _isImporting; private set => SetField(ref _isImporting, value); }
     public bool IsUpgradePromptVisible { get => _isUpgradePromptVisible; private set => SetField(ref _isUpgradePromptVisible, value); }
     public string? ErrorMessage { get => _errorMessage; private set => SetField(ref _errorMessage, value); }
@@ -91,10 +100,10 @@ public sealed class RecipeLibraryViewModel : INotifyPropertyChanged
 
     public string QuotaSummary => CreditBalance switch
     {
-        < 0 => "Smart Parser ready",
-        0 => "Out of credits — add recipes manually",
-        1 => "1 smart credit left",
-        _ => $"{CreditBalance} smart credits left",
+        < 0 => AppResources.Get("SmartParserReady"),
+        0 => AppResources.Get("OutOfCreditsManual"),
+        1 => AppResources.Get("CreditsLeftOne"),
+        _ => AppResources.Format("CreditsLeftFormat", CreditBalance),
     };
 
     public ICommand ImportCommand { get; }
@@ -132,6 +141,8 @@ public sealed class RecipeLibraryViewModel : INotifyPropertyChanged
         Recipes.Clear();
         foreach (var recipe in view)
             Recipes.Add(recipe);
+
+        OnPropertyChanged(nameof(NoSearchMatches));
     }
 
     private async Task RefreshCreditsAsync()
@@ -159,7 +170,7 @@ public sealed class RecipeLibraryViewModel : INotifyPropertyChanged
         if (!Uri.TryCreate(UrlInput, UriKind.Absolute, out var source) ||
             (source.Scheme != Uri.UriSchemeHttp && source.Scheme != Uri.UriSchemeHttps))
         {
-            ErrorMessage = "Paste a valid recipe URL to begin.";
+            ErrorMessage = AppResources.Get("ErrPasteValidUrl");
             return;
         }
 
@@ -180,7 +191,7 @@ public sealed class RecipeLibraryViewModel : INotifyPropertyChanged
         }
         catch (Exception ex)
         {
-            ErrorMessage = $"Could not import recipe: {ex.Message}";
+            ErrorMessage = AppResources.Format("ErrCouldNotImportFormat", ex.Message);
         }
         finally
         {
@@ -194,7 +205,7 @@ public sealed class RecipeLibraryViewModel : INotifyPropertyChanged
 
         if (!_billing.IsSupported || _billing.Packs.Count == 0)
         {
-            ErrorMessage = "Smart Credit packs are available in the Play Store build.";
+            ErrorMessage = AppResources.Get("ErrPacksPlayStore");
             return;
         }
 
@@ -211,7 +222,7 @@ public sealed class RecipeLibraryViewModel : INotifyPropertyChanged
         }
         catch (Exception ex)
         {
-            ErrorMessage = $"Could not complete the purchase: {ex.Message}";
+            ErrorMessage = AppResources.Format("ErrCouldNotPurchaseFormat", ex.Message);
         }
     }
 

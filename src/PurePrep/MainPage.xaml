@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:loc="clr-namespace:PurePrep.Localization"
              x:Class="PurePrep.MainPage"
              Shell.NavBarIsVisible="False"
              NavigationPage.HasNavigationBar="False"
@@ -43,13 +44,13 @@
                 </Grid>
 
                 <VerticalStackLayout Spacing="0">
-                    <Label Text="Your kitchen," TextColor="{DynamicResource Ink}" FontSize="32"
+                    <Label Text="{loc:Translate AppTaglineLine1}" TextColor="{DynamicResource Ink}" FontSize="32"
                            FontAttributes="Bold" LineHeight="1.05" />
-                    <Label Text="focused." TextColor="{DynamicResource Lime}" FontSize="32"
+                    <Label Text="{loc:Translate AppTaglineLine2}" TextColor="{DynamicResource Lime}" FontSize="32"
                            FontAttributes="Bold" LineHeight="1.05" />
                 </VerticalStackLayout>
 
-                <Label Text="Paste a link. Keep the ingredients and steps. Lose the noise."
+                <Label Text="{loc:Translate AppSubtitle}"
                        TextColor="{DynamicResource Muted}" FontSize="14.5" LineHeight="1.25" />
             </VerticalStackLayout>
 
@@ -58,13 +59,13 @@
                 <Border BackgroundColor="{DynamicResource Surface}" Stroke="{DynamicResource Line}"
                         StrokeThickness="1" Padding="7" StrokeShape="RoundRectangle 20">
                     <Grid ColumnDefinitions="*,Auto" ColumnSpacing="7">
-                        <Entry Text="{Binding UrlInput}" Placeholder="Paste a recipe URL"
+                        <Entry Text="{Binding UrlInput}" Placeholder="{loc:Translate PasteUrlPlaceholder}"
                                Margin="10,0,0,0" TextColor="{DynamicResource Ink}"
                                PlaceholderColor="{DynamicResource Faint}" Keyboard="Url"
                                ClearButtonVisibility="WhileEditing" VerticalOptions="Center"
                                ReturnCommand="{Binding ImportCommand}" />
 
-                        <Button Grid.Column="1" Text="Import" Command="{Binding ImportCommand}"
+                        <Button Grid.Column="1" Text="{loc:Translate Import}" Command="{Binding ImportCommand}"
                                 IsVisible="{Binding IsImporting, Converter={StaticResource InvertedBoolConverter}}"
                                 BackgroundColor="{DynamicResource Lime}" TextColor="{DynamicResource LimeInk}"
                                 FontAttributes="Bold" FontSize="15" Padding="22,12" CornerRadius="14" />
@@ -88,9 +89,9 @@
             <Grid Grid.Row="2" RowDefinitions="Auto,Auto,*" RowSpacing="14">
                 <Grid ColumnDefinitions="*,Auto" VerticalOptions="Center">
                     <VerticalStackLayout Spacing="2">
-                        <Label Text="Your recipes" TextColor="{DynamicResource Ink}" FontSize="20"
+                        <Label Text="{loc:Translate YourRecipes}" TextColor="{DynamicResource Ink}" FontSize="20"
                                FontAttributes="Bold" />
-                        <Label Text="Tap a recipe to cook in Focus Mode." TextColor="{DynamicResource Muted}"
+                        <Label Text="{loc:Translate YourRecipesSubtitle}" TextColor="{DynamicResource Muted}"
                                FontSize="13" />
                     </VerticalStackLayout>
                     <Border Grid.Column="1" BackgroundColor="{DynamicResource LimeWash}"
@@ -99,7 +100,7 @@
                         <Border.GestureRecognizers>
                             <TapGestureRecognizer Command="{Binding AddManuallyCommand}" />
                         </Border.GestureRecognizers>
-                        <Label Text="+ Add manually" TextColor="{DynamicResource LimeBright}" FontSize="13.5"
+                        <Label Text="{loc:Translate AddManually}" TextColor="{DynamicResource LimeBright}" FontSize="13.5"
                                FontAttributes="Bold" VerticalOptions="Center" />
                     </Border>
                 </Grid>
@@ -112,9 +113,10 @@
                     <Grid ColumnDefinitions="Auto,*" ColumnSpacing="8" VerticalOptions="Center">
                         <Label Text="⌕" FontSize="18" TextColor="{DynamicResource Muted}"
                                VerticalOptions="Center" />
-                        <Entry Grid.Column="1" Text="{Binding SearchText}" Placeholder="Search recipes"
+                        <Entry Grid.Column="1" Text="{Binding SearchText}" Placeholder="{loc:Translate SearchPlaceholder}"
                                PlaceholderColor="{DynamicResource Muted}" TextColor="{DynamicResource Ink}"
-                               BackgroundColor="Transparent" ReturnType="Search" />
+                               BackgroundColor="Transparent" ReturnType="Search"
+                               ClearButtonVisibility="WhileEditing" />
                     </Grid>
                 </Border>
 
@@ -146,10 +148,10 @@
                                            MaxLines="2" VerticalOptions="Center" />
 
                                     <HorizontalStackLayout Grid.Column="1" Grid.Row="1" Spacing="7">
-                                        <Label Text="{Binding StepCount, StringFormat='{0} steps'}"
+                                        <Label Text="{Binding StepCount, Converter={StaticResource ResourceFormatConverter}, ConverterParameter=StepsCountFormat}"
                                                TextColor="{DynamicResource Muted}" FontSize="13" />
                                         <Label Text="&#183;" TextColor="{DynamicResource Faint}" FontSize="13" />
-                                        <Label Text="{Binding IngredientCount, StringFormat='{0} ingredients'}"
+                                        <Label Text="{Binding IngredientCount, Converter={StaticResource ResourceFormatConverter}, ConverterParameter=IngredientsCountFormat}"
                                                TextColor="{DynamicResource Muted}" FontSize="13" />
                                     </HorizontalStackLayout>
 
@@ -161,8 +163,12 @@
                                                 Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.OpenFocusCommand}"
                                                 CommandParameter="{Binding .}" />
                                         </Border.GestureRecognizers>
-                                        <Label Text="COOK  &#8250;" TextColor="{DynamicResource LimeBright}" FontSize="11.5"
-                                               FontAttributes="Bold" VerticalOptions="Center" />
+                                        <HorizontalStackLayout Spacing="4" VerticalOptions="Center">
+                                            <Label Text="{loc:Translate Cook}" TextColor="{DynamicResource LimeBright}" FontSize="11.5"
+                                                   FontAttributes="Bold" VerticalOptions="Center" />
+                                            <Label Text="&#8250;" TextColor="{DynamicResource LimeBright}" FontSize="11.5"
+                                                   FontAttributes="Bold" VerticalOptions="Center" />
+                                        </HorizontalStackLayout>
                                     </Border>
                                 </Grid>
                             </Border>
@@ -171,16 +177,18 @@
 
                     <CollectionView.EmptyView>
                         <Grid Padding="24,40">
-                            <VerticalStackLayout Spacing="14" VerticalOptions="Start" HorizontalOptions="Center">
+                            <!-- No recipes at all -->
+                            <VerticalStackLayout Spacing="14" VerticalOptions="Start" HorizontalOptions="Center"
+                                                 IsVisible="{Binding IsSearching, Converter={StaticResource InvertedBoolConverter}}">
                                 <Border WidthRequest="72" HeightRequest="72" HorizontalOptions="Center"
                                         BackgroundColor="{DynamicResource LimeWash}" Stroke="{DynamicResource LineSoft}"
                                         StrokeThickness="1" StrokeShape="RoundRectangle 22">
                                     <Label Text="+" TextColor="{DynamicResource Lime}" FontSize="34"
                                            FontAttributes="Bold" HorizontalOptions="Center" VerticalOptions="Center" />
                                 </Border>
-                                <Label Text="No recipes yet" TextColor="{DynamicResource Ink}" FontSize="17"
+                                <Label Text="{loc:Translate NoRecipesTitle}" TextColor="{DynamicResource Ink}" FontSize="17"
                                        FontAttributes="Bold" HorizontalOptions="Center" />
-                                <Label Text="Paste a recipe link above to import your first one."
+                                <Label Text="{loc:Translate NoRecipesBody}"
                                        TextColor="{DynamicResource Muted}" FontSize="14" HorizontalTextAlignment="Center"
                                        HorizontalOptions="Center" MaximumWidthRequest="280" />
                                 <Border BackgroundColor="{DynamicResource LimeWash}" Stroke="{DynamicResource LineSoft}"
@@ -189,9 +197,25 @@
                                     <Border.GestureRecognizers>
                                         <TapGestureRecognizer Command="{Binding AddManuallyCommand}" />
                                     </Border.GestureRecognizers>
-                                    <Label Text="+ Add one manually" TextColor="{DynamicResource LimeBright}"
+                                    <Label Text="{loc:Translate AddOneManually}" TextColor="{DynamicResource LimeBright}"
                                            FontSize="14" FontAttributes="Bold" />
                                 </Border>
+                            </VerticalStackLayout>
+
+                            <!-- Search returned nothing -->
+                            <VerticalStackLayout Spacing="10" VerticalOptions="Start" HorizontalOptions="Center"
+                                                 IsVisible="{Binding IsSearching}">
+                                <Border WidthRequest="72" HeightRequest="72" HorizontalOptions="Center"
+                                        BackgroundColor="{DynamicResource Surface}" Stroke="{DynamicResource LineSoft}"
+                                        StrokeThickness="1" StrokeShape="RoundRectangle 22">
+                                    <Label Text="&#8981;" TextColor="{DynamicResource Muted}" FontSize="30"
+                                           HorizontalOptions="Center" VerticalOptions="Center" />
+                                </Border>
+                                <Label Text="{loc:Translate NoMatchesTitle}" TextColor="{DynamicResource Ink}" FontSize="17"
+                                       FontAttributes="Bold" HorizontalOptions="Center" />
+                                <Label Text="{Binding SearchText, Converter={StaticResource ResourceFormatConverter}, ConverterParameter=NoMatchesBodyFormat}"
+                                       TextColor="{DynamicResource Muted}" FontSize="14" HorizontalTextAlignment="Center"
+                                       HorizontalOptions="Center" MaximumWidthRequest="280" />
                             </VerticalStackLayout>
                         </Grid>
                     </CollectionView.EmptyView>
@@ -206,12 +230,12 @@
                 IsVisible="{Binding IsUpgradePromptVisible}">
             <VerticalStackLayout Spacing="14">
                 <VerticalStackLayout Spacing="4">
-                    <Label Text="Out of Smart Credits" TextColor="{DynamicResource Ink}" FontSize="17"
+                    <Label Text="{loc:Translate OutOfCreditsTitle}" TextColor="{DynamicResource Ink}" FontSize="17"
                            FontAttributes="Bold" />
-                    <Label Text="Top up to keep importing recipes by link. Your saved recipes stay free forever."
+                    <Label Text="{loc:Translate OutOfCreditsBody}"
                            TextColor="{DynamicResource Muted}" FontSize="13.5" LineHeight="1.25" />
                 </VerticalStackLayout>
-                <Button Text="Top up credits" Command="{Binding TopUpCommand}"
+                <Button Text="{loc:Translate TopUpCredits}" Command="{Binding TopUpCommand}"
                         BackgroundColor="{DynamicResource Lime}" TextColor="{DynamicResource LimeInk}"
                         FontAttributes="Bold" FontSize="15" HeightRequest="50" CornerRadius="15" />
             </VerticalStackLayout>

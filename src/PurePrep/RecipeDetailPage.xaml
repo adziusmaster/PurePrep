@@ -1,6 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:loc="clr-namespace:PurePrep.Localization"
              x:Class="PurePrep.RecipeDetailPage"
              x:Name="PageRoot"
              Shell.NavBarIsVisible="False"
@@ -46,18 +47,24 @@
                     <Label Text="{Binding Title}" TextColor="{DynamicResource Ink}" FontSize="28"
                            FontAttributes="Bold" LineHeight="1.1" />
                     <HorizontalStackLayout Spacing="7">
-                        <Label Text="{Binding StepCount, StringFormat='{0} steps'}"
+                        <Label Text="{Binding StepCount, Converter={StaticResource ResourceFormatConverter}, ConverterParameter=StepsCountFormat}"
                                TextColor="{DynamicResource Muted}" FontSize="13.5" />
                         <Label Text="&#183;" TextColor="{DynamicResource Faint}" FontSize="13.5" />
-                        <Label Text="{Binding IngredientCount, StringFormat='{0} ingredients'}"
+                        <Label Text="{Binding IngredientCount, Converter={StaticResource ResourceFormatConverter}, ConverterParameter=IngredientsCountFormat}"
                                TextColor="{DynamicResource Muted}" FontSize="13.5" />
+                    </HorizontalStackLayout>
+                    <HorizontalStackLayout Spacing="6" IsVisible="{Binding HasSource}" Margin="0,2,0,0">
+                        <Label Text="&#128279;" FontSize="12" TextColor="{DynamicResource Faint}"
+                               VerticalOptions="Center" />
+                        <Label Text="{Binding SourceHost}" TextColor="{DynamicResource Faint}"
+                               FontSize="12.5" VerticalOptions="Center" />
                     </HorizontalStackLayout>
                 </VerticalStackLayout>
 
                 <!-- Ingredients -->
                 <VerticalStackLayout Spacing="12" IsVisible="{Binding HasIngredients}">
                     <Grid ColumnDefinitions="*,Auto" VerticalOptions="Center">
-                        <Label Text="INGREDIENTS" TextColor="{DynamicResource Lime}" FontSize="12"
+                        <Label Text="{loc:Translate SectionIngredients}" TextColor="{DynamicResource Lime}" FontSize="12"
                                CharacterSpacing="1.8" FontAttributes="Bold" VerticalOptions="Center" />
                         <!-- Serving scaler -->
                         <Border Grid.Column="1" BackgroundColor="{DynamicResource Surface}"
@@ -113,7 +120,7 @@
 
                 <!-- Method -->
                 <VerticalStackLayout Spacing="12">
-                    <Label Text="METHOD" TextColor="{DynamicResource Lime}" FontSize="12"
+                    <Label Text="{loc:Translate SectionMethod}" TextColor="{DynamicResource Lime}" FontSize="12"
                            CharacterSpacing="1.8" FontAttributes="Bold" />
                     <VerticalStackLayout Spacing="10" BindableLayout.ItemsSource="{Binding Steps}">
                         <BindableLayout.ItemTemplate>
@@ -141,7 +148,7 @@
 
         <!-- Cook CTA -->
         <Border Grid.Row="2" BackgroundColor="{DynamicResource Bg}" Padding="20,10,20,16">
-            <Button Text="Start cooking" Clicked="OnCookClicked"
+            <Button Text="{loc:Translate StartCooking}" Clicked="OnCookClicked"
                     BackgroundColor="{DynamicResource Lime}" TextColor="{DynamicResource LimeInk}"
                     FontAttributes="Bold" FontSize="16" HeightRequest="54" CornerRadius="16"
                     MaximumWidthRequest="760" HorizontalOptions="Fill" />

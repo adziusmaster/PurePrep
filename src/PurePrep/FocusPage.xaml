@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:loc="clr-namespace:PurePrep.Localization"
              x:Class="PurePrep.FocusPage"
              x:Name="FocusRoot"
              Shell.NavBarIsVisible="False"
@@ -21,14 +22,14 @@
                        HorizontalOptions="Center" VerticalOptions="Center" />
             </Border>
 
-            <Label Grid.Column="1" Text="FOCUS MODE" TextColor="{DynamicResource Lime}" FontSize="12"
+            <Label Grid.Column="1" Text="{loc:Translate FocusMode}" TextColor="{DynamicResource Lime}" FontSize="12"
                    CharacterSpacing="2.2" FontAttributes="Bold"
                    VerticalOptions="Center" HorizontalOptions="Center" />
 
             <Border Grid.Column="2" BackgroundColor="{DynamicResource Surface}" Stroke="{DynamicResource Line}"
                     StrokeThickness="1" Padding="12,6" StrokeShape="RoundRectangle 20" VerticalOptions="Center">
                 <HorizontalStackLayout Spacing="8" VerticalOptions="Center">
-                    <Label Text="Screen on" TextColor="{DynamicResource Muted}" FontSize="12.5"
+                    <Label Text="{loc:Translate ScreenOn}" TextColor="{DynamicResource Muted}" FontSize="12.5"
                            FontAttributes="Bold" VerticalOptions="Center" />
                     <Switch IsToggled="{Binding KeepScreenAwake, Mode=TwoWay}" VerticalOptions="Center"
                             OnColor="{DynamicResource Lime}" ThumbColor="{DynamicResource BgElevated}"
@@ -55,7 +56,7 @@
                 <Border.GestureRecognizers>
                     <TapGestureRecognizer Command="{Binding ToggleIngredientsCommand}" />
                 </Border.GestureRecognizers>
-                <Label Text="Ingredients" TextColor="{DynamicResource LimeBright}" FontSize="12.5"
+                <Label Text="{Binding IngredientsToggleLabel}" TextColor="{DynamicResource LimeBright}" FontSize="12.5"
                        FontAttributes="Bold" VerticalOptions="Center" />
             </Border>
         </Grid>
@@ -86,7 +87,7 @@
                             <Border.GestureRecognizers>
                                 <TapGestureRecognizer Command="{Binding CancelTimerCommand}" />
                             </Border.GestureRecognizers>
-                            <Label Text="Stop" TextColor="{DynamicResource Danger}" FontSize="13.5"
+                            <Label Text="{loc:Translate Stop}" TextColor="{DynamicResource Danger}" FontSize="13.5"
                                    FontAttributes="Bold" VerticalOptions="Center" />
                         </Border>
                     </Grid>
@@ -94,7 +95,7 @@
 
                 <!-- Detected timer chips -->
                 <VerticalStackLayout Spacing="8" IsVisible="{Binding HasStepTimers}">
-                    <Label Text="TIMERS" TextColor="{DynamicResource Muted}" FontSize="11"
+                    <Label Text="{loc:Translate SectionTimers}" TextColor="{DynamicResource Muted}" FontSize="11"
                            CharacterSpacing="1.6" FontAttributes="Bold" />
                     <FlexLayout Wrap="Wrap" BindableLayout.ItemsSource="{Binding CurrentStepTimers}">
                         <BindableLayout.ItemTemplate>
@@ -119,7 +120,7 @@
                     </FlexLayout>
                 </VerticalStackLayout>
 
-                <Label Text="Tap Next when this step is done. Screen stays on while cooking."
+                <Label Text="{loc:Translate FocusHint}"
                        TextColor="{DynamicResource Muted}" FontSize="13.5" />
             </VerticalStackLayout>
         </Border>
@@ -146,7 +147,7 @@
 
         <!-- Navigation -->
         <Grid Grid.Row="4" ColumnDefinitions="*,*" ColumnSpacing="12">
-            <Button Text="Back" Command="{Binding PreviousCommand}" BackgroundColor="{DynamicResource Surface}"
+            <Button Text="{loc:Translate Back}" Command="{Binding PreviousCommand}" BackgroundColor="{DynamicResource Surface}"
                     TextColor="{DynamicResource Muted}" FontAttributes="Bold" CornerRadius="16" HeightRequest="56" />
             <Button Grid.Column="1" Text="{Binding PrimaryActionLabel}" Command="{Binding AdvanceCommand}"
                     BackgroundColor="{DynamicResource Lime}" TextColor="{DynamicResource LimeInk}"

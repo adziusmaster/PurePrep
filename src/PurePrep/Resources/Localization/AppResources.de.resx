@@ -1,0 +1,302 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="AppTaglineLine1" xml:space="preserve">
+    <value>Deine Küche,</value>
+  </data>
+  <data name="AppTaglineLine2" xml:space="preserve">
+    <value>fokussiert.</value>
+  </data>
+  <data name="AppSubtitle" xml:space="preserve">
+    <value>Link einfügen. Zutaten und Schritte behalten. Ballast weglassen.</value>
+  </data>
+  <data name="Import" xml:space="preserve">
+    <value>Importieren</value>
+  </data>
+  <data name="PasteUrlPlaceholder" xml:space="preserve">
+    <value>Rezept-URL einfügen</value>
+  </data>
+  <data name="SearchPlaceholder" xml:space="preserve">
+    <value>Rezepte suchen</value>
+  </data>
+  <data name="YourRecipes" xml:space="preserve">
+    <value>Deine Rezepte</value>
+  </data>
+  <data name="YourRecipesSubtitle" xml:space="preserve">
+    <value>Tippe auf ein Rezept, um im Fokus-Modus zu kochen.</value>
+  </data>
+  <data name="AddManually" xml:space="preserve">
+    <value>+ Manuell hinzufügen</value>
+  </data>
+  <data name="AddOneManually" xml:space="preserve">
+    <value>+ Eins manuell hinzufügen</value>
+  </data>
+  <data name="NoRecipesTitle" xml:space="preserve">
+    <value>Noch keine Rezepte</value>
+  </data>
+  <data name="NoRecipesBody" xml:space="preserve">
+    <value>Füge oben einen Rezept-Link ein, um dein erstes zu importieren.</value>
+  </data>
+  <data name="NoMatchesTitle" xml:space="preserve">
+    <value>Keine Treffer</value>
+  </data>
+  <data name="NoMatchesBodyFormat" xml:space="preserve">
+    <value>Nichts in deiner Sammlung passt zu „{0}“.</value>
+  </data>
+  <data name="Cook" xml:space="preserve">
+    <value>KOCHEN</value>
+  </data>
+  <data name="OutOfCreditsTitle" xml:space="preserve">
+    <value>Keine Smart-Credits mehr</value>
+  </data>
+  <data name="OutOfCreditsBody" xml:space="preserve">
+    <value>Lade auf, um weiter Rezepte per Link zu importieren. Deine gespeicherten Rezepte bleiben für immer kostenlos.</value>
+  </data>
+  <data name="TopUpCredits" xml:space="preserve">
+    <value>Credits aufladen</value>
+  </data>
+  <data name="StepsCountFormat" xml:space="preserve">
+    <value>{0} Schritte</value>
+  </data>
+  <data name="IngredientsCountFormat" xml:space="preserve">
+    <value>{0} Zutaten</value>
+  </data>
+  <data name="SectionIngredients" xml:space="preserve">
+    <value>ZUTATEN</value>
+  </data>
+  <data name="SectionMethod" xml:space="preserve">
+    <value>ZUBEREITUNG</value>
+  </data>
+  <data name="StartCooking" xml:space="preserve">
+    <value>Kochen starten</value>
+  </data>
+  <data name="DeleteRecipeTitle" xml:space="preserve">
+    <value>Rezept löschen</value>
+  </data>
+  <data name="DeleteRecipeBodyFormat" xml:space="preserve">
+    <value>„{0}“ aus deiner Sammlung entfernen?</value>
+  </data>
+  <data name="Delete" xml:space="preserve">
+    <value>Löschen</value>
+  </data>
+  <data name="Cancel" xml:space="preserve">
+    <value>Abbrechen</value>
+  </data>
+  <data name="FocusMode" xml:space="preserve">
+    <value>FOKUS-MODUS</value>
+  </data>
+  <data name="ScreenOn" xml:space="preserve">
+    <value>Bildschirm an</value>
+  </data>
+  <data name="Ingredients" xml:space="preserve">
+    <value>Zutaten</value>
+  </data>
+  <data name="Step" xml:space="preserve">
+    <value>Schritt</value>
+  </data>
+  <data name="SectionTimers" xml:space="preserve">
+    <value>TIMER</value>
+  </data>
+  <data name="Stop" xml:space="preserve">
+    <value>Stopp</value>
+  </data>
+  <data name="FocusHint" xml:space="preserve">
+    <value>Tippe auf Weiter, wenn dieser Schritt fertig ist. Der Bildschirm bleibt beim Kochen an.</value>
+  </data>
+  <data name="Back" xml:space="preserve">
+    <value>Zurück</value>
+  </data>
+  <data name="Next" xml:space="preserve">
+    <value>Weiter</value>
+  </data>
+  <data name="Finish" xml:space="preserve">
+    <value>Fertig</value>
+  </data>
+  <data name="StepOfFormat" xml:space="preserve">
+    <value>SCHRITT {0} VON {1}</value>
+  </data>
+  <data name="NoSteps" xml:space="preserve">
+    <value>Keine Schritte</value>
+  </data>
+  <data name="AddRecipeTitle" xml:space="preserve">
+    <value>Rezept hinzufügen</value>
+  </data>
+  <data name="EditRecipeTitle" xml:space="preserve">
+    <value>Rezept bearbeiten</value>
+  </data>
+  <data name="AddRecipeSubtitle" xml:space="preserve">
+    <value>Immer kostenlos – keine Smart-Credits nötig.</value>
+  </data>
+  <data name="EditRecipeSubtitle" xml:space="preserve">
+    <value>Kostenlos änderbar – keine Smart-Credits nötig.</value>
+  </data>
+  <data name="FieldTitle" xml:space="preserve">
+    <value>TITEL</value>
+  </data>
+  <data name="TitlePlaceholder" xml:space="preserve">
+    <value>z. B. Pilzrisotto</value>
+  </data>
+  <data name="OnePerLine" xml:space="preserve">
+    <value>Eins pro Zeile.</value>
+  </data>
+  <data name="OneStepPerLine" xml:space="preserve">
+    <value>Ein Schritt pro Zeile.</value>
+  </data>
+  <data name="IngredientsPlaceholder" xml:space="preserve">
+    <value>250 g Arborioreis
+1 Zwiebel, fein gehackt
+1 l Gemüsebrühe</value>
+  </data>
+  <data name="StepsPlaceholder" xml:space="preserve">
+    <value>Zwiebel in Öl anschwitzen.
+Reis eine Minute anrösten.
+Brühe kellenweise unter Rühren zugeben.</value>
+  </data>
+  <data name="SaveRecipe" xml:space="preserve">
+    <value>Rezept speichern</value>
+  </data>
+  <data name="SaveChanges" xml:space="preserve">
+    <value>Änderungen speichern</value>
+  </data>
+  <data name="ErrTitleRequired" xml:space="preserve">
+    <value>Gib deinem Rezept einen Titel.</value>
+  </data>
+  <data name="ErrStepsRequired" xml:space="preserve">
+    <value>Füge mindestens einen Schritt hinzu.</value>
+  </data>
+  <data name="ErrCouldNotSaveFormat" xml:space="preserve">
+    <value>Konnte nicht gespeichert werden: {0}</value>
+  </data>
+  <data name="Settings" xml:space="preserve">
+    <value>Einstellungen</value>
+  </data>
+  <data name="SectionAppearance" xml:space="preserve">
+    <value>DARSTELLUNG</value>
+  </data>
+  <data name="ThemeSystem" xml:space="preserve">
+    <value>System</value>
+  </data>
+  <data name="ThemeLight" xml:space="preserve">
+    <value>Hell</value>
+  </data>
+  <data name="ThemeDark" xml:space="preserve">
+    <value>Dunkel</value>
+  </data>
+  <data name="AppearanceDesc" xml:space="preserve">
+    <value>PurePrep ist dunkel gedacht. Hell folgt deinem Rezept genauso sauber.</value>
+  </data>
+  <data name="SectionCooking" xml:space="preserve">
+    <value>KOCHEN</value>
+  </data>
+  <data name="KeepScreenAwake" xml:space="preserve">
+    <value>Bildschirm anlassen</value>
+  </data>
+  <data name="KeepScreenAwakeDesc" xml:space="preserve">
+    <value>Verhindert, dass der Bildschirm beim Kochen im Fokus-Modus schläft.</value>
+  </data>
+  <data name="SectionAbout" xml:space="preserve">
+    <value>ÜBER</value>
+  </data>
+  <data name="Version" xml:space="preserve">
+    <value>Version</value>
+  </data>
+  <data name="PrivacyPolicy" xml:space="preserve">
+    <value>Datenschutz</value>
+  </data>
+  <data name="SectionLanguage" xml:space="preserve">
+    <value>SPRACHE</value>
+  </data>
+  <data name="LanguageDesc" xml:space="preserve">
+    <value>Wähle die App-Sprache.</value>
+  </data>
+  <data name="LanguageSystem" xml:space="preserve">
+    <value>Systemstandard</value>
+  </data>
+  <data name="SmartParserReady" xml:space="preserve">
+    <value>Smart-Parser bereit</value>
+  </data>
+  <data name="OutOfCreditsManual" xml:space="preserve">
+    <value>Keine Credits – Rezepte manuell hinzufügen</value>
+  </data>
+  <data name="CreditsLeftOne" xml:space="preserve">
+    <value>1 Smart-Credit übrig</value>
+  </data>
+  <data name="CreditsLeftFormat" xml:space="preserve">
+    <value>{0} Smart-Credits übrig</value>
+  </data>
+  <data name="ErrPasteValidUrl" xml:space="preserve">
+    <value>Füge eine gültige Rezept-URL ein, um zu beginnen.</value>
+  </data>
+  <data name="ErrCouldNotImportFormat" xml:space="preserve">
+    <value>Rezept konnte nicht importiert werden: {0}</value>
+  </data>
+  <data name="ErrPacksPlayStore" xml:space="preserve">
+    <value>Smart-Credit-Pakete sind in der Play-Store-Version verfügbar.</value>
+  </data>
+  <data name="ErrCouldNotPurchaseFormat" xml:space="preserve">
+    <value>Kauf konnte nicht abgeschlossen werden: {0}</value>
+  </data>
+  <data name="LangEnglish" xml:space="preserve">
+    <value>English</value>
+  </data>
+  <data name="LangGerman" xml:space="preserve">
+    <value>Deutsch</value>
+  </data>
+</root>

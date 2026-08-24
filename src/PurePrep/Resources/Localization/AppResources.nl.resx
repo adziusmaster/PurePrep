@@ -1,0 +1,302 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="AppTaglineLine1" xml:space="preserve">
+    <value>Jouw keuken,</value>
+  </data>
+  <data name="AppTaglineLine2" xml:space="preserve">
+    <value>gefocust.</value>
+  </data>
+  <data name="AppSubtitle" xml:space="preserve">
+    <value>Plak een link. Behoud de ingrediënten en stappen. Laat de ruis weg.</value>
+  </data>
+  <data name="Import" xml:space="preserve">
+    <value>Importeren</value>
+  </data>
+  <data name="PasteUrlPlaceholder" xml:space="preserve">
+    <value>Plak een recept-URL</value>
+  </data>
+  <data name="SearchPlaceholder" xml:space="preserve">
+    <value>Recepten zoeken</value>
+  </data>
+  <data name="YourRecipes" xml:space="preserve">
+    <value>Jouw recepten</value>
+  </data>
+  <data name="YourRecipesSubtitle" xml:space="preserve">
+    <value>Tik op een recept om te koken in Focusmodus.</value>
+  </data>
+  <data name="AddManually" xml:space="preserve">
+    <value>+ Handmatig toevoegen</value>
+  </data>
+  <data name="AddOneManually" xml:space="preserve">
+    <value>+ Voeg er handmatig een toe</value>
+  </data>
+  <data name="NoRecipesTitle" xml:space="preserve">
+    <value>Nog geen recepten</value>
+  </data>
+  <data name="NoRecipesBody" xml:space="preserve">
+    <value>Plak hierboven een receptlink om je eerste te importeren.</value>
+  </data>
+  <data name="NoMatchesTitle" xml:space="preserve">
+    <value>Geen resultaten</value>
+  </data>
+  <data name="NoMatchesBodyFormat" xml:space="preserve">
+    <value>Niets in je bibliotheek komt overeen met “{0}”.</value>
+  </data>
+  <data name="Cook" xml:space="preserve">
+    <value>KOKEN</value>
+  </data>
+  <data name="OutOfCreditsTitle" xml:space="preserve">
+    <value>Geen Smart-credits meer</value>
+  </data>
+  <data name="OutOfCreditsBody" xml:space="preserve">
+    <value>Vul aan om recepten via een link te blijven importeren. Je opgeslagen recepten blijven altijd gratis.</value>
+  </data>
+  <data name="TopUpCredits" xml:space="preserve">
+    <value>Credits aanvullen</value>
+  </data>
+  <data name="StepsCountFormat" xml:space="preserve">
+    <value>{0} stappen</value>
+  </data>
+  <data name="IngredientsCountFormat" xml:space="preserve">
+    <value>{0} ingrediënten</value>
+  </data>
+  <data name="SectionIngredients" xml:space="preserve">
+    <value>INGREDIËNTEN</value>
+  </data>
+  <data name="SectionMethod" xml:space="preserve">
+    <value>BEREIDING</value>
+  </data>
+  <data name="StartCooking" xml:space="preserve">
+    <value>Begin met koken</value>
+  </data>
+  <data name="DeleteRecipeTitle" xml:space="preserve">
+    <value>Recept verwijderen</value>
+  </data>
+  <data name="DeleteRecipeBodyFormat" xml:space="preserve">
+    <value>“{0}” uit je bibliotheek verwijderen?</value>
+  </data>
+  <data name="Delete" xml:space="preserve">
+    <value>Verwijderen</value>
+  </data>
+  <data name="Cancel" xml:space="preserve">
+    <value>Annuleren</value>
+  </data>
+  <data name="FocusMode" xml:space="preserve">
+    <value>FOCUSMODUS</value>
+  </data>
+  <data name="ScreenOn" xml:space="preserve">
+    <value>Scherm aan</value>
+  </data>
+  <data name="Ingredients" xml:space="preserve">
+    <value>Ingrediënten</value>
+  </data>
+  <data name="Step" xml:space="preserve">
+    <value>Stap</value>
+  </data>
+  <data name="SectionTimers" xml:space="preserve">
+    <value>TIMERS</value>
+  </data>
+  <data name="Stop" xml:space="preserve">
+    <value>Stoppen</value>
+  </data>
+  <data name="FocusHint" xml:space="preserve">
+    <value>Tik op Volgende als deze stap klaar is. Het scherm blijft aan tijdens het koken.</value>
+  </data>
+  <data name="Back" xml:space="preserve">
+    <value>Terug</value>
+  </data>
+  <data name="Next" xml:space="preserve">
+    <value>Volgende</value>
+  </data>
+  <data name="Finish" xml:space="preserve">
+    <value>Klaar</value>
+  </data>
+  <data name="StepOfFormat" xml:space="preserve">
+    <value>STAP {0} VAN {1}</value>
+  </data>
+  <data name="NoSteps" xml:space="preserve">
+    <value>Geen stappen</value>
+  </data>
+  <data name="AddRecipeTitle" xml:space="preserve">
+    <value>Recept toevoegen</value>
+  </data>
+  <data name="EditRecipeTitle" xml:space="preserve">
+    <value>Recept bewerken</value>
+  </data>
+  <data name="AddRecipeSubtitle" xml:space="preserve">
+    <value>Altijd gratis – geen Smart-credits nodig.</value>
+  </data>
+  <data name="EditRecipeSubtitle" xml:space="preserve">
+    <value>Gratis aanpasbaar – geen Smart-credits nodig.</value>
+  </data>
+  <data name="FieldTitle" xml:space="preserve">
+    <value>TITEL</value>
+  </data>
+  <data name="TitlePlaceholder" xml:space="preserve">
+    <value>bijv. Paddenstoelenrisotto</value>
+  </data>
+  <data name="OnePerLine" xml:space="preserve">
+    <value>Eén per regel.</value>
+  </data>
+  <data name="OneStepPerLine" xml:space="preserve">
+    <value>Eén stap per regel.</value>
+  </data>
+  <data name="IngredientsPlaceholder" xml:space="preserve">
+    <value>250 g arboriorijst
+1 ui, fijngesneden
+1 l groentebouillon</value>
+  </data>
+  <data name="StepsPlaceholder" xml:space="preserve">
+    <value>Fruit de ui in olie.
+Rooster de rijst een minuut.
+Voeg de bouillon pollepel voor pollepel toe, al roerend.</value>
+  </data>
+  <data name="SaveRecipe" xml:space="preserve">
+    <value>Recept opslaan</value>
+  </data>
+  <data name="SaveChanges" xml:space="preserve">
+    <value>Wijzigingen opslaan</value>
+  </data>
+  <data name="ErrTitleRequired" xml:space="preserve">
+    <value>Geef je recept een titel.</value>
+  </data>
+  <data name="ErrStepsRequired" xml:space="preserve">
+    <value>Voeg minstens één stap toe.</value>
+  </data>
+  <data name="ErrCouldNotSaveFormat" xml:space="preserve">
+    <value>Kan niet opslaan: {0}</value>
+  </data>
+  <data name="Settings" xml:space="preserve">
+    <value>Instellingen</value>
+  </data>
+  <data name="SectionAppearance" xml:space="preserve">
+    <value>WEERGAVE</value>
+  </data>
+  <data name="ThemeSystem" xml:space="preserve">
+    <value>Systeem</value>
+  </data>
+  <data name="ThemeLight" xml:space="preserve">
+    <value>Licht</value>
+  </data>
+  <data name="ThemeDark" xml:space="preserve">
+    <value>Donker</value>
+  </data>
+  <data name="AppearanceDesc" xml:space="preserve">
+    <value>PurePrep is ontworpen voor donker. Licht volgt je recept net zo strak.</value>
+  </data>
+  <data name="SectionCooking" xml:space="preserve">
+    <value>KOKEN</value>
+  </data>
+  <data name="KeepScreenAwake" xml:space="preserve">
+    <value>Scherm aan houden</value>
+  </data>
+  <data name="KeepScreenAwakeDesc" xml:space="preserve">
+    <value>Voorkomt dat het scherm uitgaat terwijl je kookt in Focusmodus.</value>
+  </data>
+  <data name="SectionAbout" xml:space="preserve">
+    <value>OVER</value>
+  </data>
+  <data name="Version" xml:space="preserve">
+    <value>Versie</value>
+  </data>
+  <data name="PrivacyPolicy" xml:space="preserve">
+    <value>Privacybeleid</value>
+  </data>
+  <data name="SectionLanguage" xml:space="preserve">
+    <value>TAAL</value>
+  </data>
+  <data name="LanguageDesc" xml:space="preserve">
+    <value>Kies de taal van de app.</value>
+  </data>
+  <data name="LanguageSystem" xml:space="preserve">
+    <value>Systeemstandaard</value>
+  </data>
+  <data name="SmartParserReady" xml:space="preserve">
+    <value>Smart Parser klaar</value>
+  </data>
+  <data name="OutOfCreditsManual" xml:space="preserve">
+    <value>Geen credits – voeg recepten handmatig toe</value>
+  </data>
+  <data name="CreditsLeftOne" xml:space="preserve">
+    <value>1 Smart-credit over</value>
+  </data>
+  <data name="CreditsLeftFormat" xml:space="preserve">
+    <value>{0} Smart-credits over</value>
+  </data>
+  <data name="ErrPasteValidUrl" xml:space="preserve">
+    <value>Plak een geldige recept-URL om te beginnen.</value>
+  </data>
+  <data name="ErrCouldNotImportFormat" xml:space="preserve">
+    <value>Kan recept niet importeren: {0}</value>
+  </data>
+  <data name="ErrPacksPlayStore" xml:space="preserve">
+    <value>Smart-creditpakketten zijn beschikbaar in de Play Store-versie.</value>
+  </data>
+  <data name="ErrCouldNotPurchaseFormat" xml:space="preserve">
+    <value>Kan de aankoop niet voltooien: {0}</value>
+  </data>
+  <data name="LangEnglish" xml:space="preserve">
+    <value>English</value>
+  </data>
+  <data name="LangGerman" xml:space="preserve">
+    <value>Deutsch</value>
+  </data>
+</root>

@@ -37,6 +37,19 @@ public sealed class RecipeDetailViewModel : INotifyPropertyChanged
     public bool HasIngredients => _recipe.HasIngredients;
     public IReadOnlyList<RecipeStep> Steps => _recipe.Steps;
 
+    /// <summary>Origin domain (e.g. "jamieoliver.com") when the recipe was imported from a link.</summary>
+    public string SourceHost => TryGetHost(_recipe.SourceUrl);
+    public bool HasSource => !string.IsNullOrEmpty(SourceHost);
+
+    private static string TryGetHost(string? url)
+    {
+        if (string.IsNullOrWhiteSpace(url))
+            return string.Empty;
+        return Uri.TryCreate(url, UriKind.Absolute, out var uri)
+            ? uri.Host.StartsWith("www.", StringComparison.OrdinalIgnoreCase) ? uri.Host[4..] : uri.Host
+            : string.Empty;
+    }
+
     public ObservableCollection<string> ScaledIngredients { get; } = new();
     public ObservableCollection<ScaleOption> ScaleOptions { get; }
     public ICommand SelectScaleCommand { get; }
@@ -66,6 +79,8 @@ public sealed class RecipeDetailViewModel : INotifyPropertyChanged
         OnPropertyChanged(nameof(IngredientCount));
         OnPropertyChanged(nameof(HasIngredients));
         OnPropertyChanged(nameof(Steps));
+        OnPropertyChanged(nameof(SourceHost));
+        OnPropertyChanged(nameof(HasSource));
     }
 
     private void RebuildIngredients()

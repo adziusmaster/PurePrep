@@ -3,6 +3,7 @@ using System.Runtime.CompilerServices;
 using System.Windows.Input;
 using Microsoft.Maui.Dispatching;
 using PurePrep.Domain;
+using PurePrep.Localization;
 using PurePrep.Services;
 
 namespace PurePrep.Presentation;
@@ -28,6 +29,7 @@ public sealed class FocusModeViewModel : INotifyPropertyChanged
         NextCommand = new Command(() => CurrentStepIndex++, () => !IsLastStep);
         AdvanceCommand = new Command(() =>
         {
+            Haptic();
             if (IsLastStep)
                 Completed?.Invoke(this, EventArgs.Empty);
             else
@@ -75,8 +77,12 @@ public sealed class FocusModeViewModel : INotifyPropertyChanged
             if (value == _showIngredients) return;
             _showIngredients = value;
             OnPropertyChanged();
+            OnPropertyChanged(nameof(IngredientsToggleLabel));
         }
     }
+
+    /// <summary>Label for the ingredients toggle, flipping to "Step" while the panel is open.</summary>
+    public string IngredientsToggleLabel => _showIngredients ? AppResources.Get("Step") : AppResources.Get("Ingredients");
 
     /// <summary>Toggles (and persists) whether the display is kept on while cooking.</summary>
     public bool KeepScreenAwake
@@ -93,13 +99,17 @@ public sealed class FocusModeViewModel : INotifyPropertyChanged
     }
 
     public RecipeStep? CurrentStep => Steps.Count == 0 ? null : Steps[CurrentStepIndex];
-    public string StepLabel => Steps.Count == 0 ? "No steps" : $"STEP {CurrentStepIndex + 1} OF {Steps.Count}";
+    public string StepLabel => Steps.Count == 0
+        ? AppResources.Get("NoSteps")
+        : AppResources.Format("StepOfFormat", CurrentStepIndex + 1, Steps.Count);
     /// <summary>Completion fraction (0–1) for the progress bar.</summary>
     public double Progress => Steps.Count == 0 ? 0 : (double)(CurrentStepIndex + 1) / Steps.Count;
     public bool IsFirstStep => CurrentStepIndex == 0;
     public bool IsLastStep => Steps.Count == 0 || CurrentStepIndex == Steps.Count - 1;
     /// <summary>Label for the primary button: advances, or finishes on the last step.</summary>
-    public string PrimaryActionLabel => IsLastStep ? "Finish  \u2713" : "Next  \u203A";
+    public string PrimaryActionLabel => IsLastStep
+        ? AppResources.Get("Finish") + "  \u2713"
+        : AppResources.Get("Next") + "  \u203A";
     public ICommand PreviousCommand { get; }
     public ICommand NextCommand { get; }
     public ICommand AdvanceCommand { get; }
@@ -171,6 +181,18 @@ public sealed class FocusModeViewModel : INotifyPropertyChanged
         }
 
         OnPropertyChanged(nameof(ActiveTimerDisplay));
+    }
+
+    private static void Haptic()
+    {
+        try
+        {
+            HapticFeedback.Default.Perform(HapticFeedbackType.Click);
+        }
+        catch
+        {
+            // Haptics are best-effort; ignore unsupported devices.
+        }
     }
 
     private static void NotifyTimerFinished()

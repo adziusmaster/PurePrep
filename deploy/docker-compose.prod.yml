@@ -1,0 +1,39 @@
+# PurePrep AI backend — production stack.
+#
+# Deployed alongside Coldstart on the same Hetzner host. It reuses Coldstart's
+# Caddy (the `coldstart_default` network) for automatic HTTPS, so this stack only
+# needs to run the app container; TLS + routing are handled by that shared Caddy
+# via a reverse_proxy block for api.pureprep.lechdigital.nl.
+#
+# Deploy (run from /opt/pureprep on the server):
+#   docker compose --env-file .env -f deploy/docker-compose.prod.yml up -d --build
+services:
+  web:
+    build:
+      context: ..
+      dockerfile: Dockerfile
+    image: pureprep-web
+    container_name: pureprep-web
+    restart: unless-stopped
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+      # Server-side only — the app (APK) never sees this key.
+      Gemini__ApiKey: ${GEMINI_API_KEY:?set GEMINI_API_KEY in .env}
+      Gemini__Model: ${GEMINI_MODEL:-gemini-flash-lite-latest}
+      # Protects POST /api/dev/grant. Soft-degrade: unset -> that dev endpoint is closed.
+      Dev__Secret: ${DEV_SECRET:-}
+    volumes:
+      # SQLite credit ledger persists across redeploys.
+      - pureprep-data:/data
+    networks:
+      - coldstart_default
+    expose:
+      - "8080"
+
+# Coldstart's Caddy lives on this network; joining it lets Caddy reach us by name.
+networks:
+  coldstart_default:
+    external: true
+
+volumes:
+  pureprep-data:

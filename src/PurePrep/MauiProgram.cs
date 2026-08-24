@@ -11,10 +11,14 @@ namespace PurePrep;
 public static class MauiProgram
 {
 	// Backend base URL for the AI Smart Parser + credit endpoints.
-	// - Android emulator: 10.0.2.2 routes to the host machine running the local server.
-	// - Real device / release: point this at your deployed backend, e.g. https://api.yourdomain.com/
-	//   (use HTTPS in production; cleartext HTTP on Android needs a network-security-config exception).
+	// - Release builds target the deployed backend over HTTPS.
+	// - Debug builds target 10.0.2.2, the Android emulator's alias for the host
+	//   machine running the local server (dotnet run on PurePrep.Server).
+#if DEBUG
 	private const string BackendBaseUrl = "http://10.0.2.2:5299/";
+#else
+	private const string BackendBaseUrl = "https://api.pureprep.lechdigital.nl/";
+#endif
 
 	public static MauiApp CreateMauiApp()
 	{

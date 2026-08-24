@@ -1,0 +1,13 @@
+# Keep the Docker build context small and reproducible.
+**/bin/
+**/obj/
+**/.vs/
+.git/
+.github/
+docs/
+store-assets/
+**/*.db
+**/*.db-shm
+**/*.db-wal
+**/*.user
+.DS_Store

@@ -35,7 +35,7 @@
 
 		<!-- Versions -->
 		<ApplicationDisplayVersion>1.0</ApplicationDisplayVersion>
-		<ApplicationVersion>6</ApplicationVersion>
+		<ApplicationVersion>7</ApplicationVersion>
 
 		<!-- To develop, package, and publish an app to the Microsoft Store, see: https://aka.ms/MauiTemplateUnpackaged -->
 		<WindowsPackageType>None</WindowsPackageType>
@@ -45,6 +45,18 @@
 		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">21.0</SupportedOSPlatformVersion>
 		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">10.0.17763.0</SupportedOSPlatformVersion>
 		<TargetPlatformMinVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">10.0.17763.0</TargetPlatformMinVersion>
+	</PropertyGroup>
+
+	<!--
+		Play Console crash/ANR analysis + size. Applies to all Release Android builds.
+		- R8 shrinker produces a deobfuscation (mapping.txt) file, auto-embedded in the .aab.
+		- Managed symbols give readable managed stack traces in Release crash reports.
+		- Native debug symbols let Play symbolicate native (runtime) crashes/ANRs.
+	-->
+	<PropertyGroup Condition="'$(Configuration)' == 'Release' And $([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">
+		<AndroidLinkTool>r8</AndroidLinkTool>
+		<AndroidManagedSymbols>true</AndroidManagedSymbols>
+		<AndroidPreferNativeLibrariesWithDebugSymbols>true</AndroidPreferNativeLibrariesWithDebugSymbols>
 	</PropertyGroup>
 
 	<!--

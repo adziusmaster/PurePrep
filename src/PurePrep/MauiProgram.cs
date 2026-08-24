@@ -39,6 +39,7 @@ public static class MauiProgram
 		// Play-signed build; the paywall degrades gracefully when it is unsupported.
 		builder.Services.AddSingleton<IDeviceIdentity, SecureStorageDeviceIdentity>();
 		builder.Services.AddSingleton<IBillingService, PlayBillingService>();
+		builder.Services.AddSingleton<ThemeService>();
 
 		// Link import is powered by the backend AI Smart Parser and is gated by server-side credits.
 		builder.Services.AddHttpClient<IRecipeParser, AiProxyRecipeParser>(client =>

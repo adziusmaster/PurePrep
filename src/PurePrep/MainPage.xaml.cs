@@ -2,6 +2,7 @@ namespace PurePrep;
 
 using PurePrep.Domain;
 using PurePrep.Presentation;
+using PurePrep.Services;
 
 public partial class MainPage : ContentPage
 {
@@ -11,6 +12,7 @@ public partial class MainPage : ContentPage
 	{
 		InitializeComponent();
 		viewModel.FocusRequested += OnFocusRequested;
+		viewModel.DetailRequested += OnDetailRequested;
 		viewModel.AddManuallyRequested += OnAddManuallyRequested;
 		BindingContext = viewModel;
 	}
@@ -28,8 +30,21 @@ public partial class MainPage : ContentPage
 		await Navigation.PushAsync(new FocusPage(recipe));
 	}
 
+	private async void OnDetailRequested(object? sender, ParsedRecipe recipe)
+	{
+		await Navigation.PushAsync(new RecipeDetailPage(recipe, (RecipeLibraryViewModel)BindingContext));
+	}
+
 	private async void OnAddManuallyRequested(object? sender, EventArgs e)
 	{
 		await Navigation.PushAsync(new ManualAddPage((RecipeLibraryViewModel)BindingContext));
 	}
+
+	private async void OnSettingsTapped(object? sender, EventArgs e)
+	{
+		var theme = this.Handler?.MauiContext?.Services.GetService(typeof(ThemeService)) as ThemeService;
+		if (theme is not null)
+			await Navigation.PushAsync(new SettingsPage(theme));
+	}
 }
+

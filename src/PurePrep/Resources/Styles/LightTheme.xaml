@@ -1,0 +1,26 @@
+﻿<?xml version="1.0" encoding="UTF-8" ?>
+<ResourceDictionary xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+                    x:Class="PurePrep.Resources.Styles.LightTheme">
+
+    <!-- PurePrep design tokens — light, warm paper + deep olive. Same keys as DarkTheme.
+         Note the semantic flips so contrast stays high:
+         - Lime becomes a deep olive-green (used for brand text, accents, dots).
+         - LimeInk (text on primary buttons) becomes white, since buttons now use the deep green.
+         - LimeWash / LimeBright stay a pale-green chip with deep-green text. -->
+    <Color x:Key="Bg">#F4F5EF</Color>
+    <Color x:Key="BgElevated">#FFFFFF</Color>
+    <Color x:Key="Surface">#FFFFFF</Color>
+    <Color x:Key="Line">#E4E7DA</Color>
+    <Color x:Key="LineSoft">#D3DAC4</Color>
+    <Color x:Key="Lime">#4C7A2B</Color>
+    <Color x:Key="LimeBright">#3C6320</Color>
+    <Color x:Key="LimeDim">#93B36A</Color>
+    <Color x:Key="LimeInk">#FFFFFF</Color>
+    <Color x:Key="LimeWash">#E9F2DB</Color>
+    <Color x:Key="Ink">#17201A</Color>
+    <Color x:Key="Muted">#5D6A54</Color>
+    <Color x:Key="Faint">#8A9680</Color>
+    <Color x:Key="Danger">#B3261E</Color>
+    <Color x:Key="Warm">#B26B2A</Color>
+</ResourceDictionary>

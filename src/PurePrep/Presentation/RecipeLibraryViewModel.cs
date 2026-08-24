@@ -42,6 +42,11 @@ public sealed class RecipeLibraryViewModel : INotifyPropertyChanged
             if (recipe is not null)
                 FocusRequested?.Invoke(this, recipe);
         });
+        OpenDetailCommand = new Command<ParsedRecipe>(recipe =>
+        {
+            if (recipe is not null)
+                DetailRequested?.Invoke(this, recipe);
+        });
     }
 
     public ObservableCollection<ParsedRecipe> Recipes { get; }
@@ -77,8 +82,10 @@ public sealed class RecipeLibraryViewModel : INotifyPropertyChanged
     public ICommand TopUpCommand { get; }
     public ICommand AddManuallyCommand { get; }
     public ICommand OpenFocusCommand { get; }
+    public ICommand OpenDetailCommand { get; }
 
     public event EventHandler<ParsedRecipe>? FocusRequested;
+    public event EventHandler<ParsedRecipe>? DetailRequested;
     public event EventHandler? AddManuallyRequested;
     public event PropertyChangedEventHandler? PropertyChanged;
 
@@ -193,6 +200,13 @@ public sealed class RecipeLibraryViewModel : INotifyPropertyChanged
 
         await _repository.SaveAsync(recipe);
         Recipes.Insert(0, recipe);
+    }
+
+    /// <summary>Removes a saved recipe from storage and the library list.</summary>
+    public async Task DeleteRecipeAsync(ParsedRecipe recipe)
+    {
+        await _repository.DeleteAsync(recipe.Id);
+        Recipes.Remove(recipe);
     }
 
     private bool SetField<T>(ref T field, T value, [CallerMemberName] string? propertyName = null)

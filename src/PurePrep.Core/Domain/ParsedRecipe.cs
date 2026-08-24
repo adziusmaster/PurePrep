@@ -7,6 +7,13 @@ public sealed class ParsedRecipe
     public string? SourceUrl { get; init; }
     public IReadOnlyList<string> Ingredients { get; init; } = Array.Empty<string>();
     public IReadOnlyList<RecipeStep> Steps { get; init; } = Array.Empty<RecipeStep>();
+
+    // Exposed as plain int properties because XAML bindings resolve against the runtime
+    // type (an array), whose IReadOnlyCollection<T>.Count is an explicit interface member
+    // the binding engine cannot see — binding directly to Steps.Count renders blank.
+    public int StepCount => Steps.Count;
+    public int IngredientCount => Ingredients.Count;
+    public bool HasIngredients => Ingredients.Count > 0;
     public MeasurementSystem SourceSystem { get; init; } = MeasurementSystem.Metric;
     public DateTimeOffset SavedAt { get; init; } = DateTimeOffset.UtcNow;
 }

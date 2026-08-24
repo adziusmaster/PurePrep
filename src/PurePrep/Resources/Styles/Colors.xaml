@@ -42,25 +42,4 @@
     <SolidColorBrush x:Key="Gray900Brush" Color="{StaticResource Gray900}"/>
     <SolidColorBrush x:Key="Gray950Brush" Color="{StaticResource Gray950}"/>
 
-    <!-- ===== PurePrep design tokens (dark, warm-lime) ===== -->
-    <Color x:Key="Bg">#0B0F0C</Color>
-    <Color x:Key="BgElevated">#10160F</Color>
-    <Color x:Key="Surface">#141B12</Color>
-    <Color x:Key="SurfaceAlt">#18201625</Color>
-    <Color x:Key="Line">#26311E</Color>
-    <Color x:Key="LineSoft">#33422A</Color>
-    <Color x:Key="Lime">#A7D46F</Color>
-    <Color x:Key="LimeBright">#C8E994</Color>
-    <Color x:Key="LimeDim">#6C8F45</Color>
-    <Color x:Key="LimeInk">#132009</Color>
-    <Color x:Key="LimeWash">#1B2614</Color>
-    <Color x:Key="Ink">#F4F1E8</Color>
-    <Color x:Key="Muted">#909C88</Color>
-    <Color x:Key="Faint">#66725E</Color>
-    <Color x:Key="Danger">#FFB4A9</Color>
-    <Color x:Key="Warm">#EAA46A</Color>
-
-    <SolidColorBrush x:Key="BgBrush" Color="{StaticResource Bg}"/>
-    <SolidColorBrush x:Key="LimeBrush" Color="{StaticResource Lime}"/>
-    <SolidColorBrush x:Key="SurfaceBrush" Color="{StaticResource Surface}"/>
 </ResourceDictionary>

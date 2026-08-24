@@ -4,7 +4,7 @@
              x:Class="PurePrep.MainPage"
              Shell.NavBarIsVisible="False"
              NavigationPage.HasNavigationBar="False"
-             BackgroundColor="{StaticResource Bg}">
+             BackgroundColor="{DynamicResource Bg}">
 
     <!-- Outer grid lets the upgrade sheet float above the content. -->
     <Grid>
@@ -14,61 +14,72 @@
             <!-- ===== Header ===== -->
             <VerticalStackLayout Spacing="14">
                 <Grid ColumnDefinitions="*,Auto" VerticalOptions="Center">
-                    <Label Text="PUREPREP" TextColor="{StaticResource Lime}" FontSize="12"
+                    <Label Text="PUREPREP" TextColor="{DynamicResource Lime}" FontSize="12"
                            CharacterSpacing="3.4" FontAttributes="Bold" VerticalOptions="Center" />
-                    <Border Grid.Column="1" BackgroundColor="{StaticResource LimeWash}"
-                            Stroke="{StaticResource LineSoft}" StrokeThickness="1"
-                            Padding="12,7" StrokeShape="RoundRectangle 20">
-                        <Border.GestureRecognizers>
-                            <TapGestureRecognizer Command="{Binding UpgradeCommand}" />
-                        </Border.GestureRecognizers>
-                        <HorizontalStackLayout Spacing="8" VerticalOptions="Center">
-                            <Ellipse Fill="{StaticResource Lime}" WidthRequest="7" HeightRequest="7"
-                                     VerticalOptions="Center" />
-                            <Label Text="{Binding QuotaSummary}" TextColor="{StaticResource LimeBright}"
-                                   FontSize="12.5" FontAttributes="Bold" VerticalOptions="Center" />
-                        </HorizontalStackLayout>
-                    </Border>
+                    <HorizontalStackLayout Grid.Column="1" Spacing="10" VerticalOptions="Center">
+                        <Border BackgroundColor="{DynamicResource LimeWash}"
+                                Stroke="{DynamicResource LineSoft}" StrokeThickness="1"
+                                Padding="12,7" StrokeShape="RoundRectangle 20">
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding UpgradeCommand}" />
+                            </Border.GestureRecognizers>
+                            <HorizontalStackLayout Spacing="8" VerticalOptions="Center">
+                                <Ellipse Fill="{DynamicResource Lime}" WidthRequest="7" HeightRequest="7"
+                                         VerticalOptions="Center" />
+                                <Label Text="{Binding QuotaSummary}" TextColor="{DynamicResource LimeBright}"
+                                       FontSize="12.5" FontAttributes="Bold" VerticalOptions="Center" />
+                            </HorizontalStackLayout>
+                        </Border>
+                        <Border WidthRequest="40" HeightRequest="40" BackgroundColor="{DynamicResource Surface}"
+                                Stroke="{DynamicResource Line}" StrokeThickness="1"
+                                StrokeShape="RoundRectangle 20" VerticalOptions="Center">
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer Tapped="OnSettingsTapped" />
+                            </Border.GestureRecognizers>
+                            <Label Text="&#9881;" TextColor="{DynamicResource Muted}" FontSize="19"
+                                   HorizontalOptions="Center" VerticalOptions="Center" />
+                        </Border>
+                    </HorizontalStackLayout>
                 </Grid>
 
                 <VerticalStackLayout Spacing="0">
-                    <Label Text="Your kitchen," TextColor="{StaticResource Ink}" FontSize="32"
+                    <Label Text="Your kitchen," TextColor="{DynamicResource Ink}" FontSize="32"
                            FontAttributes="Bold" LineHeight="1.05" />
-                    <Label Text="focused." TextColor="{StaticResource Lime}" FontSize="32"
+                    <Label Text="focused." TextColor="{DynamicResource Lime}" FontSize="32"
                            FontAttributes="Bold" LineHeight="1.05" />
                 </VerticalStackLayout>
 
                 <Label Text="Paste a link. Keep the ingredients and steps. Lose the noise."
-                       TextColor="{StaticResource Muted}" FontSize="14.5" LineHeight="1.25" />
+                       TextColor="{DynamicResource Muted}" FontSize="14.5" LineHeight="1.25" />
             </VerticalStackLayout>
 
             <!-- ===== Import ===== -->
             <VerticalStackLayout Grid.Row="1" Spacing="9">
-                <Border BackgroundColor="{StaticResource Surface}" Stroke="{StaticResource Line}"
+                <Border BackgroundColor="{DynamicResource Surface}" Stroke="{DynamicResource Line}"
                         StrokeThickness="1" Padding="7" StrokeShape="RoundRectangle 20">
                     <Grid ColumnDefinitions="*,Auto" ColumnSpacing="7">
                         <Entry Text="{Binding UrlInput}" Placeholder="Paste a recipe URL"
-                               Margin="10,0,0,0" TextColor="{StaticResource Ink}"
-                               PlaceholderColor="{StaticResource Faint}" Keyboard="Url"
+                               Margin="10,0,0,0" TextColor="{DynamicResource Ink}"
+                               PlaceholderColor="{DynamicResource Faint}" Keyboard="Url"
                                ClearButtonVisibility="WhileEditing" VerticalOptions="Center"
                                ReturnCommand="{Binding ImportCommand}" />
 
                         <Button Grid.Column="1" Text="Import" Command="{Binding ImportCommand}"
                                 IsVisible="{Binding IsImporting, Converter={StaticResource InvertedBoolConverter}}"
-                                BackgroundColor="{StaticResource Lime}" TextColor="{StaticResource LimeInk}"
+                                BackgroundColor="{DynamicResource Lime}" TextColor="{DynamicResource LimeInk}"
                                 FontAttributes="Bold" FontSize="15" Padding="22,12" CornerRadius="14" />
 
                         <Border Grid.Column="1" IsVisible="{Binding IsImporting}"
-                                BackgroundColor="{StaticResource LimeWash}" StrokeThickness="0"
+                                BackgroundColor="{DynamicResource LimeWash}" StrokeThickness="0"
                                 Padding="22,10" StrokeShape="RoundRectangle 14">
                             <ActivityIndicator IsRunning="{Binding IsImporting}"
-                                               Color="{StaticResource Lime}"
+                                               Color="{DynamicResource Lime}"
                                                WidthRequest="22" HeightRequest="22" />
                         </Border>
                     </Grid>
                 </Border>
 
-                <Label Text="{Binding ErrorMessage}" TextColor="{StaticResource Danger}" FontSize="13"
+                <Label Text="{Binding ErrorMessage}" TextColor="{DynamicResource Danger}" FontSize="13"
                        Margin="4,0,0,0"
                        IsVisible="{Binding ErrorMessage, Converter={StaticResource StringNotNullOrEmptyConverter}}" />
             </VerticalStackLayout>
@@ -77,18 +88,18 @@
             <Grid Grid.Row="2" RowDefinitions="Auto,*" RowSpacing="14">
                 <Grid ColumnDefinitions="*,Auto" VerticalOptions="Center">
                     <VerticalStackLayout Spacing="2">
-                        <Label Text="Your recipes" TextColor="{StaticResource Ink}" FontSize="20"
+                        <Label Text="Your recipes" TextColor="{DynamicResource Ink}" FontSize="20"
                                FontAttributes="Bold" />
-                        <Label Text="Tap a recipe to cook in Focus Mode." TextColor="{StaticResource Muted}"
+                        <Label Text="Tap a recipe to cook in Focus Mode." TextColor="{DynamicResource Muted}"
                                FontSize="13" />
                     </VerticalStackLayout>
-                    <Border Grid.Column="1" BackgroundColor="{StaticResource LimeWash}"
-                            Stroke="{StaticResource LineSoft}" StrokeThickness="1"
+                    <Border Grid.Column="1" BackgroundColor="{DynamicResource LimeWash}"
+                            Stroke="{DynamicResource LineSoft}" StrokeThickness="1"
                             Padding="13,8" StrokeShape="RoundRectangle 13" VerticalOptions="Center">
                         <Border.GestureRecognizers>
                             <TapGestureRecognizer Command="{Binding AddManuallyCommand}" />
                         </Border.GestureRecognizers>
-                        <Label Text="+ Add manually" TextColor="{StaticResource LimeBright}" FontSize="13.5"
+                        <Label Text="+ Add manually" TextColor="{DynamicResource LimeBright}" FontSize="13.5"
                                FontAttributes="Bold" VerticalOptions="Center" />
                     </Border>
                 </Grid>
@@ -97,41 +108,46 @@
                                 VerticalScrollBarVisibility="Never">
                     <CollectionView.ItemTemplate>
                         <DataTemplate>
-                            <Border Margin="0,0,0,12" Padding="0" BackgroundColor="{StaticResource Surface}"
-                                    Stroke="{StaticResource Line}" StrokeThickness="1"
+                            <Border Margin="0,0,0,12" Padding="0" BackgroundColor="{DynamicResource Surface}"
+                                    Stroke="{DynamicResource Line}" StrokeThickness="1"
                                     StrokeShape="RoundRectangle 20">
                                 <Border.GestureRecognizers>
                                     <TapGestureRecognizer
-                                        Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.OpenFocusCommand}"
+                                        Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.OpenDetailCommand}"
                                         CommandParameter="{Binding .}" />
                                 </Border.GestureRecognizers>
                                 <Grid Padding="16" ColumnDefinitions="Auto,*,Auto" ColumnSpacing="14"
                                       RowDefinitions="Auto,Auto" RowSpacing="6">
                                     <Border Grid.RowSpan="2" WidthRequest="48" HeightRequest="48"
-                                            BackgroundColor="{StaticResource LimeWash}"
-                                            Stroke="{StaticResource LineSoft}" StrokeThickness="1"
+                                            BackgroundColor="{DynamicResource LimeWash}"
+                                            Stroke="{DynamicResource LineSoft}" StrokeThickness="1"
                                             StrokeShape="RoundRectangle 15" VerticalOptions="Center">
-                                        <Label Text="{Binding Steps.Count}" TextColor="{StaticResource Lime}"
+                                        <Label Text="{Binding StepCount}" TextColor="{DynamicResource Lime}"
                                                FontSize="19" FontAttributes="Bold"
                                                HorizontalOptions="Center" VerticalOptions="Center" />
                                     </Border>
 
-                                    <Label Grid.Column="1" Text="{Binding Title}" TextColor="{StaticResource Ink}"
+                                    <Label Grid.Column="1" Text="{Binding Title}" TextColor="{DynamicResource Ink}"
                                            FontSize="17" FontAttributes="Bold" LineBreakMode="TailTruncation"
                                            MaxLines="2" VerticalOptions="Center" />
 
                                     <HorizontalStackLayout Grid.Column="1" Grid.Row="1" Spacing="7">
-                                        <Label Text="{Binding Steps.Count, StringFormat='{0} steps'}"
-                                               TextColor="{StaticResource Muted}" FontSize="13" />
-                                        <Label Text="&#183;" TextColor="{StaticResource Faint}" FontSize="13" />
-                                        <Label Text="{Binding Ingredients.Count, StringFormat='{0} ingredients'}"
-                                               TextColor="{StaticResource Muted}" FontSize="13" />
+                                        <Label Text="{Binding StepCount, StringFormat='{0} steps'}"
+                                               TextColor="{DynamicResource Muted}" FontSize="13" />
+                                        <Label Text="&#183;" TextColor="{DynamicResource Faint}" FontSize="13" />
+                                        <Label Text="{Binding IngredientCount, StringFormat='{0} ingredients'}"
+                                               TextColor="{DynamicResource Muted}" FontSize="13" />
                                     </HorizontalStackLayout>
 
-                                    <Border Grid.Column="2" Grid.RowSpan="2" BackgroundColor="{StaticResource LimeWash}"
+                                    <Border Grid.Column="2" Grid.RowSpan="2" BackgroundColor="{DynamicResource LimeWash}"
                                             StrokeThickness="0" Padding="13,8" StrokeShape="RoundRectangle 12"
                                             VerticalOptions="Center">
-                                        <Label Text="COOK  &#8250;" TextColor="{StaticResource LimeBright}" FontSize="11.5"
+                                        <Border.GestureRecognizers>
+                                            <TapGestureRecognizer
+                                                Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.OpenFocusCommand}"
+                                                CommandParameter="{Binding .}" />
+                                        </Border.GestureRecognizers>
+                                        <Label Text="COOK  &#8250;" TextColor="{DynamicResource LimeBright}" FontSize="11.5"
                                                FontAttributes="Bold" VerticalOptions="Center" />
                                     </Border>
                                 </Grid>
@@ -143,23 +159,23 @@
                         <Grid Padding="24,40">
                             <VerticalStackLayout Spacing="14" VerticalOptions="Start" HorizontalOptions="Center">
                                 <Border WidthRequest="72" HeightRequest="72" HorizontalOptions="Center"
-                                        BackgroundColor="{StaticResource LimeWash}" Stroke="{StaticResource LineSoft}"
+                                        BackgroundColor="{DynamicResource LimeWash}" Stroke="{DynamicResource LineSoft}"
                                         StrokeThickness="1" StrokeShape="RoundRectangle 22">
-                                    <Label Text="+" TextColor="{StaticResource Lime}" FontSize="34"
+                                    <Label Text="+" TextColor="{DynamicResource Lime}" FontSize="34"
                                            FontAttributes="Bold" HorizontalOptions="Center" VerticalOptions="Center" />
                                 </Border>
-                                <Label Text="No recipes yet" TextColor="{StaticResource Ink}" FontSize="17"
+                                <Label Text="No recipes yet" TextColor="{DynamicResource Ink}" FontSize="17"
                                        FontAttributes="Bold" HorizontalOptions="Center" />
                                 <Label Text="Paste a recipe link above to import your first one."
-                                       TextColor="{StaticResource Muted}" FontSize="14" HorizontalTextAlignment="Center"
+                                       TextColor="{DynamicResource Muted}" FontSize="14" HorizontalTextAlignment="Center"
                                        HorizontalOptions="Center" MaximumWidthRequest="280" />
-                                <Border BackgroundColor="{StaticResource LimeWash}" Stroke="{StaticResource LineSoft}"
+                                <Border BackgroundColor="{DynamicResource LimeWash}" Stroke="{DynamicResource LineSoft}"
                                         StrokeThickness="1" Padding="16,10" StrokeShape="RoundRectangle 13"
                                         HorizontalOptions="Center" Margin="0,4,0,0">
                                     <Border.GestureRecognizers>
                                         <TapGestureRecognizer Command="{Binding AddManuallyCommand}" />
                                     </Border.GestureRecognizers>
-                                    <Label Text="+ Add one manually" TextColor="{StaticResource LimeBright}"
+                                    <Label Text="+ Add one manually" TextColor="{DynamicResource LimeBright}"
                                            FontSize="14" FontAttributes="Bold" />
                                 </Border>
                             </VerticalStackLayout>
@@ -170,19 +186,19 @@
         </Grid>
 
         <!-- ===== Upgrade sheet (floats above content) ===== -->
-        <Border BackgroundColor="{StaticResource Surface}" Stroke="{StaticResource LimeDim}"
+        <Border BackgroundColor="{DynamicResource Surface}" Stroke="{DynamicResource LimeDim}"
                 StrokeThickness="1" Padding="18" Margin="14,0,14,18" StrokeShape="RoundRectangle 22"
                 VerticalOptions="End" MaximumWidthRequest="720" HorizontalOptions="Center"
                 IsVisible="{Binding IsUpgradePromptVisible}">
             <VerticalStackLayout Spacing="14">
                 <VerticalStackLayout Spacing="4">
-                    <Label Text="Out of Smart Credits" TextColor="{StaticResource Ink}" FontSize="17"
+                    <Label Text="Out of Smart Credits" TextColor="{DynamicResource Ink}" FontSize="17"
                            FontAttributes="Bold" />
                     <Label Text="Top up to keep importing recipes by link. Your saved recipes stay free forever."
-                           TextColor="{StaticResource Muted}" FontSize="13.5" LineHeight="1.25" />
+                           TextColor="{DynamicResource Muted}" FontSize="13.5" LineHeight="1.25" />
                 </VerticalStackLayout>
                 <Button Text="Top up credits" Command="{Binding TopUpCommand}"
-                        BackgroundColor="{StaticResource Lime}" TextColor="{StaticResource LimeInk}"
+                        BackgroundColor="{DynamicResource Lime}" TextColor="{DynamicResource LimeInk}"
                         FontAttributes="Bold" FontSize="15" HeightRequest="50" CornerRadius="15" />
             </VerticalStackLayout>
         </Border>

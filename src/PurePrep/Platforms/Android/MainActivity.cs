@@ -3,6 +3,7 @@ using Android.Content.PM;
 using Android.OS;
 using Android.Views;
 using AndroidX.Core.View;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace PurePrep;
 
@@ -18,16 +19,13 @@ public class MainActivity : MauiAppCompatActivity
 
         // Android 15+ (SDK 35) enforces edge-to-edge: draw behind the now-transparent
         // system bars using the modern WindowCompat API (not the deprecated
-        // Window.SetStatusBarColor / SetNavigationBarColor), and keep bar icons light
-        // so they read on our dark background.
+        // Window.SetStatusBarColor / SetNavigationBarColor).
         WindowCompat.SetDecorFitsSystemWindows(Window, false);
 
-        var controller = WindowCompat.GetInsetsController(Window, Window.DecorView);
-        if (controller is not null)
-        {
-            controller.AppearanceLightStatusBars = false;
-            controller.AppearanceLightNavigationBars = false;
-        }
+        // The window/decor background and bar-icon colours are theme-dependent; let the
+        // shared ThemeService paint them so they match whichever appearance is active
+        // (this is what removes the white status/navigation bands in light OS mode).
+        IPlatformApplication.Current?.Services.GetService<PurePrep.Services.ThemeService>()?.ApplyNativeBars();
 
         // Handle insets ourselves: pad the content view by the system-bar + cutout
         // insets so no page content sits under the status or navigation bars, then

@@ -4,30 +4,101 @@
              x:Class="PurePrep.FocusPage"
              Shell.NavBarIsVisible="False"
              NavigationPage.HasNavigationBar="False"
-             BackgroundColor="#0E100E">
-    <Grid Padding="24,28,24,22" RowDefinitions="Auto,Auto,*,Auto" RowSpacing="24">
-        <Grid ColumnDefinitions="Auto,*,Auto">
-            <Button Text="‹" Clicked="OnBackClicked" BackgroundColor="Transparent" TextColor="#D7E5C7" FontSize="32" Padding="0" WidthRequest="42" HeightRequest="42" />
-            <Label Grid.Column="1" Text="FOCUS MODE" TextColor="#A7D46F" FontSize="12" CharacterSpacing="2.2" FontAttributes="Bold" VerticalOptions="Center" HorizontalOptions="Center" />
-            <Label Grid.Column="2" Text="ON" TextColor="#A7D46F" FontSize="12" FontAttributes="Bold" VerticalOptions="Center" />
+             BackgroundColor="{DynamicResource Bg}">
+
+    <Grid Padding="20,12,20,18" RowDefinitions="Auto,Auto,Auto,*,Auto" RowSpacing="16"
+          MaximumWidthRequest="760" HorizontalOptions="Center">
+
+        <!-- Top bar: back + keep-awake toggle -->
+        <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="10">
+            <Border WidthRequest="42" HeightRequest="42" BackgroundColor="{DynamicResource Surface}"
+                    Stroke="{DynamicResource Line}" StrokeThickness="1" StrokeShape="RoundRectangle 13">
+                <Border.GestureRecognizers>
+                    <TapGestureRecognizer Tapped="OnBackTapped" />
+                </Border.GestureRecognizers>
+                <Label Text="&#8249;" TextColor="{DynamicResource Ink}" FontSize="26"
+                       HorizontalOptions="Center" VerticalOptions="Center" />
+            </Border>
+
+            <Label Grid.Column="1" Text="FOCUS MODE" TextColor="{DynamicResource Lime}" FontSize="12"
+                   CharacterSpacing="2.2" FontAttributes="Bold"
+                   VerticalOptions="Center" HorizontalOptions="Center" />
+
+            <Border Grid.Column="2" BackgroundColor="{DynamicResource Surface}" Stroke="{DynamicResource Line}"
+                    StrokeThickness="1" Padding="12,6" StrokeShape="RoundRectangle 20" VerticalOptions="Center">
+                <HorizontalStackLayout Spacing="8" VerticalOptions="Center">
+                    <Label Text="Screen on" TextColor="{DynamicResource Muted}" FontSize="12.5"
+                           FontAttributes="Bold" VerticalOptions="Center" />
+                    <Switch IsToggled="{Binding KeepScreenAwake, Mode=TwoWay}" VerticalOptions="Center"
+                            OnColor="{DynamicResource Lime}" ThumbColor="{DynamicResource BgElevated}"
+                            Scale="0.8" />
+                </HorizontalStackLayout>
+            </Border>
         </Grid>
 
-        <VerticalStackLayout Grid.Row="1" Spacing="4">
-            <Label Text="{Binding Recipe.Title}" TextColor="#F5F4EE" FontSize="27" FontAttributes="Bold" />
-            <Label Text="{Binding StepLabel}" TextColor="#83917C" FontSize="12" CharacterSpacing="1.6" FontAttributes="Bold" />
-        </VerticalStackLayout>
+        <!-- Progress -->
+        <ProgressBar Grid.Row="1" Progress="{Binding Progress}" ProgressColor="{DynamicResource Lime}"
+                     BackgroundColor="{DynamicResource Line}" HeightRequest="4" />
 
-        <Border Grid.Row="2" BackgroundColor="#1A2119" Stroke="#3A4D31" StrokeThickness="1" Padding="24" StrokeShape="RoundRectangle 22" VerticalOptions="Center">
-            <VerticalStackLayout Spacing="22">
-                <Label Text="{Binding CurrentStep.Instruction}" TextColor="#F5F4EE" FontSize="29" FontAttributes="Bold" LineHeight="1.15" />
-                <BoxView HeightRequest="2" Color="#3A4D31" />
-                <Label Text="Keep the screen open while you cook. Tap next when you are ready." TextColor="#91A08C" FontSize="14" />
+        <!-- Title + step + ingredients toggle -->
+        <Grid Grid.Row="2" ColumnDefinitions="*,Auto" ColumnSpacing="12">
+            <VerticalStackLayout Spacing="3">
+                <Label Text="{Binding Recipe.Title}" TextColor="{DynamicResource Ink}" FontSize="24"
+                       FontAttributes="Bold" LineBreakMode="TailTruncation" MaxLines="2" />
+                <Label Text="{Binding StepLabel}" TextColor="{DynamicResource Muted}" FontSize="12"
+                       CharacterSpacing="1.6" FontAttributes="Bold" />
+            </VerticalStackLayout>
+            <Border Grid.Column="1" BackgroundColor="{DynamicResource LimeWash}" Stroke="{DynamicResource LineSoft}"
+                    StrokeThickness="1" Padding="13,9" StrokeShape="RoundRectangle 12" VerticalOptions="Center"
+                    IsVisible="{Binding HasIngredients}">
+                <Border.GestureRecognizers>
+                    <TapGestureRecognizer Command="{Binding ToggleIngredientsCommand}" />
+                </Border.GestureRecognizers>
+                <Label Text="Ingredients" TextColor="{DynamicResource LimeBright}" FontSize="12.5"
+                       FontAttributes="Bold" VerticalOptions="Center" />
+            </Border>
+        </Grid>
+
+        <!-- Step card (hidden while the ingredients panel is open) -->
+        <Border Grid.Row="3" BackgroundColor="{DynamicResource Surface}" Stroke="{DynamicResource LineSoft}"
+                StrokeThickness="1" Padding="24" StrokeShape="RoundRectangle 22" VerticalOptions="Center"
+                IsVisible="{Binding ShowIngredients, Converter={StaticResource InvertedBoolConverter}}">
+            <VerticalStackLayout Spacing="20">
+                <Label Text="{Binding CurrentStep.Instruction}" TextColor="{DynamicResource Ink}" FontSize="27"
+                       FontAttributes="Bold" LineHeight="1.18" />
+                <BoxView HeightRequest="1" Color="{DynamicResource Line}" />
+                <Label Text="Tap Next when this step is done. Screen stays on while cooking."
+                       TextColor="{DynamicResource Muted}" FontSize="13.5" />
             </VerticalStackLayout>
         </Border>
 
-        <Grid Grid.Row="3" ColumnDefinitions="*,*" ColumnSpacing="12">
-            <Button Text="BACK" Command="{Binding PreviousCommand}" BackgroundColor="#202820" TextColor="#AEBBA5" FontAttributes="Bold" CornerRadius="14" HeightRequest="54" />
-            <Button Grid.Column="1" Text="NEXT  ›" Command="{Binding NextCommand}" BackgroundColor="#A7D46F" TextColor="#172013" FontAttributes="Bold" CornerRadius="14" HeightRequest="54" />
+        <!-- Ingredients panel -->
+        <Border Grid.Row="3" BackgroundColor="{DynamicResource Surface}" Stroke="{DynamicResource LineSoft}"
+                StrokeThickness="1" Padding="8,4" StrokeShape="RoundRectangle 22" VerticalOptions="Fill"
+                IsVisible="{Binding ShowIngredients}">
+            <ScrollView>
+                <VerticalStackLayout Padding="14,12" Spacing="0" BindableLayout.ItemsSource="{Binding Ingredients}">
+                    <BindableLayout.ItemTemplate>
+                        <DataTemplate>
+                            <Grid ColumnDefinitions="Auto,*" ColumnSpacing="12" Padding="0,10">
+                                <Ellipse Fill="{DynamicResource Lime}" WidthRequest="6" HeightRequest="6"
+                                         VerticalOptions="Center" />
+                                <Label Grid.Column="1" Text="{Binding .}" TextColor="{DynamicResource Ink}"
+                                       FontSize="16" LineHeight="1.2" VerticalOptions="Center" />
+                            </Grid>
+                        </DataTemplate>
+                    </BindableLayout.ItemTemplate>
+                </VerticalStackLayout>
+            </ScrollView>
+        </Border>
+
+        <!-- Navigation -->
+        <Grid Grid.Row="4" ColumnDefinitions="*,*" ColumnSpacing="12">
+            <Button Text="Back" Command="{Binding PreviousCommand}" BackgroundColor="{DynamicResource Surface}"
+                    TextColor="{DynamicResource Muted}" FontAttributes="Bold" CornerRadius="16" HeightRequest="56" />
+            <Button Grid.Column="1" Text="{Binding PrimaryActionLabel}" Command="{Binding AdvanceCommand}"
+                    BackgroundColor="{DynamicResource Lime}" TextColor="{DynamicResource LimeInk}"
+                    FontAttributes="Bold" FontSize="16" CornerRadius="16" HeightRequest="56" />
         </Grid>
     </Grid>
 </ContentPage>

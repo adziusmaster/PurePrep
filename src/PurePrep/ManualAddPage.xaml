@@ -1,0 +1,74 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="PurePrep.ManualAddPage"
+             Shell.NavBarIsVisible="False"
+             NavigationPage.HasNavigationBar="False"
+             BackgroundColor="{StaticResource Bg}">
+
+    <Grid MaximumWidthRequest="760" HorizontalOptions="Center"
+          RowDefinitions="Auto,*,Auto" Padding="20,12,20,16" RowSpacing="18">
+
+        <!-- Header -->
+        <Grid ColumnDefinitions="Auto,*" ColumnSpacing="10" VerticalOptions="Center">
+            <Border WidthRequest="42" HeightRequest="42" BackgroundColor="{StaticResource Surface}"
+                    Stroke="{StaticResource Line}" StrokeThickness="1" StrokeShape="RoundRectangle 13">
+                <Border.GestureRecognizers>
+                    <TapGestureRecognizer Tapped="OnCancelTapped" />
+                </Border.GestureRecognizers>
+                <Label Text="&#8249;" TextColor="{StaticResource Ink}" FontSize="26"
+                       HorizontalOptions="Center" VerticalOptions="Center" />
+            </Border>
+            <VerticalStackLayout Grid.Column="1" Spacing="1">
+                <Label Text="Add a recipe" TextColor="{StaticResource Ink}" FontSize="20" FontAttributes="Bold" />
+                <Label Text="Always free — no Smart Credits used." TextColor="{StaticResource Muted}" FontSize="13" />
+            </VerticalStackLayout>
+        </Grid>
+
+        <!-- Form -->
+        <ScrollView Grid.Row="1">
+            <VerticalStackLayout Spacing="16">
+                <VerticalStackLayout Spacing="7">
+                    <Label Text="TITLE" TextColor="{StaticResource Muted}" FontSize="11.5"
+                           CharacterSpacing="1.6" FontAttributes="Bold" />
+                    <Border BackgroundColor="{StaticResource Surface}" Stroke="{StaticResource Line}"
+                            StrokeThickness="1" Padding="14,2" StrokeShape="RoundRectangle 15">
+                        <Entry x:Name="TitleEntry" Placeholder="e.g. Mushroom Risotto"
+                               TextColor="{StaticResource Ink}" PlaceholderColor="{StaticResource Faint}" />
+                    </Border>
+                </VerticalStackLayout>
+
+                <VerticalStackLayout Spacing="7">
+                    <Label Text="INGREDIENTS" TextColor="{StaticResource Muted}" FontSize="11.5"
+                           CharacterSpacing="1.6" FontAttributes="Bold" />
+                    <Label Text="One per line." TextColor="{StaticResource Faint}" FontSize="12.5" />
+                    <Border BackgroundColor="{StaticResource Surface}" Stroke="{StaticResource Line}"
+                            StrokeThickness="1" Padding="12,6" StrokeShape="RoundRectangle 15">
+                        <Editor x:Name="IngredientsEditor" AutoSize="TextChanges" HeightRequest="150"
+                                Placeholder="250g arborio rice&#10;1 onion, finely chopped&#10;1L vegetable stock"
+                                TextColor="{StaticResource Ink}" PlaceholderColor="{StaticResource Faint}" />
+                    </Border>
+                </VerticalStackLayout>
+
+                <VerticalStackLayout Spacing="7">
+                    <Label Text="METHOD" TextColor="{StaticResource Muted}" FontSize="11.5"
+                           CharacterSpacing="1.6" FontAttributes="Bold" />
+                    <Label Text="One step per line." TextColor="{StaticResource Faint}" FontSize="12.5" />
+                    <Border BackgroundColor="{StaticResource Surface}" Stroke="{StaticResource Line}"
+                            StrokeThickness="1" Padding="12,6" StrokeShape="RoundRectangle 15">
+                        <Editor x:Name="StepsEditor" AutoSize="TextChanges" HeightRequest="200"
+                                Placeholder="Soften the onion in oil.&#10;Toast the rice for a minute.&#10;Add stock a ladle at a time, stirring."
+                                TextColor="{StaticResource Ink}" PlaceholderColor="{StaticResource Faint}" />
+                    </Border>
+                </VerticalStackLayout>
+
+                <Label x:Name="ErrorLabel" TextColor="{StaticResource Danger}" FontSize="13" IsVisible="False" />
+            </VerticalStackLayout>
+        </ScrollView>
+
+        <!-- Save -->
+        <Button Grid.Row="2" x:Name="SaveButton" Text="Save recipe" Clicked="OnSaveClicked"
+                BackgroundColor="{StaticResource Lime}" TextColor="{StaticResource LimeInk}"
+                FontAttributes="Bold" FontSize="16" HeightRequest="54" CornerRadius="16" />
+    </Grid>
+</ContentPage>

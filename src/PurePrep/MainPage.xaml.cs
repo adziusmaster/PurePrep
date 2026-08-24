@@ -11,6 +11,7 @@ public partial class MainPage : ContentPage
 	{
 		InitializeComponent();
 		viewModel.FocusRequested += OnFocusRequested;
+		viewModel.AddManuallyRequested += OnAddManuallyRequested;
 		BindingContext = viewModel;
 	}
 
@@ -25,5 +26,10 @@ public partial class MainPage : ContentPage
 	private async void OnFocusRequested(object? sender, ParsedRecipe recipe)
 	{
 		await Navigation.PushAsync(new FocusPage(recipe));
+	}
+
+	private async void OnAddManuallyRequested(object? sender, EventArgs e)
+	{
+		await Navigation.PushAsync(new ManualAddPage((RecipeLibraryViewModel)BindingContext));
 	}
 }

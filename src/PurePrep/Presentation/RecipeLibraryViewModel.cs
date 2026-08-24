@@ -36,6 +36,7 @@ public sealed class RecipeLibraryViewModel : INotifyPropertyChanged
         ImportCommand = new Command(async () => await ImportAsync());
         UpgradeCommand = new Command(() => IsUpgradePromptVisible = true);
         TopUpCommand = new Command(async () => await TopUpAsync());
+        AddManuallyCommand = new Command(() => AddManuallyRequested?.Invoke(this, EventArgs.Empty));
         OpenFocusCommand = new Command<ParsedRecipe>(recipe =>
         {
             if (recipe is not null)
@@ -74,9 +75,11 @@ public sealed class RecipeLibraryViewModel : INotifyPropertyChanged
     public ICommand ImportCommand { get; }
     public ICommand UpgradeCommand { get; }
     public ICommand TopUpCommand { get; }
+    public ICommand AddManuallyCommand { get; }
     public ICommand OpenFocusCommand { get; }
 
     public event EventHandler<ParsedRecipe>? FocusRequested;
+    public event EventHandler? AddManuallyRequested;
     public event PropertyChangedEventHandler? PropertyChanged;
 
     /// <summary>Loads saved recipes and the current credit balance. Called when the page appears.</summary>
@@ -169,6 +172,27 @@ public sealed class RecipeLibraryViewModel : INotifyPropertyChanged
         {
             ErrorMessage = $"Could not complete the purchase: {ex.Message}";
         }
+    }
+
+    /// <summary>Saves a hand-entered recipe. Manual add is always free — no Smart Credits are used.</summary>
+    public async Task SaveManualAsync(string title, IEnumerable<string> ingredients, IEnumerable<string> steps)
+    {
+        var recipe = new ParsedRecipe
+        {
+            Title = title.Trim(),
+            Ingredients = ingredients
+                .Select(i => i.Trim())
+                .Where(i => i.Length > 0)
+                .ToArray(),
+            Steps = steps
+                .Select(s => s.Trim())
+                .Where(s => s.Length > 0)
+                .Select((instruction, index) => new RecipeStep { Order = index + 1, Instruction = instruction })
+                .ToArray(),
+        };
+
+        await _repository.SaveAsync(recipe);
+        Recipes.Insert(0, recipe);
     }
 
     private bool SetField<T>(ref T field, T value, [CallerMemberName] string? propertyName = null)

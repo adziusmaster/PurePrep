@@ -14,7 +14,11 @@ public sealed class RecipeLibraryViewModel : INotifyPropertyChanged
     private readonly ISmartCreditsClient _credits;
     private readonly IBillingService _billing;
 
+    // Full unfiltered library; Recipes is the search-filtered view bound to the UI.
+    private readonly List<ParsedRecipe> _all = new();
+
     private string _urlInput = string.Empty;
+    private string _searchText = string.Empty;
     private bool _isImporting;
     private bool _isUpgradePromptVisible;
     private string? _errorMessage;
@@ -52,6 +56,22 @@ public sealed class RecipeLibraryViewModel : INotifyPropertyChanged
     public ObservableCollection<ParsedRecipe> Recipes { get; }
 
     public string UrlInput { get => _urlInput; set => SetField(ref _urlInput, value); }
+
+    public string SearchText
+    {
+        get => _searchText;
+        set
+        {
+            if (SetField(ref _searchText, value))
+            {
+                ApplyFilter();
+                OnPropertyChanged(nameof(HasRecipes));
+            }
+        }
+    }
+
+    /// <summary>True when the full library has any recipes (used to show the search box).</summary>
+    public bool HasRecipes => _all.Count > 0;
     public bool IsImporting { get => _isImporting; private set => SetField(ref _isImporting, value); }
     public bool IsUpgradePromptVisible { get => _isUpgradePromptVisible; private set => SetField(ref _isUpgradePromptVisible, value); }
     public string? ErrorMessage { get => _errorMessage; private set => SetField(ref _errorMessage, value); }
@@ -93,11 +113,25 @@ public sealed class RecipeLibraryViewModel : INotifyPropertyChanged
     public async Task LoadAsync()
     {
         var savedRecipes = await _repository.GetAllAsync();
-        Recipes.Clear();
-        foreach (var recipe in savedRecipes)
-            Recipes.Add(recipe);
+        _all.Clear();
+        _all.AddRange(savedRecipes);
+        ApplyFilter();
+        OnPropertyChanged(nameof(HasRecipes));
 
         await RefreshCreditsAsync();
+    }
+
+    /// <summary>Rebuilds the bound <see cref="Recipes"/> collection from the full list + search text.</summary>
+    private void ApplyFilter()
+    {
+        var query = _searchText?.Trim();
+        IEnumerable<ParsedRecipe> view = _all;
+        if (!string.IsNullOrEmpty(query))
+            view = _all.Where(r => r.Title.Contains(query, StringComparison.OrdinalIgnoreCase));
+
+        Recipes.Clear();
+        foreach (var recipe in view)
+            Recipes.Add(recipe);
     }
 
     private async Task RefreshCreditsAsync()
@@ -134,7 +168,7 @@ public sealed class RecipeLibraryViewModel : INotifyPropertyChanged
         {
             var recipe = await _parser.ParseAsync(source);
             await _repository.SaveAsync(recipe);
-            Recipes.Insert(0, recipe);
+            AddNewRecipe(recipe);
             UrlInput = string.Empty;
             IsUpgradePromptVisible = false;
             await RefreshCreditsAsync();
@@ -184,29 +218,64 @@ public sealed class RecipeLibraryViewModel : INotifyPropertyChanged
     /// <summary>Saves a hand-entered recipe. Manual add is always free — no Smart Credits are used.</summary>
     public async Task SaveManualAsync(string title, IEnumerable<string> ingredients, IEnumerable<string> steps)
     {
-        var recipe = new ParsedRecipe
-        {
-            Title = title.Trim(),
-            Ingredients = ingredients
-                .Select(i => i.Trim())
-                .Where(i => i.Length > 0)
-                .ToArray(),
-            Steps = steps
-                .Select(s => s.Trim())
-                .Where(s => s.Length > 0)
-                .Select((instruction, index) => new RecipeStep { Order = index + 1, Instruction = instruction })
-                .ToArray(),
-        };
-
+        var recipe = BuildRecipe(Guid.NewGuid(), title, ingredients, steps, DateTimeOffset.UtcNow, null);
         await _repository.SaveAsync(recipe);
-        Recipes.Insert(0, recipe);
+        AddNewRecipe(recipe);
+    }
+
+    /// <summary>Updates an existing recipe in place (editing is free — no Smart Credits are used).</summary>
+    public async Task<ParsedRecipe> UpdateManualAsync(ParsedRecipe original, string title,
+        IEnumerable<string> ingredients, IEnumerable<string> steps)
+    {
+        var updated = BuildRecipe(original.Id, title, ingredients, steps, original.SavedAt, original.SourceUrl,
+            original.SourceSystem);
+        await _repository.UpdateAsync(updated);
+        ReplaceRecipe(original, updated);
+        return updated;
+    }
+
+    private static ParsedRecipe BuildRecipe(Guid id, string title, IEnumerable<string> ingredients,
+        IEnumerable<string> steps, DateTimeOffset savedAt, string? sourceUrl,
+        MeasurementSystem sourceSystem = MeasurementSystem.Metric) => new()
+    {
+        Id = id,
+        Title = title.Trim(),
+        SourceUrl = sourceUrl,
+        SourceSystem = sourceSystem,
+        SavedAt = savedAt,
+        Ingredients = ingredients
+            .Select(i => i.Trim())
+            .Where(i => i.Length > 0)
+            .ToArray(),
+        Steps = steps
+            .Select(s => s.Trim())
+            .Where(s => s.Length > 0)
+            .Select((instruction, index) => new RecipeStep { Order = index + 1, Instruction = instruction })
+            .ToArray(),
+    };
+
+    private void AddNewRecipe(ParsedRecipe recipe)
+    {
+        _all.Insert(0, recipe);
+        ApplyFilter();
+        OnPropertyChanged(nameof(HasRecipes));
+    }
+
+    private void ReplaceRecipe(ParsedRecipe original, ParsedRecipe updated)
+    {
+        var index = _all.FindIndex(r => r.Id == original.Id);
+        if (index >= 0)
+            _all[index] = updated;
+        ApplyFilter();
     }
 
     /// <summary>Removes a saved recipe from storage and the library list.</summary>
     public async Task DeleteRecipeAsync(ParsedRecipe recipe)
     {
         await _repository.DeleteAsync(recipe.Id);
+        _all.RemoveAll(r => r.Id == recipe.Id);
         Recipes.Remove(recipe);
+        OnPropertyChanged(nameof(HasRecipes));
     }
 
     private bool SetField<T>(ref T field, T value, [CallerMemberName] string? propertyName = null)

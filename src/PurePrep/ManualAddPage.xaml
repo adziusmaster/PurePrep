@@ -20,8 +20,8 @@
                        HorizontalOptions="Center" VerticalOptions="Center" />
             </Border>
             <VerticalStackLayout Grid.Column="1" Spacing="1">
-                <Label Text="Add a recipe" TextColor="{DynamicResource Ink}" FontSize="20" FontAttributes="Bold" />
-                <Label Text="Always free — no Smart Credits used." TextColor="{DynamicResource Muted}" FontSize="13" />
+                <Label x:Name="HeaderTitle" Text="Add a recipe" TextColor="{DynamicResource Ink}" FontSize="20" FontAttributes="Bold" />
+                <Label x:Name="HeaderSubtitle" Text="Always free — no Smart Credits used." TextColor="{DynamicResource Muted}" FontSize="13" />
             </VerticalStackLayout>
         </Grid>
 

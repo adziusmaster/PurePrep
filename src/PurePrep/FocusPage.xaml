@@ -2,6 +2,7 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="PurePrep.FocusPage"
+             x:Name="FocusRoot"
              Shell.NavBarIsVisible="False"
              NavigationPage.HasNavigationBar="False"
              BackgroundColor="{DynamicResource Bg}">
@@ -67,6 +68,57 @@
                 <Label Text="{Binding CurrentStep.Instruction}" TextColor="{DynamicResource Ink}" FontSize="27"
                        FontAttributes="Bold" LineHeight="1.18" />
                 <BoxView HeightRequest="1" Color="{DynamicResource Line}" />
+
+                <!-- Active countdown -->
+                <Border BackgroundColor="{DynamicResource LimeWash}" Stroke="{DynamicResource Lime}"
+                        StrokeThickness="1" Padding="16,14" StrokeShape="RoundRectangle 16"
+                        IsVisible="{Binding IsTimerRunning}">
+                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12" VerticalOptions="Center">
+                        <VerticalStackLayout>
+                            <Label Text="{Binding ActiveTimerLabel}" TextColor="{DynamicResource LimeBright}"
+                                   FontSize="12.5" CharacterSpacing="1.2" FontAttributes="Bold" />
+                            <Label Text="{Binding ActiveTimerDisplay}" TextColor="{DynamicResource Ink}"
+                                   FontSize="34" FontAttributes="Bold" />
+                        </VerticalStackLayout>
+                        <Border Grid.Column="1" BackgroundColor="{DynamicResource Surface}"
+                                Stroke="{DynamicResource Line}" StrokeThickness="1" Padding="16,10"
+                                StrokeShape="RoundRectangle 12" VerticalOptions="Center">
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding CancelTimerCommand}" />
+                            </Border.GestureRecognizers>
+                            <Label Text="Stop" TextColor="{DynamicResource Danger}" FontSize="13.5"
+                                   FontAttributes="Bold" VerticalOptions="Center" />
+                        </Border>
+                    </Grid>
+                </Border>
+
+                <!-- Detected timer chips -->
+                <VerticalStackLayout Spacing="8" IsVisible="{Binding HasStepTimers}">
+                    <Label Text="TIMERS" TextColor="{DynamicResource Muted}" FontSize="11"
+                           CharacterSpacing="1.6" FontAttributes="Bold" />
+                    <FlexLayout Wrap="Wrap" BindableLayout.ItemsSource="{Binding CurrentStepTimers}">
+                        <BindableLayout.ItemTemplate>
+                            <DataTemplate>
+                                <Border BackgroundColor="{DynamicResource Surface}" Stroke="{DynamicResource Lime}"
+                                        StrokeThickness="1" Padding="16,11" StrokeShape="RoundRectangle 13"
+                                        Margin="0,0,8,8">
+                                    <Border.GestureRecognizers>
+                                        <TapGestureRecognizer
+                                            Command="{Binding Source={x:Reference FocusRoot}, Path=BindingContext.StartTimerCommand}"
+                                            CommandParameter="{Binding .}" />
+                                    </Border.GestureRecognizers>
+                                    <HorizontalStackLayout Spacing="8" VerticalOptions="Center">
+                                        <Label Text="&#9202;" FontSize="16" TextColor="{DynamicResource Lime}"
+                                               VerticalOptions="Center" />
+                                        <Label Text="{Binding Label}" TextColor="{DynamicResource Ink}"
+                                               FontSize="14.5" FontAttributes="Bold" VerticalOptions="Center" />
+                                    </HorizontalStackLayout>
+                                </Border>
+                            </DataTemplate>
+                        </BindableLayout.ItemTemplate>
+                    </FlexLayout>
+                </VerticalStackLayout>
+
                 <Label Text="Tap Next when this step is done. Screen stays on while cooking."
                        TextColor="{DynamicResource Muted}" FontSize="13.5" />
             </VerticalStackLayout>

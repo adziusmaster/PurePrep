@@ -10,7 +10,7 @@ public partial class FocusPage : ContentPage
     public FocusPage(ParsedRecipe recipe)
     {
         InitializeComponent();
-        _viewModel = new FocusModeViewModel(recipe);
+        _viewModel = new FocusModeViewModel(recipe, Dispatcher);
         _viewModel.Completed += OnCompleted;
         BindingContext = _viewModel;
     }
@@ -24,6 +24,7 @@ public partial class FocusPage : ContentPage
 
     protected override void OnDisappearing()
     {
+        _viewModel.StopTimers();
         DeviceDisplay.Current.KeepScreenOn = false;
         SetStatusBarHidden(false);
         base.OnDisappearing();

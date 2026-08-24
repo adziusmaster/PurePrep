@@ -2,6 +2,7 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="PurePrep.RecipeDetailPage"
+             x:Name="PageRoot"
              Shell.NavBarIsVisible="False"
              NavigationPage.HasNavigationBar="False"
              BackgroundColor="{DynamicResource Bg}">
@@ -9,7 +10,7 @@
     <Grid RowDefinitions="Auto,*,Auto">
 
         <!-- Top bar -->
-        <Grid Padding="20,12,20,0" ColumnDefinitions="Auto,*,Auto" ColumnSpacing="10"
+        <Grid Padding="20,12,20,0" ColumnDefinitions="Auto,*,Auto,Auto" ColumnSpacing="10"
               MaximumWidthRequest="760" HorizontalOptions="Center">
             <Border WidthRequest="42" HeightRequest="42" BackgroundColor="{DynamicResource Surface}"
                     Stroke="{DynamicResource Line}" StrokeThickness="1" StrokeShape="RoundRectangle 13">
@@ -20,6 +21,14 @@
                        HorizontalOptions="Center" VerticalOptions="Center" />
             </Border>
             <Border Grid.Column="2" WidthRequest="42" HeightRequest="42" BackgroundColor="{DynamicResource Surface}"
+                    Stroke="{DynamicResource Line}" StrokeThickness="1" StrokeShape="RoundRectangle 13">
+                <Border.GestureRecognizers>
+                    <TapGestureRecognizer Tapped="OnEditTapped" />
+                </Border.GestureRecognizers>
+                <Label Text="&#9998;" TextColor="{DynamicResource Ink}" FontSize="17"
+                       HorizontalOptions="Center" VerticalOptions="Center" />
+            </Border>
+            <Border Grid.Column="3" WidthRequest="42" HeightRequest="42" BackgroundColor="{DynamicResource Surface}"
                     Stroke="{DynamicResource Line}" StrokeThickness="1" StrokeShape="RoundRectangle 13">
                 <Border.GestureRecognizers>
                     <TapGestureRecognizer Tapped="OnDeleteTapped" />
@@ -47,11 +56,47 @@
 
                 <!-- Ingredients -->
                 <VerticalStackLayout Spacing="12" IsVisible="{Binding HasIngredients}">
-                    <Label Text="INGREDIENTS" TextColor="{DynamicResource Lime}" FontSize="12"
-                           CharacterSpacing="1.8" FontAttributes="Bold" />
+                    <Grid ColumnDefinitions="*,Auto" VerticalOptions="Center">
+                        <Label Text="INGREDIENTS" TextColor="{DynamicResource Lime}" FontSize="12"
+                               CharacterSpacing="1.8" FontAttributes="Bold" VerticalOptions="Center" />
+                        <!-- Serving scaler -->
+                        <Border Grid.Column="1" BackgroundColor="{DynamicResource Surface}"
+                                Stroke="{DynamicResource Line}" StrokeThickness="1"
+                                Padding="3" StrokeShape="RoundRectangle 12">
+                            <HorizontalStackLayout Spacing="2" BindableLayout.ItemsSource="{Binding ScaleOptions}">
+                                <BindableLayout.ItemTemplate>
+                                    <DataTemplate>
+                                        <Border StrokeThickness="0" Padding="12,6" StrokeShape="RoundRectangle 9">
+                                            <Border.GestureRecognizers>
+                                                <TapGestureRecognizer
+                                                    Command="{Binding Source={x:Reference PageRoot}, Path=BindingContext.SelectScaleCommand}"
+                                                    CommandParameter="{Binding .}" />
+                                            </Border.GestureRecognizers>
+                                            <Border.Triggers>
+                                                <DataTrigger TargetType="Border" Binding="{Binding IsSelected}" Value="True">
+                                                    <Setter Property="BackgroundColor" Value="{DynamicResource Lime}" />
+                                                </DataTrigger>
+                                            </Border.Triggers>
+                                            <Label Text="{Binding Label}" FontSize="13.5" FontAttributes="Bold"
+                                                   HorizontalOptions="Center" VerticalOptions="Center">
+                                                <Label.Triggers>
+                                                    <DataTrigger TargetType="Label" Binding="{Binding IsSelected}" Value="True">
+                                                        <Setter Property="TextColor" Value="{DynamicResource LimeInk}" />
+                                                    </DataTrigger>
+                                                    <DataTrigger TargetType="Label" Binding="{Binding IsSelected}" Value="False">
+                                                        <Setter Property="TextColor" Value="{DynamicResource Muted}" />
+                                                    </DataTrigger>
+                                                </Label.Triggers>
+                                            </Label>
+                                        </Border>
+                                    </DataTemplate>
+                                </BindableLayout.ItemTemplate>
+                            </HorizontalStackLayout>
+                        </Border>
+                    </Grid>
                     <Border BackgroundColor="{DynamicResource Surface}" Stroke="{DynamicResource Line}"
                             StrokeThickness="1" Padding="16,6" StrokeShape="RoundRectangle 18">
-                        <VerticalStackLayout BindableLayout.ItemsSource="{Binding Ingredients}">
+                        <VerticalStackLayout BindableLayout.ItemsSource="{Binding ScaledIngredients}">
                             <BindableLayout.ItemTemplate>
                                 <DataTemplate>
                                     <Grid ColumnDefinitions="Auto,*" ColumnSpacing="12" Padding="0,9">

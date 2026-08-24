@@ -3,6 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="PurePrep.MainPage"
              Shell.NavBarIsVisible="False"
+             NavigationPage.HasNavigationBar="False"
              BackgroundColor="#111411">
     <Grid RowDefinitions="Auto,Auto,*" Padding="24,28,24,18" RowSpacing="22">
         <Grid ColumnDefinitions="*,Auto">

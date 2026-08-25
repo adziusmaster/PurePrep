@@ -299,4 +299,82 @@ Add stock a ladle at a time, stirring.</value>
   <data name="LangGerman" xml:space="preserve">
     <value>Deutsch</value>
   </data>
+  <data name="SectionUnits" xml:space="preserve">
+    <value>UNITS</value>
+  </data>
+  <data name="UnitsSource" xml:space="preserve">
+    <value>As written</value>
+  </data>
+  <data name="UnitsMetric" xml:space="preserve">
+    <value>Metric</value>
+  </data>
+  <data name="UnitsImperial" xml:space="preserve">
+    <value>Imperial</value>
+  </data>
+  <data name="UnitsDesc" xml:space="preserve">
+    <value>Convert ingredient and step quantities to your preferred system.</value>
+  </data>
+  <data name="ServesFormat" xml:space="preserve">
+    <value>Serves {0}</value>
+  </data>
+  <data name="ScaleCaptionFormat" xml:space="preserve">
+    <value>Scale {0}</value>
+  </data>
+  <data name="Ok" xml:space="preserve">
+    <value>OK</value>
+  </data>
+  <data name="Download" xml:space="preserve">
+    <value>Download</value>
+  </data>
+  <data name="Translate" xml:space="preserve">
+    <value>Translate</value>
+  </data>
+  <data name="TranslateTo" xml:space="preserve">
+    <value>Translate to…</value>
+  </data>
+  <data name="TranslateUnsupported" xml:space="preserve">
+    <value>On-device translation isn't available on this device.</value>
+  </data>
+  <data name="TranslateWorking" xml:space="preserve">
+    <value>Translating…</value>
+  </data>
+  <data name="TranslateDownloadPromptFormat" xml:space="preserve">
+    <value>The {0} language pack needs a one-time download (~30 MB). Download it over Wi-Fi now?</value>
+  </data>
+  <data name="TranslateAlreadyFormat" xml:space="preserve">
+    <value>This recipe already appears to be in {0}.</value>
+  </data>
+  <data name="TranslateFailedFormat" xml:space="preserve">
+    <value>Couldn't translate the recipe: {0}</value>
+  </data>
+  <data name="SectionLanguagePacks" xml:space="preserve">
+    <value>Language packs</value>
+  </data>
+  <data name="LanguagePacksDesc" xml:space="preserve">
+    <value>Download offline packs to translate recipes for free.</value>
+  </data>
+  <data name="LanguagePacksIntro" xml:space="preserve">
+    <value>Translations run fully on your device — no internet needed once a pack is installed. Each pack is a one-time download of about 30 MB.</value>
+  </data>
+  <data name="LanguagePackIncluded" xml:space="preserve">
+    <value>Included</value>
+  </data>
+  <data name="LanguagePackBundledDesc" xml:space="preserve">
+    <value>Built in — always available</value>
+  </data>
+  <data name="LanguagePackReady" xml:space="preserve">
+    <value>Installed · ready offline</value>
+  </data>
+  <data name="LanguagePackNotDownloaded" xml:space="preserve">
+    <value>Not downloaded</value>
+  </data>
+  <data name="LanguagePackDownloadFailedFormat" xml:space="preserve">
+    <value>Download failed: {0}</value>
+  </data>
+  <data name="LanguagePackDeletePromptFormat" xml:space="preserve">
+    <value>Remove the {0} language pack from this device?</value>
+  </data>
+  <data name="LanguagePackDeleteFailedFormat" xml:space="preserve">
+    <value>Couldn't remove the pack: {0}</value>
+  </data>
 </root>

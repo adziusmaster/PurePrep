@@ -3,39 +3,52 @@ using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Windows.Input;
 using PurePrep.Domain;
+using PurePrep.Localization;
+using PurePrep.Services;
 
 namespace PurePrep.Presentation;
 
 /// <summary>
-/// Wraps a saved recipe for the detail screen and applies live serving-size scaling
-/// to the ingredient list via <see cref="RecipeScaling"/>. Steps are never scaled.
+/// Wraps a saved recipe for the detail screen. Applies the user's unit preference to a display
+/// copy of the recipe, then live serving-size scaling to the ingredient list via
+/// <see cref="RecipeScaling"/>. Steps are unit-converted but never scaled.
 /// </summary>
 public sealed class RecipeDetailViewModel : INotifyPropertyChanged
 {
     private ParsedRecipe _recipe;
+    private ParsedRecipe _display;
+    private int? _baseServings;
     private double _factor = 1.0;
 
     public RecipeDetailViewModel(ParsedRecipe recipe)
     {
         _recipe = recipe;
+        _display = RecipeUnits.ForDisplay(recipe);
+        _baseServings = ServingsDetector.Detect(recipe.Title, recipe.Ingredients, recipe.Steps.Select(s => s.Instruction));
+
         ScaleOptions = new ObservableCollection<ScaleOption>
         {
-            new(this, "½×", 0.5),
-            new(this, "1×", 1.0),
-            new(this, "2×", 2.0),
-            new(this, "3×", 3.0),
+            new(this, "\u00BD\u00D7", 0.5),
+            new(this, "1\u00D7", 1.0),
+            new(this, "2\u00D7", 2.0),
+            new(this, "3\u00D7", 3.0),
         };
         SelectScaleCommand = new Command<ScaleOption>(opt => { if (opt is not null) Factor = opt.Factor; });
-        RebuildIngredients();
+        RebuildDisplay();
     }
 
     public ParsedRecipe Recipe => _recipe;
+
+    /// <summary>The recipe with units already converted to the user's preference, for Focus Mode.</summary>
+    public ParsedRecipe DisplayRecipe => _display;
 
     public string Title => _recipe.Title;
     public int StepCount => _recipe.StepCount;
     public int IngredientCount => _recipe.IngredientCount;
     public bool HasIngredients => _recipe.HasIngredients;
-    public IReadOnlyList<RecipeStep> Steps => _recipe.Steps;
+
+    /// <summary>Unit-converted method steps (not scaled).</summary>
+    public ObservableCollection<RecipeStep> DisplaySteps { get; } = new();
 
     /// <summary>Origin domain (e.g. "jamieoliver.com") when the recipe was imported from a link.</summary>
     public string SourceHost => TryGetHost(_recipe.SourceUrl);
@@ -54,6 +67,25 @@ public sealed class RecipeDetailViewModel : INotifyPropertyChanged
     public ObservableCollection<ScaleOption> ScaleOptions { get; }
     public ICommand SelectScaleCommand { get; }
 
+    /// <summary>
+    /// Caption that explains the scaler: shows the resulting servings when the recipe's yield
+    /// could be detected ("Serves 8"), otherwise the plain multiplier ("Scale 2x").
+    /// </summary>
+    public string ServingsCaption
+    {
+        get
+        {
+            if (_baseServings is int baseServings)
+            {
+                var scaled = Math.Max(1, (int)Math.Round(baseServings * _factor, MidpointRounding.AwayFromZero));
+                return AppResources.Format("ServesFormat", scaled);
+            }
+
+            var label = ScaleOptions.FirstOrDefault(o => o.IsSelected)?.Label ?? "1\u00D7";
+            return AppResources.Format("ScaleCaptionFormat", label);
+        }
+    }
+
     /// <summary>The active serving multiplier. 1.0 shows the original quantities.</summary>
     public double Factor
     {
@@ -64,29 +96,41 @@ public sealed class RecipeDetailViewModel : INotifyPropertyChanged
                 return;
             _factor = value;
             RebuildIngredients();
+            OnPropertyChanged(nameof(ServingsCaption));
             foreach (var option in ScaleOptions)
                 option.RaiseSelectedChanged();
         }
     }
 
-    /// <summary>Replaces the wrapped recipe (e.g. after an edit) and refreshes all bindings.</summary>
+    /// <summary>Replaces the wrapped recipe (e.g. after an edit or a units change) and refreshes bindings.</summary>
     public void SetRecipe(ParsedRecipe recipe)
     {
         _recipe = recipe;
-        RebuildIngredients();
+        _display = RecipeUnits.ForDisplay(recipe);
+        _baseServings = ServingsDetector.Detect(recipe.Title, recipe.Ingredients, recipe.Steps.Select(s => s.Instruction));
+        RebuildDisplay();
         OnPropertyChanged(nameof(Title));
         OnPropertyChanged(nameof(StepCount));
         OnPropertyChanged(nameof(IngredientCount));
         OnPropertyChanged(nameof(HasIngredients));
-        OnPropertyChanged(nameof(Steps));
+        OnPropertyChanged(nameof(DisplayRecipe));
         OnPropertyChanged(nameof(SourceHost));
         OnPropertyChanged(nameof(HasSource));
+        OnPropertyChanged(nameof(ServingsCaption));
+    }
+
+    private void RebuildDisplay()
+    {
+        DisplaySteps.Clear();
+        foreach (var step in _display.Steps)
+            DisplaySteps.Add(step);
+        RebuildIngredients();
     }
 
     private void RebuildIngredients()
     {
         ScaledIngredients.Clear();
-        foreach (var line in _recipe.Ingredients)
+        foreach (var line in _display.Ingredients)
             ScaledIngredients.Add(RecipeScaling.Scale(line, _factor));
     }
 

@@ -299,4 +299,82 @@ Ajoutez le bouillon louche par louche en remuant.</value>
   <data name="LangGerman" xml:space="preserve">
     <value>Deutsch</value>
   </data>
+  <data name="SectionUnits" xml:space="preserve">
+    <value>UNITÉS</value>
+  </data>
+  <data name="UnitsSource" xml:space="preserve">
+    <value>Comme indiqué</value>
+  </data>
+  <data name="UnitsMetric" xml:space="preserve">
+    <value>Métrique</value>
+  </data>
+  <data name="UnitsImperial" xml:space="preserve">
+    <value>Impérial</value>
+  </data>
+  <data name="UnitsDesc" xml:space="preserve">
+    <value>Convertit les quantités des ingrédients et des étapes dans votre système préféré.</value>
+  </data>
+  <data name="ServesFormat" xml:space="preserve">
+    <value>Pour {0} personnes</value>
+  </data>
+  <data name="ScaleCaptionFormat" xml:space="preserve">
+    <value>Quantité {0}</value>
+  </data>
+  <data name="Ok" xml:space="preserve">
+    <value>OK</value>
+  </data>
+  <data name="Download" xml:space="preserve">
+    <value>Télécharger</value>
+  </data>
+  <data name="Translate" xml:space="preserve">
+    <value>Traduire</value>
+  </data>
+  <data name="TranslateTo" xml:space="preserve">
+    <value>Traduire en…</value>
+  </data>
+  <data name="TranslateUnsupported" xml:space="preserve">
+    <value>La traduction sur l'appareil n'est pas disponible sur cet appareil.</value>
+  </data>
+  <data name="TranslateWorking" xml:space="preserve">
+    <value>Traduction…</value>
+  </data>
+  <data name="TranslateDownloadPromptFormat" xml:space="preserve">
+    <value>Le pack de langue {0} nécessite un téléchargement unique (~30 Mo). Le télécharger via le Wi-Fi maintenant ?</value>
+  </data>
+  <data name="TranslateAlreadyFormat" xml:space="preserve">
+    <value>Cette recette semble déjà être en {0}.</value>
+  </data>
+  <data name="TranslateFailedFormat" xml:space="preserve">
+    <value>Impossible de traduire la recette : {0}</value>
+  </data>
+  <data name="SectionLanguagePacks" xml:space="preserve">
+    <value>Packs de langue</value>
+  </data>
+  <data name="LanguagePacksDesc" xml:space="preserve">
+    <value>Téléchargez des packs hors ligne pour traduire des recettes gratuitement.</value>
+  </data>
+  <data name="LanguagePacksIntro" xml:space="preserve">
+    <value>Les traductions s'exécutent entièrement sur votre appareil — aucune connexion nécessaire une fois le pack installé. Chaque pack est un téléchargement unique d'environ 30 Mo.</value>
+  </data>
+  <data name="LanguagePackIncluded" xml:space="preserve">
+    <value>Inclus</value>
+  </data>
+  <data name="LanguagePackBundledDesc" xml:space="preserve">
+    <value>Intégré — toujours disponible</value>
+  </data>
+  <data name="LanguagePackReady" xml:space="preserve">
+    <value>Installé · prêt hors ligne</value>
+  </data>
+  <data name="LanguagePackNotDownloaded" xml:space="preserve">
+    <value>Non téléchargé</value>
+  </data>
+  <data name="LanguagePackDownloadFailedFormat" xml:space="preserve">
+    <value>Échec du téléchargement : {0}</value>
+  </data>
+  <data name="LanguagePackDeletePromptFormat" xml:space="preserve">
+    <value>Supprimer le pack de langue {0} de cet appareil ?</value>
+  </data>
+  <data name="LanguagePackDeleteFailedFormat" xml:space="preserve">
+    <value>Impossible de supprimer le pack : {0}</value>
+  </data>
 </root>

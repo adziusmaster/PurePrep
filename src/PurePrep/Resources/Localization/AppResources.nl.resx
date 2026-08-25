@@ -299,4 +299,82 @@ Voeg de bouillon pollepel voor pollepel toe, al roerend.</value>
   <data name="LangGerman" xml:space="preserve">
     <value>Deutsch</value>
   </data>
+  <data name="SectionUnits" xml:space="preserve">
+    <value>EENHEDEN</value>
+  </data>
+  <data name="UnitsSource" xml:space="preserve">
+    <value>Zoals vermeld</value>
+  </data>
+  <data name="UnitsMetric" xml:space="preserve">
+    <value>Metrisch</value>
+  </data>
+  <data name="UnitsImperial" xml:space="preserve">
+    <value>Imperiaal</value>
+  </data>
+  <data name="UnitsDesc" xml:space="preserve">
+    <value>Zet hoeveelheden in ingrediënten en stappen om naar je voorkeurssysteem.</value>
+  </data>
+  <data name="ServesFormat" xml:space="preserve">
+    <value>Voor {0} personen</value>
+  </data>
+  <data name="ScaleCaptionFormat" xml:space="preserve">
+    <value>Hoeveelheid {0}</value>
+  </data>
+  <data name="Ok" xml:space="preserve">
+    <value>OK</value>
+  </data>
+  <data name="Download" xml:space="preserve">
+    <value>Downloaden</value>
+  </data>
+  <data name="Translate" xml:space="preserve">
+    <value>Vertalen</value>
+  </data>
+  <data name="TranslateTo" xml:space="preserve">
+    <value>Vertalen naar…</value>
+  </data>
+  <data name="TranslateUnsupported" xml:space="preserve">
+    <value>Vertaling op het apparaat is niet beschikbaar op dit apparaat.</value>
+  </data>
+  <data name="TranslateWorking" xml:space="preserve">
+    <value>Vertalen…</value>
+  </data>
+  <data name="TranslateDownloadPromptFormat" xml:space="preserve">
+    <value>Het taalpakket {0} vereist een eenmalige download (~30 MB). Nu downloaden via wifi?</value>
+  </data>
+  <data name="TranslateAlreadyFormat" xml:space="preserve">
+    <value>Dit recept lijkt al in het {0} te zijn.</value>
+  </data>
+  <data name="TranslateFailedFormat" xml:space="preserve">
+    <value>Kan het recept niet vertalen: {0}</value>
+  </data>
+  <data name="SectionLanguagePacks" xml:space="preserve">
+    <value>Taalpakketten</value>
+  </data>
+  <data name="LanguagePacksDesc" xml:space="preserve">
+    <value>Download offline pakketten om recepten gratis te vertalen.</value>
+  </data>
+  <data name="LanguagePacksIntro" xml:space="preserve">
+    <value>Vertalingen draaien volledig op je apparaat — geen internet nodig zodra een pakket is geïnstalleerd. Elk pakket is een eenmalige download van ongeveer 30 MB.</value>
+  </data>
+  <data name="LanguagePackIncluded" xml:space="preserve">
+    <value>Inbegrepen</value>
+  </data>
+  <data name="LanguagePackBundledDesc" xml:space="preserve">
+    <value>Ingebouwd — altijd beschikbaar</value>
+  </data>
+  <data name="LanguagePackReady" xml:space="preserve">
+    <value>Geïnstalleerd · offline klaar</value>
+  </data>
+  <data name="LanguagePackNotDownloaded" xml:space="preserve">
+    <value>Niet gedownload</value>
+  </data>
+  <data name="LanguagePackDownloadFailedFormat" xml:space="preserve">
+    <value>Downloaden mislukt: {0}</value>
+  </data>
+  <data name="LanguagePackDeletePromptFormat" xml:space="preserve">
+    <value>Het taalpakket {0} van dit apparaat verwijderen?</value>
+  </data>
+  <data name="LanguagePackDeleteFailedFormat" xml:space="preserve">
+    <value>Kan het pakket niet verwijderen: {0}</value>
+  </data>
 </root>

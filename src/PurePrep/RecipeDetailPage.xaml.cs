@@ -1,3 +1,5 @@
+using Microsoft.Extensions.DependencyInjection;
+using PurePrep.Application;
 using PurePrep.Domain;
 using PurePrep.Localization;
 using PurePrep.Presentation;
@@ -38,8 +40,70 @@ public partial class RecipeDetailPage : ContentPage
     private async void OnEditTapped(object? sender, EventArgs e) =>
         await Navigation.PushAsync(new ManualAddPage(_library, _recipe));
 
+    private async void OnTranslateTapped(object? sender, EventArgs e)
+    {
+        var svc = IPlatformApplication.Current?.Services.GetService<ITranslationService>();
+        if (svc is null || !svc.IsSupported)
+        {
+            await DisplayAlert(AppResources.Get("Translate"), AppResources.Get("TranslateUnsupported"),
+                AppResources.Get("Ok"));
+            return;
+        }
+
+        var languages = LocalizationService.Supported
+            .Where(l => l.Code.Length == 2 && svc.SupportedLanguageCodes.Contains(l.Code))
+            .ToList();
+        var names = languages.Select(l => l.NativeName).ToArray();
+
+        var choice = await DisplayActionSheet(AppResources.Get("TranslateTo"),
+            AppResources.Get("Cancel"), null, names);
+        if (string.IsNullOrEmpty(choice))
+            return;
+
+        var target = languages.FirstOrDefault(l => l.NativeName == choice);
+        if (target is null)
+            return;
+
+        try
+        {
+            if (!await svc.IsModelDownloadedAsync(target.Code))
+            {
+                var ok = await DisplayAlert(AppResources.Get("Translate"),
+                    AppResources.Format("TranslateDownloadPromptFormat", target.NativeName),
+                    AppResources.Get("Download"), AppResources.Get("Cancel"));
+                if (!ok)
+                    return;
+            }
+
+            BusyOverlay.IsVisible = true;
+            var translated = await svc.TranslateAsync(_recipe, target.Code);
+
+            if (ReferenceEquals(translated, _recipe))
+            {
+                BusyOverlay.IsVisible = false;
+                await DisplayAlert(AppResources.Get("Translate"),
+                    AppResources.Format("TranslateAlreadyFormat", target.NativeName), AppResources.Get("Ok"));
+                return;
+            }
+
+            var saved = await _library.UpdateManualAsync(_recipe, translated.Title,
+                translated.Ingredients, translated.Steps.Select(s => s.Instruction));
+            _recipe = saved;
+            _viewModel.SetRecipe(saved);
+        }
+        catch (Exception ex)
+        {
+            await DisplayAlert(AppResources.Get("Translate"),
+                AppResources.Format("TranslateFailedFormat", ex.Message), AppResources.Get("Ok"));
+        }
+        finally
+        {
+            BusyOverlay.IsVisible = false;
+        }
+    }
+
     private async void OnCookClicked(object? sender, EventArgs e) =>
-        await Navigation.PushAsync(new FocusPage(_recipe));
+        await Navigation.PushAsync(new FocusPage(_viewModel.DisplayRecipe));
 
     private async void OnDeleteTapped(object? sender, EventArgs e)
     {

@@ -18,6 +18,7 @@ public partial class SettingsPage : ContentPage
         KeepAwakeSwitch.IsToggled = CookingSettings.KeepScreenAwake;
         VersionLabel.Text = $"{AppInfo.Current.VersionString} ({AppInfo.Current.BuildString})";
         RefreshAppearancePills();
+        RefreshUnitPills();
         BuildLanguagePicker();
     }
 
@@ -66,6 +67,9 @@ public partial class SettingsPage : ContentPage
 
     private void OnBackTapped(object? sender, EventArgs e) => _ = Navigation.PopAsync();
 
+    private async void OnLanguagePacksTapped(object? sender, EventArgs e) =>
+        await Navigation.PushAsync(new LanguagePacksPage());
+
     private void OnSystemTapped(object? sender, EventArgs e) => SelectTheme(AppThemeChoice.System);
     private void OnLightTapped(object? sender, EventArgs e) => SelectTheme(AppThemeChoice.Light);
     private void OnDarkTapped(object? sender, EventArgs e) => SelectTheme(AppThemeChoice.Dark);
@@ -78,6 +82,30 @@ public partial class SettingsPage : ContentPage
 
     private void OnKeepAwakeToggled(object? sender, ToggledEventArgs e) =>
         CookingSettings.KeepScreenAwake = e.Value;
+
+    private void OnUnitsSourceTapped(object? sender, EventArgs e) => SelectUnits(UnitDisplay.Source);
+    private void OnUnitsMetricTapped(object? sender, EventArgs e) => SelectUnits(UnitDisplay.Metric);
+    private void OnUnitsImperialTapped(object? sender, EventArgs e) => SelectUnits(UnitDisplay.Imperial);
+
+    private void SelectUnits(UnitDisplay display)
+    {
+        UnitSettings.Display = display;
+        RefreshUnitPills();
+    }
+
+    private void RefreshUnitPills()
+    {
+        var current = UnitSettings.Display;
+        Apply(UnitsSourcePill, UnitsSourceLabel, current == UnitDisplay.Source);
+        Apply(UnitsMetricPill, UnitsMetricLabel, current == UnitDisplay.Metric);
+        Apply(UnitsImperialPill, UnitsImperialLabel, current == UnitDisplay.Imperial);
+
+        static void Apply(Border pill, Label label, bool selected)
+        {
+            pill.BackgroundColor = selected ? Token("Lime") : Colors.Transparent;
+            label.TextColor = selected ? Token("LimeInk") : Token("Muted");
+        }
+    }
 
     private async void OnPrivacyTapped(object? sender, EventArgs e)
     {

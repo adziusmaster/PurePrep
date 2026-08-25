@@ -299,4 +299,82 @@ Dodawaj bulion po chochli, mieszając.</value>
   <data name="LangGerman" xml:space="preserve">
     <value>Deutsch</value>
   </data>
+  <data name="SectionUnits" xml:space="preserve">
+    <value>JEDNOSTKI</value>
+  </data>
+  <data name="UnitsSource" xml:space="preserve">
+    <value>Jak w przepisie</value>
+  </data>
+  <data name="UnitsMetric" xml:space="preserve">
+    <value>Metryczne</value>
+  </data>
+  <data name="UnitsImperial" xml:space="preserve">
+    <value>Imperialne</value>
+  </data>
+  <data name="UnitsDesc" xml:space="preserve">
+    <value>Przelicza ilości w składnikach i krokach na wybrany system.</value>
+  </data>
+  <data name="ServesFormat" xml:space="preserve">
+    <value>Dla {0} osób</value>
+  </data>
+  <data name="ScaleCaptionFormat" xml:space="preserve">
+    <value>Ilość {0}</value>
+  </data>
+  <data name="Ok" xml:space="preserve">
+    <value>OK</value>
+  </data>
+  <data name="Download" xml:space="preserve">
+    <value>Pobierz</value>
+  </data>
+  <data name="Translate" xml:space="preserve">
+    <value>Przetłumacz</value>
+  </data>
+  <data name="TranslateTo" xml:space="preserve">
+    <value>Przetłumacz na…</value>
+  </data>
+  <data name="TranslateUnsupported" xml:space="preserve">
+    <value>Tłumaczenie na urządzeniu nie jest dostępne na tym urządzeniu.</value>
+  </data>
+  <data name="TranslateWorking" xml:space="preserve">
+    <value>Tłumaczenie…</value>
+  </data>
+  <data name="TranslateDownloadPromptFormat" xml:space="preserve">
+    <value>Pakiet języka {0} wymaga jednorazowego pobrania (~30 MB). Pobrać teraz przez Wi-Fi?</value>
+  </data>
+  <data name="TranslateAlreadyFormat" xml:space="preserve">
+    <value>Ten przepis wygląda na już w języku {0}.</value>
+  </data>
+  <data name="TranslateFailedFormat" xml:space="preserve">
+    <value>Nie udało się przetłumaczyć przepisu: {0}</value>
+  </data>
+  <data name="SectionLanguagePacks" xml:space="preserve">
+    <value>Pakiety językowe</value>
+  </data>
+  <data name="LanguagePacksDesc" xml:space="preserve">
+    <value>Pobierz pakiety offline, aby tłumaczyć przepisy za darmo.</value>
+  </data>
+  <data name="LanguagePacksIntro" xml:space="preserve">
+    <value>Tłumaczenia działają w całości na Twoim urządzeniu — po zainstalowaniu pakietu internet nie jest potrzebny. Każdy pakiet to jednorazowe pobranie około 30 MB.</value>
+  </data>
+  <data name="LanguagePackIncluded" xml:space="preserve">
+    <value>W zestawie</value>
+  </data>
+  <data name="LanguagePackBundledDesc" xml:space="preserve">
+    <value>Wbudowany — zawsze dostępny</value>
+  </data>
+  <data name="LanguagePackReady" xml:space="preserve">
+    <value>Zainstalowany · gotowy offline</value>
+  </data>
+  <data name="LanguagePackNotDownloaded" xml:space="preserve">
+    <value>Nie pobrano</value>
+  </data>
+  <data name="LanguagePackDownloadFailedFormat" xml:space="preserve">
+    <value>Pobieranie nie powiodło się: {0}</value>
+  </data>
+  <data name="LanguagePackDeletePromptFormat" xml:space="preserve">
+    <value>Usunąć pakiet języka {0} z tego urządzenia?</value>
+  </data>
+  <data name="LanguagePackDeleteFailedFormat" xml:space="preserve">
+    <value>Nie udało się usunąć pakietu: {0}</value>
+  </data>
 </root>

@@ -64,6 +64,43 @@
                            TextColor="{DynamicResource Faint}" FontSize="12.5" />
                 </VerticalStackLayout>
 
+                <!-- Units -->
+                <VerticalStackLayout Spacing="12">
+                    <Label Text="{loc:Translate SectionUnits}" TextColor="{DynamicResource Muted}" FontSize="11.5"
+                           CharacterSpacing="1.8" FontAttributes="Bold" />
+                    <Border BackgroundColor="{DynamicResource Surface}" Stroke="{DynamicResource Line}"
+                            StrokeThickness="1" Padding="6" StrokeShape="RoundRectangle 18">
+                        <Grid ColumnDefinitions="*,*,*" ColumnSpacing="6">
+                            <Border x:Name="UnitsSourcePill" StrokeThickness="0" Padding="0,12"
+                                    StrokeShape="RoundRectangle 13">
+                                <Border.GestureRecognizers>
+                                    <TapGestureRecognizer Tapped="OnUnitsSourceTapped" />
+                                </Border.GestureRecognizers>
+                                <Label x:Name="UnitsSourceLabel" Text="{loc:Translate UnitsSource}" FontSize="14" FontAttributes="Bold"
+                                       HorizontalOptions="Center" />
+                            </Border>
+                            <Border x:Name="UnitsMetricPill" Grid.Column="1" StrokeThickness="0" Padding="0,12"
+                                    StrokeShape="RoundRectangle 13">
+                                <Border.GestureRecognizers>
+                                    <TapGestureRecognizer Tapped="OnUnitsMetricTapped" />
+                                </Border.GestureRecognizers>
+                                <Label x:Name="UnitsMetricLabel" Text="{loc:Translate UnitsMetric}" FontSize="14" FontAttributes="Bold"
+                                       HorizontalOptions="Center" />
+                            </Border>
+                            <Border x:Name="UnitsImperialPill" Grid.Column="2" StrokeThickness="0" Padding="0,12"
+                                    StrokeShape="RoundRectangle 13">
+                                <Border.GestureRecognizers>
+                                    <TapGestureRecognizer Tapped="OnUnitsImperialTapped" />
+                                </Border.GestureRecognizers>
+                                <Label x:Name="UnitsImperialLabel" Text="{loc:Translate UnitsImperial}" FontSize="14" FontAttributes="Bold"
+                                       HorizontalOptions="Center" />
+                            </Border>
+                        </Grid>
+                    </Border>
+                    <Label Text="{loc:Translate UnitsDesc}"
+                           TextColor="{DynamicResource Faint}" FontSize="12.5" />
+                </VerticalStackLayout>
+
                 <!-- Language -->
                 <VerticalStackLayout Spacing="12">
                     <Label Text="{loc:Translate SectionLanguage}" TextColor="{DynamicResource Muted}" FontSize="11.5"
@@ -76,6 +113,22 @@
                     </Border>
                     <Label Text="{loc:Translate LanguageDesc}"
                            TextColor="{DynamicResource Faint}" FontSize="12.5" />
+                    <Border BackgroundColor="{DynamicResource Surface}" Stroke="{DynamicResource Line}"
+                            StrokeThickness="1" Padding="16,14" StrokeShape="RoundRectangle 18">
+                        <Border.GestureRecognizers>
+                            <TapGestureRecognizer Tapped="OnLanguagePacksTapped" />
+                        </Border.GestureRecognizers>
+                        <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
+                            <VerticalStackLayout Spacing="3">
+                                <Label Text="{loc:Translate SectionLanguagePacks}" TextColor="{DynamicResource Ink}"
+                                       FontSize="16" FontAttributes="Bold" />
+                                <Label Text="{loc:Translate LanguagePacksDesc}"
+                                       TextColor="{DynamicResource Muted}" FontSize="13" />
+                            </VerticalStackLayout>
+                            <Label Grid.Column="1" Text="&#8250;" TextColor="{DynamicResource Muted}"
+                                   FontSize="22" VerticalOptions="Center" />
+                        </Grid>
+                    </Border>
                 </VerticalStackLayout>
 
                 <!-- Cooking -->

@@ -11,7 +11,7 @@
     <Grid RowDefinitions="Auto,*,Auto">
 
         <!-- Top bar -->
-        <Grid Padding="20,12,20,0" ColumnDefinitions="Auto,*,Auto,Auto" ColumnSpacing="10"
+        <Grid Padding="20,12,20,0" ColumnDefinitions="Auto,*,Auto,Auto,Auto" ColumnSpacing="10"
               MaximumWidthRequest="760" HorizontalOptions="Center">
             <Border WidthRequest="42" HeightRequest="42" BackgroundColor="{DynamicResource Surface}"
                     Stroke="{DynamicResource Line}" StrokeThickness="1" StrokeShape="RoundRectangle 13">
@@ -24,12 +24,20 @@
             <Border Grid.Column="2" WidthRequest="42" HeightRequest="42" BackgroundColor="{DynamicResource Surface}"
                     Stroke="{DynamicResource Line}" StrokeThickness="1" StrokeShape="RoundRectangle 13">
                 <Border.GestureRecognizers>
+                    <TapGestureRecognizer Tapped="OnTranslateTapped" />
+                </Border.GestureRecognizers>
+                <Label Text="&#127760;" FontSize="18"
+                       HorizontalOptions="Center" VerticalOptions="Center" />
+            </Border>
+            <Border Grid.Column="3" WidthRequest="42" HeightRequest="42" BackgroundColor="{DynamicResource Surface}"
+                    Stroke="{DynamicResource Line}" StrokeThickness="1" StrokeShape="RoundRectangle 13">
+                <Border.GestureRecognizers>
                     <TapGestureRecognizer Tapped="OnEditTapped" />
                 </Border.GestureRecognizers>
                 <Label Text="&#9998;" TextColor="{DynamicResource Ink}" FontSize="17"
                        HorizontalOptions="Center" VerticalOptions="Center" />
             </Border>
-            <Border Grid.Column="3" WidthRequest="42" HeightRequest="42" BackgroundColor="{DynamicResource Surface}"
+            <Border Grid.Column="4" WidthRequest="42" HeightRequest="42" BackgroundColor="{DynamicResource Surface}"
                     Stroke="{DynamicResource Line}" StrokeThickness="1" StrokeShape="RoundRectangle 13">
                 <Border.GestureRecognizers>
                     <TapGestureRecognizer Tapped="OnDeleteTapped" />
@@ -83,6 +91,9 @@
                                                 <DataTrigger TargetType="Border" Binding="{Binding IsSelected}" Value="True">
                                                     <Setter Property="BackgroundColor" Value="{DynamicResource Lime}" />
                                                 </DataTrigger>
+                                                <DataTrigger TargetType="Border" Binding="{Binding IsSelected}" Value="False">
+                                                    <Setter Property="BackgroundColor" Value="Transparent" />
+                                                </DataTrigger>
                                             </Border.Triggers>
                                             <Label Text="{Binding Label}" FontSize="13.5" FontAttributes="Bold"
                                                    HorizontalOptions="Center" VerticalOptions="Center">
@@ -101,6 +112,8 @@
                             </HorizontalStackLayout>
                         </Border>
                     </Grid>
+                    <Label Text="{Binding ServingsCaption}" TextColor="{DynamicResource Muted}" FontSize="12.5"
+                           HorizontalOptions="End" Margin="0,-6,2,0" />
                     <Border BackgroundColor="{DynamicResource Surface}" Stroke="{DynamicResource Line}"
                             StrokeThickness="1" Padding="16,6" StrokeShape="RoundRectangle 18">
                         <VerticalStackLayout BindableLayout.ItemsSource="{Binding ScaledIngredients}">
@@ -122,7 +135,7 @@
                 <VerticalStackLayout Spacing="12">
                     <Label Text="{loc:Translate SectionMethod}" TextColor="{DynamicResource Lime}" FontSize="12"
                            CharacterSpacing="1.8" FontAttributes="Bold" />
-                    <VerticalStackLayout Spacing="10" BindableLayout.ItemsSource="{Binding Steps}">
+                    <VerticalStackLayout Spacing="10" BindableLayout.ItemsSource="{Binding DisplaySteps}">
                         <BindableLayout.ItemTemplate>
                             <DataTemplate>
                                 <Border BackgroundColor="{DynamicResource Surface}" Stroke="{DynamicResource Line}"
@@ -153,5 +166,20 @@
                     FontAttributes="Bold" FontSize="16" HeightRequest="54" CornerRadius="16"
                     MaximumWidthRequest="760" HorizontalOptions="Fill" />
         </Border>
+
+        <!-- Busy overlay (translation / model download) -->
+        <Grid x:Name="BusyOverlay" Grid.RowSpan="3" IsVisible="False"
+              BackgroundColor="#B3000000">
+            <Border BackgroundColor="{DynamicResource Surface}" Stroke="{DynamicResource Line}"
+                    StrokeThickness="1" StrokeShape="RoundRectangle 16" Padding="26,22"
+                    VerticalOptions="Center" HorizontalOptions="Center">
+                <VerticalStackLayout Spacing="14" HorizontalOptions="Center">
+                    <ActivityIndicator IsRunning="{Binding Source={x:Reference BusyOverlay}, Path=IsVisible}"
+                                       Color="{DynamicResource Lime}" HorizontalOptions="Center" />
+                    <Label x:Name="BusyLabel" Text="{loc:Translate TranslateWorking}"
+                           TextColor="{DynamicResource Ink}" FontSize="15" HorizontalOptions="Center" />
+                </VerticalStackLayout>
+            </Border>
+        </Grid>
     </Grid>
 </ContentPage>

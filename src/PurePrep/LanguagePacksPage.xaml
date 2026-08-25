@@ -1,0 +1,68 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:loc="clr-namespace:PurePrep.Localization"
+             x:Class="PurePrep.LanguagePacksPage"
+             Shell.NavBarIsVisible="False"
+             NavigationPage.HasNavigationBar="False"
+             BackgroundColor="{DynamicResource Bg}">
+
+    <Grid MaximumWidthRequest="760" HorizontalOptions="Center"
+          Padding="20,12,20,16" RowDefinitions="Auto,Auto,*">
+
+        <!-- Header -->
+        <Grid ColumnDefinitions="Auto,*" ColumnSpacing="12" VerticalOptions="Center">
+            <Border WidthRequest="42" HeightRequest="42" BackgroundColor="{DynamicResource Surface}"
+                    Stroke="{DynamicResource Line}" StrokeThickness="1" StrokeShape="RoundRectangle 13">
+                <Border.GestureRecognizers>
+                    <TapGestureRecognizer Tapped="OnBackTapped" />
+                </Border.GestureRecognizers>
+                <Label Text="&#8249;" TextColor="{DynamicResource Ink}" FontSize="26"
+                       HorizontalOptions="Center" VerticalOptions="Center" />
+            </Border>
+            <Label Grid.Column="1" Text="{loc:Translate SectionLanguagePacks}" TextColor="{DynamicResource Ink}"
+                   FontSize="24" FontAttributes="Bold" VerticalOptions="Center" />
+        </Grid>
+
+        <Label Grid.Row="1" Text="{loc:Translate LanguagePacksIntro}" TextColor="{DynamicResource Muted}"
+               FontSize="13.5" LineHeight="1.3" Margin="0,10,0,14" />
+
+        <CollectionView Grid.Row="2" x:Name="PacksList" SelectionMode="None">
+            <CollectionView.ItemTemplate>
+                <DataTemplate>
+                    <Border BackgroundColor="{DynamicResource Surface}" Stroke="{DynamicResource Line}"
+                            StrokeThickness="1" Padding="16,14" StrokeShape="RoundRectangle 16"
+                            Margin="0,0,0,10">
+                        <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
+                            <VerticalStackLayout Spacing="3" VerticalOptions="Center">
+                                <Label Text="{Binding Name}" TextColor="{DynamicResource Ink}"
+                                       FontSize="16.5" FontAttributes="Bold" />
+                                <Label Text="{Binding StatusText}" TextColor="{DynamicResource Muted}"
+                                       FontSize="12.5" />
+                            </VerticalStackLayout>
+                            <ActivityIndicator Grid.Column="1" IsRunning="{Binding IsBusy}"
+                                               IsVisible="{Binding IsBusy}"
+                                               Color="{DynamicResource Lime}" VerticalOptions="Center" />
+                            <Button Grid.Column="1" Text="{loc:Translate Download}"
+                                    IsVisible="{Binding CanDownload}" Clicked="OnDownloadClicked"
+                                    CommandParameter="{Binding Code}"
+                                    BackgroundColor="{DynamicResource Lime}" TextColor="{DynamicResource LimeInk}"
+                                    FontSize="13.5" FontAttributes="Bold" Padding="16,0" HeightRequest="38"
+                                    CornerRadius="12" VerticalOptions="Center" />
+                            <Button Grid.Column="1" Text="{loc:Translate Delete}"
+                                    IsVisible="{Binding CanDelete}" Clicked="OnDeleteClicked"
+                                    CommandParameter="{Binding Code}"
+                                    BackgroundColor="{DynamicResource Surface}" TextColor="{DynamicResource Danger}"
+                                    BorderColor="{DynamicResource Line}" BorderWidth="1"
+                                    FontSize="13.5" FontAttributes="Bold" Padding="16,0" HeightRequest="38"
+                                    CornerRadius="12" VerticalOptions="Center" />
+                            <Label Grid.Column="1" Text="{loc:Translate LanguagePackIncluded}"
+                                   IsVisible="{Binding IsBundled}" TextColor="{DynamicResource Muted}"
+                                   FontSize="13" VerticalOptions="Center" />
+                        </Grid>
+                    </Border>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+        </CollectionView>
+    </Grid>
+</ContentPage>

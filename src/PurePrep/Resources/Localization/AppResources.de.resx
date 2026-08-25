@@ -299,4 +299,82 @@ Brühe kellenweise unter Rühren zugeben.</value>
   <data name="LangGerman" xml:space="preserve">
     <value>Deutsch</value>
   </data>
+  <data name="SectionUnits" xml:space="preserve">
+    <value>EINHEITEN</value>
+  </data>
+  <data name="UnitsSource" xml:space="preserve">
+    <value>Wie angegeben</value>
+  </data>
+  <data name="UnitsMetric" xml:space="preserve">
+    <value>Metrisch</value>
+  </data>
+  <data name="UnitsImperial" xml:space="preserve">
+    <value>Imperial</value>
+  </data>
+  <data name="UnitsDesc" xml:space="preserve">
+    <value>Mengen in Zutaten und Schritten in dein bevorzugtes System umrechnen.</value>
+  </data>
+  <data name="ServesFormat" xml:space="preserve">
+    <value>Für {0} Personen</value>
+  </data>
+  <data name="ScaleCaptionFormat" xml:space="preserve">
+    <value>Menge {0}</value>
+  </data>
+  <data name="Ok" xml:space="preserve">
+    <value>OK</value>
+  </data>
+  <data name="Download" xml:space="preserve">
+    <value>Herunterladen</value>
+  </data>
+  <data name="Translate" xml:space="preserve">
+    <value>Übersetzen</value>
+  </data>
+  <data name="TranslateTo" xml:space="preserve">
+    <value>Übersetzen in…</value>
+  </data>
+  <data name="TranslateUnsupported" xml:space="preserve">
+    <value>Die Geräteübersetzung ist auf diesem Gerät nicht verfügbar.</value>
+  </data>
+  <data name="TranslateWorking" xml:space="preserve">
+    <value>Übersetzen…</value>
+  </data>
+  <data name="TranslateDownloadPromptFormat" xml:space="preserve">
+    <value>Das Sprachpaket „{0}“ muss einmalig heruntergeladen werden (~30 MB). Jetzt über WLAN herunterladen?</value>
+  </data>
+  <data name="TranslateAlreadyFormat" xml:space="preserve">
+    <value>Dieses Rezept ist anscheinend bereits auf {0}.</value>
+  </data>
+  <data name="TranslateFailedFormat" xml:space="preserve">
+    <value>Rezept konnte nicht übersetzt werden: {0}</value>
+  </data>
+  <data name="SectionLanguagePacks" xml:space="preserve">
+    <value>Sprachpakete</value>
+  </data>
+  <data name="LanguagePacksDesc" xml:space="preserve">
+    <value>Lade Offline-Pakete herunter, um Rezepte kostenlos zu übersetzen.</value>
+  </data>
+  <data name="LanguagePacksIntro" xml:space="preserve">
+    <value>Übersetzungen laufen vollständig auf deinem Gerät – nach der Installation ist kein Internet nötig. Jedes Paket ist ein einmaliger Download von etwa 30 MB.</value>
+  </data>
+  <data name="LanguagePackIncluded" xml:space="preserve">
+    <value>Enthalten</value>
+  </data>
+  <data name="LanguagePackBundledDesc" xml:space="preserve">
+    <value>Integriert – immer verfügbar</value>
+  </data>
+  <data name="LanguagePackReady" xml:space="preserve">
+    <value>Installiert · offline bereit</value>
+  </data>
+  <data name="LanguagePackNotDownloaded" xml:space="preserve">
+    <value>Nicht heruntergeladen</value>
+  </data>
+  <data name="LanguagePackDownloadFailedFormat" xml:space="preserve">
+    <value>Download fehlgeschlagen: {0}</value>
+  </data>
+  <data name="LanguagePackDeletePromptFormat" xml:space="preserve">
+    <value>Das Sprachpaket „{0}“ von diesem Gerät entfernen?</value>
+  </data>
+  <data name="LanguagePackDeleteFailedFormat" xml:space="preserve">
+    <value>Paket konnte nicht entfernt werden: {0}</value>
+  </data>
 </root>

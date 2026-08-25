@@ -41,6 +41,13 @@ public static class MauiProgram
 		builder.Services.AddSingleton<IBillingService, PlayBillingService>();
 		builder.Services.AddSingleton<ThemeService>();
 
+		// On-device offline translation (free). Real ML Kit impl on Android; no-op elsewhere.
+#if ANDROID
+		builder.Services.AddSingleton<ITranslationService, PurePrep.Platforms.Android.MlKitTranslationService>();
+#else
+		builder.Services.AddSingleton<ITranslationService, UnsupportedTranslationService>();
+#endif
+
 		// Link import is powered by the backend AI Smart Parser and is gated by server-side credits.
 		builder.Services.AddHttpClient<IRecipeParser, AiProxyRecipeParser>(client =>
 		{

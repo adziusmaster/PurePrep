@@ -10,24 +10,72 @@ public partial class SettingsPage : ContentPage
     private const string PrivacyUrl = "https://lechdigital.nl/PurePrep/";
     private readonly ThemeService _theme;
     private readonly ISmartCreditsClient? _credits;
+    private readonly IBillingService? _billing;
     private bool _suppressLanguageEvent;
     private bool _suppressRecipeLanguageEvent;
 
     // Recipe-language options: index 0 = follow the app language (""), then each concrete language.
     private readonly List<string> _recipeLanguageCodes = new();
 
-    public SettingsPage(ThemeService theme, ISmartCreditsClient? credits = null)
+    public SettingsPage(ThemeService theme, ISmartCreditsClient? credits = null, IBillingService? billing = null)
     {
         InitializeComponent();
         _theme = theme;
         _credits = credits;
+        _billing = billing;
 
         KeepAwakeSwitch.IsToggled = CookingSettings.KeepScreenAwake;
         VersionLabel.Text = $"{AppInfo.Current.VersionString} ({AppInfo.Current.BuildString})";
+        // The buy-credits row only works where in-app billing is available (real Android build).
+        BuyCreditsCard.IsVisible = _billing?.IsSupported == true;
         RefreshAppearancePills();
         RefreshUnitPills();
         BuildLanguagePicker();
         BuildRecipeLanguagePicker();
+    }
+
+    private async void OnBuyCreditsTapped(object? sender, EventArgs e)
+    {
+        if (_billing is null || _credits is null || !_billing.IsSupported)
+            return;
+
+        var packs = _billing.Packs;
+        if (packs.Count == 0)
+            return;
+
+        var labels = packs
+            .Select(p => AppResources.Format("PackOptionFormat", p.Credits, p.DisplayPrice))
+            .ToArray();
+
+        var choice = await DisplayActionSheet(
+            AppResources.Get("BuyCreditsChoosePack"),
+            AppResources.Get("Cancel"),
+            null,
+            labels);
+
+        var index = Array.IndexOf(labels, choice);
+        if (index < 0)
+            return; // cancelled or dismissed
+
+        var pack = packs[index];
+        try
+        {
+            var newBalance = await CreditPurchaseFlow.PurchaseAsync(_billing, _credits, pack.ProductId);
+            if (newBalance is null)
+                return; // user cancelled the Google purchase sheet
+
+            await DisplayAlert(
+                AppResources.Get("RedeemResultTitle"),
+                AppResources.Format("RedeemSuccessFormat", pack.Credits),
+                AppResources.Get("Ok"));
+        }
+        catch (Exception ex)
+        {
+            await DisplayAlert(
+                AppResources.Get("RedeemResultTitle"),
+                AppResources.Format("ErrCouldNotPurchaseFormat", ex.Message),
+                AppResources.Get("Ok"));
+        }
     }
 
     private void BuildLanguagePicker()

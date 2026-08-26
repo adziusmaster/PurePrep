@@ -49,6 +49,7 @@ public sealed class RecipeLibraryViewModel : INotifyPropertyChanged
 
         ImportCommand = new Command(async () => await ImportAsync());
         UpgradeCommand = new Command(() => IsUpgradePromptVisible = true);
+        DismissUpgradeCommand = new Command(() => IsUpgradePromptVisible = false);
         TopUpCommand = new Command(async () => await TopUpAsync());
         BuyPackCommand = new Command<CreditPackOption>(async option => await PurchaseAsync(option));
         AddManuallyCommand = new Command(() => AddManuallyRequested?.Invoke(this, EventArgs.Empty));
@@ -100,6 +101,9 @@ public sealed class RecipeLibraryViewModel : INotifyPropertyChanged
     public bool IsImporting { get => _isImporting; private set => SetField(ref _isImporting, value); }
     public bool IsPurchasing { get => _isPurchasing; private set => SetField(ref _isPurchasing, value); }
     public bool IsUpgradePromptVisible { get => _isUpgradePromptVisible; private set => SetField(ref _isUpgradePromptVisible, value); }
+
+    /// <summary>Closes the paywall sheet (called by the hardware back button and the scrim/close tap).</summary>
+    public void CloseUpgradePrompt() => IsUpgradePromptVisible = false;
     public string? ErrorMessage { get => _errorMessage; private set => SetField(ref _errorMessage, value); }
 
     public int CreditBalance
@@ -125,6 +129,7 @@ public sealed class RecipeLibraryViewModel : INotifyPropertyChanged
 
     public ICommand ImportCommand { get; }
     public ICommand UpgradeCommand { get; }
+    public ICommand DismissUpgradeCommand { get; }
     public ICommand TopUpCommand { get; }
     public ICommand BuyPackCommand { get; }
     public ICommand AddManuallyCommand { get; }
@@ -242,23 +247,12 @@ public sealed class RecipeLibraryViewModel : INotifyPropertyChanged
         IsPurchasing = true;
         try
         {
-            var purchase = await _billing.BuyAsync(option.ProductId);
-            if (purchase is null)
+            var newBalance = await CreditPurchaseFlow.PurchaseAsync(_billing, _credits, option.ProductId);
+            if (newBalance is null)
                 return; // user cancelled
 
-            CreditBalance = await _credits.RedeemAsync(purchase.ProductId, purchase.PurchaseToken);
+            CreditBalance = newBalance.Value;
             IsUpgradePromptVisible = false;
-
-            // Credits are granted server-side: only now consume the purchase so Google marks it
-            // fulfilled (and re-purchasable). A failed consume is non-fatal — reconciled on next buy.
-            try
-            {
-                await _billing.ConsumeAsync(purchase.PurchaseToken);
-            }
-            catch
-            {
-                // Ignore: the purchase is already redeemed on the backend; consume retries on next buy.
-            }
         }
         catch (Exception ex)
         {

@@ -224,17 +224,36 @@
         </Grid>
 
         <!-- ===== Upgrade sheet (floats above content) ===== -->
+        <!-- Dim scrim: tap outside the sheet to dismiss. -->
+        <BoxView Color="#B3000000" IsVisible="{Binding IsUpgradePromptVisible}">
+            <BoxView.GestureRecognizers>
+                <TapGestureRecognizer Command="{Binding DismissUpgradeCommand}" />
+            </BoxView.GestureRecognizers>
+        </BoxView>
+
         <Border BackgroundColor="{DynamicResource Surface}" Stroke="{DynamicResource LimeDim}"
                 StrokeThickness="1" Padding="18" Margin="14,0,14,18" StrokeShape="RoundRectangle 22"
                 VerticalOptions="End" MaximumWidthRequest="720" HorizontalOptions="Center"
                 IsVisible="{Binding IsUpgradePromptVisible}">
             <VerticalStackLayout Spacing="14">
-                <VerticalStackLayout Spacing="4">
-                    <Label Text="{loc:Translate OutOfCreditsTitle}" TextColor="{DynamicResource Ink}" FontSize="17"
-                           FontAttributes="Bold" />
-                    <Label Text="{loc:Translate OutOfCreditsBody}"
-                           TextColor="{DynamicResource Muted}" FontSize="13.5" LineHeight="1.25" />
-                </VerticalStackLayout>
+                <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10">
+                    <VerticalStackLayout Spacing="4">
+                        <Label Text="{loc:Translate OutOfCreditsTitle}" TextColor="{DynamicResource Ink}" FontSize="17"
+                               FontAttributes="Bold" />
+                        <Label Text="{loc:Translate OutOfCreditsBody}"
+                               TextColor="{DynamicResource Muted}" FontSize="13.5" LineHeight="1.25" />
+                    </VerticalStackLayout>
+                    <Border Grid.Column="1" WidthRequest="32" HeightRequest="32"
+                            BackgroundColor="{DynamicResource BgElevated}" Stroke="{DynamicResource Line}"
+                            StrokeThickness="1" StrokeShape="RoundRectangle 16"
+                            VerticalOptions="Start" HorizontalOptions="End">
+                        <Border.GestureRecognizers>
+                            <TapGestureRecognizer Command="{Binding DismissUpgradeCommand}" />
+                        </Border.GestureRecognizers>
+                        <Label Text="&#10005;" TextColor="{DynamicResource Muted}" FontSize="14"
+                               HorizontalOptions="Center" VerticalOptions="Center" />
+                    </Border>
+                </Grid>
 
                 <!-- Why credits cost money -->
                 <Border BackgroundColor="{DynamicResource BgElevated}" Stroke="Transparent" Padding="12"

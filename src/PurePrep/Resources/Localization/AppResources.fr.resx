@@ -434,4 +434,13 @@ Ajoutez le bouillon louche par louche en remuant.</value>
   <data name="PackOptionFormat" xml:space="preserve">
     <value>{0} crédits · {1}</value>
   </data>
+  <data name="BuyCredits" xml:space="preserve">
+    <value>Acheter des Smart Credits</value>
+  </data>
+  <data name="BuyCreditsDesc" xml:space="preserve">
+    <value>Les crédits permettent d'importer des recettes par lien. L'IA qui lit chaque page tourne sur des serveurs payants.</value>
+  </data>
+  <data name="BuyCreditsChoosePack" xml:space="preserve">
+    <value>Choisissez un pack de crédits</value>
+  </data>
 </root>

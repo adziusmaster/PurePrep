@@ -434,4 +434,13 @@ Dodawaj bulion po chochli, mieszając.</value>
   <data name="PackOptionFormat" xml:space="preserve">
     <value>{0} kredytów · {1}</value>
   </data>
+  <data name="BuyCredits" xml:space="preserve">
+    <value>Kup Smart Credits</value>
+  </data>
+  <data name="BuyCreditsDesc" xml:space="preserve">
+    <value>Kredyty pozwalają importować przepisy z linku. AI, które czyta każdą stronę, działa na płatnych serwerach.</value>
+  </data>
+  <data name="BuyCreditsChoosePack" xml:space="preserve">
+    <value>Wybierz pakiet kredytów</value>
+  </data>
 </root>

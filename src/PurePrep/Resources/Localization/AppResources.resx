@@ -434,4 +434,13 @@ Add stock a ladle at a time, stirring.</value>
   <data name="PackOptionFormat" xml:space="preserve">
     <value>{0} credits · {1}</value>
   </data>
+  <data name="BuyCredits" xml:space="preserve">
+    <value>Buy Smart Credits</value>
+  </data>
+  <data name="BuyCreditsDesc" xml:space="preserve">
+    <value>Credits let you import recipes by link. The AI that reads each page runs on paid servers.</value>
+  </data>
+  <data name="BuyCreditsChoosePack" xml:space="preserve">
+    <value>Choose a credit pack</value>
+  </data>
 </root>

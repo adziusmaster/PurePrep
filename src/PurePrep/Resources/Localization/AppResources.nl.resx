@@ -434,4 +434,13 @@ Voeg de bouillon pollepel voor pollepel toe, al roerend.</value>
   <data name="PackOptionFormat" xml:space="preserve">
     <value>{0} credits · {1}</value>
   </data>
+  <data name="BuyCredits" xml:space="preserve">
+    <value>Smart Credits kopen</value>
+  </data>
+  <data name="BuyCreditsDesc" xml:space="preserve">
+    <value>Met credits importeer je recepten via een link. De AI die elke pagina leest, draait op betaalde servers.</value>
+  </data>
+  <data name="BuyCreditsChoosePack" xml:space="preserve">
+    <value>Kies een creditpakket</value>
+  </data>
 </root>

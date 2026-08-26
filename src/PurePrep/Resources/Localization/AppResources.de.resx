@@ -434,4 +434,13 @@ Brühe kellenweise unter Rühren zugeben.</value>
   <data name="PackOptionFormat" xml:space="preserve">
     <value>{0} Credits · {1}</value>
   </data>
+  <data name="BuyCredits" xml:space="preserve">
+    <value>Smart Credits kaufen</value>
+  </data>
+  <data name="BuyCreditsDesc" xml:space="preserve">
+    <value>Mit Credits importierst du Rezepte per Link. Die KI, die jede Seite liest, läuft auf kostenpflichtigen Servern.</value>
+  </data>
+  <data name="BuyCreditsChoosePack" xml:space="preserve">
+    <value>Credit-Paket wählen</value>
+  </data>
 </root>

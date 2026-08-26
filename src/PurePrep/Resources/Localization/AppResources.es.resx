@@ -434,4 +434,13 @@ Añade el caldo cucharón a cucharón, removiendo.</value>
   <data name="PackOptionFormat" xml:space="preserve">
     <value>{0} créditos · {1}</value>
   </data>
+  <data name="BuyCredits" xml:space="preserve">
+    <value>Comprar Smart Credits</value>
+  </data>
+  <data name="BuyCreditsDesc" xml:space="preserve">
+    <value>Los créditos te permiten importar recetas por enlace. La IA que lee cada página se ejecuta en servidores de pago.</value>
+  </data>
+  <data name="BuyCreditsChoosePack" xml:space="preserve">
+    <value>Elige un paquete de créditos</value>
+  </data>
 </root>

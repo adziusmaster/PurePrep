@@ -33,6 +33,20 @@ public partial class MainPage : ContentPage
 		}
 	}
 
+	protected override bool OnBackButtonPressed()
+	{
+		// When the paywall sheet is open, the hardware back button should close it rather than
+		// exit the app (this page is the navigation root, so the default would quit PurePrep).
+		var vm = (RecipeLibraryViewModel)BindingContext;
+		if (vm.IsUpgradePromptVisible)
+		{
+			vm.CloseUpgradePrompt();
+			return true;
+		}
+
+		return base.OnBackButtonPressed();
+	}
+
 	private async void OnFocusRequested(object? sender, ParsedRecipe recipe)
 	{
 		await Navigation.PushAsync(new FocusPage(recipe));
@@ -53,8 +67,9 @@ public partial class MainPage : ContentPage
 		var services = this.Handler?.MauiContext?.Services;
 		var theme = services?.GetService(typeof(ThemeService)) as ThemeService;
 		var credits = services?.GetService(typeof(PurePrep.Application.ISmartCreditsClient)) as PurePrep.Application.ISmartCreditsClient;
+		var billing = services?.GetService(typeof(PurePrep.Application.IBillingService)) as PurePrep.Application.IBillingService;
 		if (theme is not null)
-			await Navigation.PushAsync(new SettingsPage(theme, credits));
+			await Navigation.PushAsync(new SettingsPage(theme, credits, billing));
 	}
 }
 

@@ -434,4 +434,13 @@ Aggiungi il brodo un mestolo alla volta, mescolando.</value>
   <data name="PackOptionFormat" xml:space="preserve">
     <value>{0} crediti · {1}</value>
   </data>
+  <data name="BuyCredits" xml:space="preserve">
+    <value>Acquista Smart Credits</value>
+  </data>
+  <data name="BuyCreditsDesc" xml:space="preserve">
+    <value>I crediti ti permettono di importare ricette da un link. L'IA che legge ogni pagina gira su server a pagamento.</value>
+  </data>
+  <data name="BuyCreditsChoosePack" xml:space="preserve">
+    <value>Scegli un pacchetto di crediti</value>
+  </data>
 </root>

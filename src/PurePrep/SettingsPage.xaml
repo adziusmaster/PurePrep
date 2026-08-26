@@ -105,6 +105,22 @@
                 <VerticalStackLayout Spacing="12">
                     <Label Text="{loc:Translate SectionSmartCredits}" TextColor="{DynamicResource Muted}" FontSize="11.5"
                            CharacterSpacing="1.8" FontAttributes="Bold" />
+                    <Border x:Name="BuyCreditsCard" BackgroundColor="{DynamicResource Surface}" Stroke="{DynamicResource Line}"
+                            StrokeThickness="1" Padding="16,14" StrokeShape="RoundRectangle 18">
+                        <Border.GestureRecognizers>
+                            <TapGestureRecognizer Tapped="OnBuyCreditsTapped" />
+                        </Border.GestureRecognizers>
+                        <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
+                            <VerticalStackLayout Spacing="3">
+                                <Label Text="{loc:Translate BuyCredits}" TextColor="{DynamicResource Ink}"
+                                       FontSize="16" FontAttributes="Bold" />
+                                <Label Text="{loc:Translate BuyCreditsDesc}"
+                                       TextColor="{DynamicResource Muted}" FontSize="13" />
+                            </VerticalStackLayout>
+                            <Label Grid.Column="1" Text="&#8250;" TextColor="{DynamicResource Muted}"
+                                   FontSize="22" VerticalOptions="Center" />
+                        </Grid>
+                    </Border>
                     <Border BackgroundColor="{DynamicResource Surface}" Stroke="{DynamicResource Line}"
                             StrokeThickness="1" Padding="16,14" StrokeShape="RoundRectangle 18">
                         <Border.GestureRecognizers>

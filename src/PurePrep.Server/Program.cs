@@ -52,4 +52,34 @@ app.MapPost("/api/admin/promo", PromoEndpoint.Create).AddEndpointFilter(PromoEnd
 app.MapGet("/api/admin/promo", PromoEndpoint.List).AddEndpointFilter(PromoEndpoint.SecretFilter);
 app.MapPost("/api/admin/promo/{code}/revoke", PromoEndpoint.Revoke).AddEndpointFilter(PromoEndpoint.SecretFilter);
 
+// Ensure the schema is present. EnsureCreated builds every table for a brand-new database, but it
+// does NOT add newly-introduced tables to a database that already exists (no migrations are used).
+// So we also create any recently-added tables explicitly and idempotently on startup.
+await using (var db = await app.Services
+    .GetRequiredService<IDbContextFactory<PurePrep.Server.Data.ServerDbContext>>()
+    .CreateDbContextAsync())
+{
+    await db.Database.EnsureCreatedAsync();
+    await db.Database.ExecuteSqlRawAsync(
+        """
+        CREATE TABLE IF NOT EXISTS "PromoCodes" (
+            "Code" TEXT NOT NULL CONSTRAINT "PK_PromoCodes" PRIMARY KEY,
+            "Credits" INTEGER NOT NULL,
+            "CreatedAt" TEXT NOT NULL,
+            "ExpiresAt" TEXT NULL,
+            "Revoked" INTEGER NOT NULL
+        );
+        """);
+    await db.Database.ExecuteSqlRawAsync(
+        """
+        CREATE TABLE IF NOT EXISTS "PromoRedemptions" (
+            "Code" TEXT NOT NULL,
+            "DeviceId" TEXT NOT NULL,
+            "CreditsGranted" INTEGER NOT NULL,
+            "RedeemedAt" TEXT NOT NULL,
+            CONSTRAINT "PK_PromoRedemptions" PRIMARY KEY ("Code", "DeviceId")
+        );
+        """);
+}
+
 app.Run();

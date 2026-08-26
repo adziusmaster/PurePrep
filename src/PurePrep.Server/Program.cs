@@ -13,6 +13,7 @@ var connectionString = builder.Configuration.GetConnectionString("Db")
 builder.Services.AddDbContextFactory<PurePrep.Server.Data.ServerDbContext>(o => o.UseSqlite(connectionString));
 
 builder.Services.AddScoped<ICreditStore, SqliteCreditStore>();
+builder.Services.AddScoped<IPromoStore, SqlitePromoStore>();
 builder.Services.AddSingleton<IUrlGuard, UrlGuard>();
 
 // Outbound fetch client with browser-like headers + hard limits (defence in depth for SSRF/DoS).
@@ -45,5 +46,10 @@ app.MapGet("/api/credits/{deviceId:guid}", async (Guid deviceId, ICreditStore cr
     Results.Ok(new { balance = await credits.EnsureDeviceAsync(deviceId, creditOptions.Value.FreeCredits, ct) }));
 
 app.MapPost("/api/dev/grant", DevEndpoint.Grant).AddEndpointFilter(DevEndpoint.SecretFilter);
+
+app.MapPost("/api/promo/redeem", PromoEndpoint.Redeem);
+app.MapPost("/api/admin/promo", PromoEndpoint.Create).AddEndpointFilter(PromoEndpoint.SecretFilter);
+app.MapGet("/api/admin/promo", PromoEndpoint.List).AddEndpointFilter(PromoEndpoint.SecretFilter);
+app.MapPost("/api/admin/promo/{code}/revoke", PromoEndpoint.Revoke).AddEndpointFilter(PromoEndpoint.SecretFilter);
 
 app.Run();

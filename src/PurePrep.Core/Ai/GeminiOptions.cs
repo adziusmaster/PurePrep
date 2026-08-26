@@ -18,5 +18,5 @@ public sealed record AiRecipe(string Title, string[] Ingredients, string[] Steps
 
 public interface IGeminiClient
 {
-    Task<AiRecipe> ExtractAsync(string pageText, CancellationToken ct = default);
+    Task<AiRecipe> ExtractAsync(string pageText, string? targetLanguage = null, CancellationToken ct = default);
 }

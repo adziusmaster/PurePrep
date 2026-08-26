@@ -13,4 +13,10 @@ public interface ISmartCreditsClient
     /// Redeems a validated Google Play purchase for a credit pack. Returns the new balance.
     /// </summary>
     Task<int> RedeemAsync(string productId, string purchaseToken, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Redeems a promo/tester code for smart credits. Each device may redeem a given code only once.
+    /// Never throws for expected outcomes (invalid/expired/already redeemed) — inspect the result.
+    /// </summary>
+    Task<PromoRedeemResult> RedeemCodeAsync(string code, CancellationToken cancellationToken = default);
 }

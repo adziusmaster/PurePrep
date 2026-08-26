@@ -377,4 +377,52 @@ Ajoutez le bouillon louche par louche en remuant.</value>
   <data name="LanguagePackDeleteFailedFormat" xml:space="preserve">
     <value>Impossible de supprimer le pack : {0}</value>
   </data>
+  <data name="SectionSmartCredits" xml:space="preserve">
+    <value>CRÉDITS SMART</value>
+  </data>
+  <data name="RedeemCode" xml:space="preserve">
+    <value>Utiliser un code</value>
+  </data>
+  <data name="RedeemCodeDesc" xml:space="preserve">
+    <value>Vous avez un code ? Échangez-le contre des crédits Smart gratuits.</value>
+  </data>
+  <data name="RedeemCodePrompt" xml:space="preserve">
+    <value>Saisissez votre code à 5 caractères</value>
+  </data>
+  <data name="RedeemCodePlaceholder" xml:space="preserve">
+    <value>ex. AB3KP</value>
+  </data>
+  <data name="Redeem" xml:space="preserve">
+    <value>Valider</value>
+  </data>
+  <data name="RedeemResultTitle" xml:space="preserve">
+    <value>Utiliser un code</value>
+  </data>
+  <data name="RedeemSuccessFormat" xml:space="preserve">
+    <value>{0} crédits Smart ajoutés. 🎉</value>
+  </data>
+  <data name="RedeemInvalid" xml:space="preserve">
+    <value>Ce code n'est pas valide. Vérifiez-le et réessayez.</value>
+  </data>
+  <data name="RedeemRevoked" xml:space="preserve">
+    <value>Ce code n'est plus actif.</value>
+  </data>
+  <data name="RedeemExpired" xml:space="preserve">
+    <value>Ce code a expiré.</value>
+  </data>
+  <data name="RedeemAlready" xml:space="preserve">
+    <value>Vous avez déjà utilisé ce code.</value>
+  </data>
+  <data name="RedeemNetworkError" xml:space="preserve">
+    <value>Impossible de joindre le serveur. Vérifiez votre connexion et réessayez.</value>
+  </data>
+  <data name="SectionRecipeLanguage" xml:space="preserve">
+    <value>LANGUE DES RECETTES</value>
+  </data>
+  <data name="RecipeLanguageDesc" xml:space="preserve">
+    <value>Les nouvelles recettes importées sont produites dans cette langue. L'IA les traduit à l'import.</value>
+  </data>
+  <data name="RecipeLangSameAsApp" xml:space="preserve">
+    <value>Comme la langue de l'app</value>
+  </data>
 </root>

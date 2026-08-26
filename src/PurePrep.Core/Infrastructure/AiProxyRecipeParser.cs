@@ -11,15 +11,16 @@ namespace PurePrep.Infrastructure;
 /// deducts one Smart Credit from the device. A 402 response (no credits) surfaces as
 /// <see cref="InsufficientCreditsException"/> so the UI can show the paywall.
 /// </summary>
-public sealed class AiProxyRecipeParser(HttpClient http, IDeviceIdentity identity) : IRecipeParser
+public sealed class AiProxyRecipeParser(HttpClient http, IDeviceIdentity identity, IRecipeLanguageProvider? languageProvider = null) : IRecipeParser
 {
     public async Task<ParsedRecipe> ParseAsync(Uri source, CancellationToken cancellationToken = default)
     {
         var deviceId = await identity.GetDeviceIdAsync(cancellationToken);
+        var language = languageProvider?.GetRecipeLanguage();
 
         using var response = await http.PostAsJsonAsync(
             "api/ai/parse",
-            new { deviceId, url = source.ToString() },
+            new { deviceId, url = source.ToString(), language },
             cancellationToken);
 
         if (response.StatusCode == HttpStatusCode.PaymentRequired)

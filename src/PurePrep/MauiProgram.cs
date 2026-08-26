@@ -41,6 +41,9 @@ public static class MauiProgram
 		builder.Services.AddSingleton<IBillingService, PlayBillingService>();
 		builder.Services.AddSingleton<ThemeService>();
 
+		// Language newly imported recipes are produced in (defaults to the app UI language).
+		builder.Services.AddSingleton<IRecipeLanguageProvider, RecipeLanguageSettings>();
+
 		// On-device offline translation (free). Real ML Kit impl on Android; no-op elsewhere.
 #if ANDROID
 		builder.Services.AddSingleton<ITranslationService, PurePrep.Platforms.Android.MlKitTranslationService>();

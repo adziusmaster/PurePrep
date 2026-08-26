@@ -42,7 +42,7 @@ public static class ParseEndpoint
             var html = await page.Content.ReadAsStringAsync(ct);
 
             var text = PageText.Extract(html);
-            var ai = await gemini.ExtractAsync(text, ct);
+            var ai = await gemini.ExtractAsync(text, request.Language, ct);
 
             var system = UnitConverter.Detect(ai.Ingredients.Concat(ai.Steps));
             var recipe = new RecipeResponse(

@@ -377,4 +377,52 @@ Brühe kellenweise unter Rühren zugeben.</value>
   <data name="LanguagePackDeleteFailedFormat" xml:space="preserve">
     <value>Paket konnte nicht entfernt werden: {0}</value>
   </data>
+  <data name="SectionSmartCredits" xml:space="preserve">
+    <value>SMART-CREDITS</value>
+  </data>
+  <data name="RedeemCode" xml:space="preserve">
+    <value>Code einlösen</value>
+  </data>
+  <data name="RedeemCodeDesc" xml:space="preserve">
+    <value>Hast du einen Code? Löse ihn für kostenlose Smart-Credits ein.</value>
+  </data>
+  <data name="RedeemCodePrompt" xml:space="preserve">
+    <value>Gib deinen 5-stelligen Code ein</value>
+  </data>
+  <data name="RedeemCodePlaceholder" xml:space="preserve">
+    <value>z. B. AB3KP</value>
+  </data>
+  <data name="Redeem" xml:space="preserve">
+    <value>Einlösen</value>
+  </data>
+  <data name="RedeemResultTitle" xml:space="preserve">
+    <value>Code einlösen</value>
+  </data>
+  <data name="RedeemSuccessFormat" xml:space="preserve">
+    <value>{0} Smart-Credits hinzugefügt. 🎉</value>
+  </data>
+  <data name="RedeemInvalid" xml:space="preserve">
+    <value>Dieser Code ist ungültig. Bitte prüfen und erneut versuchen.</value>
+  </data>
+  <data name="RedeemRevoked" xml:space="preserve">
+    <value>Dieser Code ist nicht mehr aktiv.</value>
+  </data>
+  <data name="RedeemExpired" xml:space="preserve">
+    <value>Dieser Code ist abgelaufen.</value>
+  </data>
+  <data name="RedeemAlready" xml:space="preserve">
+    <value>Du hast diesen Code bereits eingelöst.</value>
+  </data>
+  <data name="RedeemNetworkError" xml:space="preserve">
+    <value>Server nicht erreichbar. Prüfe deine Verbindung und versuche es erneut.</value>
+  </data>
+  <data name="SectionRecipeLanguage" xml:space="preserve">
+    <value>REZEPTSPRACHE</value>
+  </data>
+  <data name="RecipeLanguageDesc" xml:space="preserve">
+    <value>Neu importierte Rezepte werden in dieser Sprache erstellt. Die KI übersetzt sie beim Import.</value>
+  </data>
+  <data name="RecipeLangSameAsApp" xml:space="preserve">
+    <value>Wie App-Sprache</value>
+  </data>
 </root>

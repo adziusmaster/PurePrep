@@ -377,4 +377,52 @@ Añade el caldo cucharón a cucharón, removiendo.</value>
   <data name="LanguagePackDeleteFailedFormat" xml:space="preserve">
     <value>No se pudo quitar el paquete: {0}</value>
   </data>
+  <data name="SectionSmartCredits" xml:space="preserve">
+    <value>CRÉDITOS SMART</value>
+  </data>
+  <data name="RedeemCode" xml:space="preserve">
+    <value>Canjear un código</value>
+  </data>
+  <data name="RedeemCodeDesc" xml:space="preserve">
+    <value>¿Tienes un código? Canjéalo por créditos Smart gratis.</value>
+  </data>
+  <data name="RedeemCodePrompt" xml:space="preserve">
+    <value>Introduce tu código de 5 caracteres</value>
+  </data>
+  <data name="RedeemCodePlaceholder" xml:space="preserve">
+    <value>p. ej. AB3KP</value>
+  </data>
+  <data name="Redeem" xml:space="preserve">
+    <value>Canjear</value>
+  </data>
+  <data name="RedeemResultTitle" xml:space="preserve">
+    <value>Canjear código</value>
+  </data>
+  <data name="RedeemSuccessFormat" xml:space="preserve">
+    <value>Se añadieron {0} créditos Smart. 🎉</value>
+  </data>
+  <data name="RedeemInvalid" xml:space="preserve">
+    <value>Ese código no es válido. Compruébalo e inténtalo de nuevo.</value>
+  </data>
+  <data name="RedeemRevoked" xml:space="preserve">
+    <value>Este código ya no está activo.</value>
+  </data>
+  <data name="RedeemExpired" xml:space="preserve">
+    <value>Este código ha caducado.</value>
+  </data>
+  <data name="RedeemAlready" xml:space="preserve">
+    <value>Ya has canjeado este código.</value>
+  </data>
+  <data name="RedeemNetworkError" xml:space="preserve">
+    <value>No se pudo conectar con el servidor. Comprueba tu conexión e inténtalo de nuevo.</value>
+  </data>
+  <data name="SectionRecipeLanguage" xml:space="preserve">
+    <value>IDIOMA DE LAS RECETAS</value>
+  </data>
+  <data name="RecipeLanguageDesc" xml:space="preserve">
+    <value>Las recetas nuevas que importes se crean en este idioma. La IA las traduce al importar.</value>
+  </data>
+  <data name="RecipeLangSameAsApp" xml:space="preserve">
+    <value>Igual que la app</value>
+  </data>
 </root>

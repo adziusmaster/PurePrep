@@ -20,6 +20,30 @@ public sealed class ProcessedPurchase
     public DateTimeOffset RedeemedAt { get; set; }
 }
 
+/// <summary>A promo/redemption code that grants smart credits. One code can be redeemed by many
+/// devices, but each device may redeem a given code only once (see <see cref="PromoRedemption"/>).</summary>
+public sealed class PromoCode
+{
+    /// <summary>Normalized (upper-case) code, e.g. "AB3KP".</summary>
+    public string Code { get; set; } = string.Empty;
+    public int Credits { get; set; }
+    public DateTimeOffset CreatedAt { get; set; }
+    /// <summary>Optional expiry; null means the code never expires.</summary>
+    public DateTimeOffset? ExpiresAt { get; set; }
+    /// <summary>Set true to permanently disable the code regardless of expiry.</summary>
+    public bool Revoked { get; set; }
+}
+
+/// <summary>Records that a specific device redeemed a specific code. Composite key enforces the
+/// "one redemption per device per code" rule.</summary>
+public sealed class PromoRedemption
+{
+    public string Code { get; set; } = string.Empty;
+    public Guid DeviceId { get; set; }
+    public int CreditsGranted { get; set; }
+    public DateTimeOffset RedeemedAt { get; set; }
+}
+
 /// <summary>Lightweight audit trail for observability and abuse detection (no full URLs / PII).</summary>
 public sealed class UsageLog
 {

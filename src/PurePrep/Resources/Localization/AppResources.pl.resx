@@ -377,4 +377,52 @@ Dodawaj bulion po chochli, mieszając.</value>
   <data name="LanguagePackDeleteFailedFormat" xml:space="preserve">
     <value>Nie udało się usunąć pakietu: {0}</value>
   </data>
+  <data name="SectionSmartCredits" xml:space="preserve">
+    <value>KREDYTY SMART</value>
+  </data>
+  <data name="RedeemCode" xml:space="preserve">
+    <value>Zrealizuj kod</value>
+  </data>
+  <data name="RedeemCodeDesc" xml:space="preserve">
+    <value>Masz kod? Zrealizuj go, by otrzymać darmowe kredyty Smart.</value>
+  </data>
+  <data name="RedeemCodePrompt" xml:space="preserve">
+    <value>Wpisz swój 5-znakowy kod</value>
+  </data>
+  <data name="RedeemCodePlaceholder" xml:space="preserve">
+    <value>np. AB3KP</value>
+  </data>
+  <data name="Redeem" xml:space="preserve">
+    <value>Zrealizuj</value>
+  </data>
+  <data name="RedeemResultTitle" xml:space="preserve">
+    <value>Zrealizuj kod</value>
+  </data>
+  <data name="RedeemSuccessFormat" xml:space="preserve">
+    <value>Dodano {0} kredytów Smart. 🎉</value>
+  </data>
+  <data name="RedeemInvalid" xml:space="preserve">
+    <value>Ten kod jest nieprawidłowy. Sprawdź go i spróbuj ponownie.</value>
+  </data>
+  <data name="RedeemRevoked" xml:space="preserve">
+    <value>Ten kod nie jest już aktywny.</value>
+  </data>
+  <data name="RedeemExpired" xml:space="preserve">
+    <value>Ten kod wygasł.</value>
+  </data>
+  <data name="RedeemAlready" xml:space="preserve">
+    <value>Ten kod został już przez Ciebie zrealizowany.</value>
+  </data>
+  <data name="RedeemNetworkError" xml:space="preserve">
+    <value>Nie można połączyć się z serwerem. Sprawdź połączenie i spróbuj ponownie.</value>
+  </data>
+  <data name="SectionRecipeLanguage" xml:space="preserve">
+    <value>JĘZYK PRZEPISÓW</value>
+  </data>
+  <data name="RecipeLanguageDesc" xml:space="preserve">
+    <value>Nowe importowane przepisy powstają w tym języku. SI tłumaczy je podczas importu.</value>
+  </data>
+  <data name="RecipeLangSameAsApp" xml:space="preserve">
+    <value>Tak jak język aplikacji</value>
+  </data>
 </root>

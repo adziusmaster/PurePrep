@@ -1,3 +1,4 @@
+using System.Net;
 using System.Net.Http.Json;
 using PurePrep.Application;
 
@@ -31,7 +32,66 @@ public sealed class HttpSmartCreditsClient(HttpClient http, IDeviceIdentity iden
         return dto?.Balance ?? 0;
     }
 
+    public async Task<PromoRedeemResult> RedeemCodeAsync(string code, CancellationToken cancellationToken = default)
+    {
+        var normalized = (code ?? string.Empty).Trim().ToUpperInvariant();
+        var deviceId = await identity.GetDeviceIdAsync(cancellationToken);
+
+        HttpResponseMessage response;
+        try
+        {
+            response = await http.PostAsJsonAsync(
+                "api/promo/redeem",
+                new { deviceId, code = normalized },
+                cancellationToken);
+        }
+        catch (HttpRequestException)
+        {
+            return new PromoRedeemResult(PromoRedeemOutcome.NetworkError, 0, 0);
+        }
+        catch (TaskCanceledException) when (!cancellationToken.IsCancellationRequested)
+        {
+            return new PromoRedeemResult(PromoRedeemOutcome.NetworkError, 0, 0);
+        }
+
+        using (response)
+        {
+            if (response.IsSuccessStatusCode)
+            {
+                var dto = await response.Content.ReadFromJsonAsync<RedeemResponse>(cancellationToken);
+                return new PromoRedeemResult(PromoRedeemOutcome.Success, dto?.CreditsGranted ?? 0, dto?.Balance ?? 0);
+            }
+
+            var error = await ReadErrorAsync(response, cancellationToken);
+            var outcome = response.StatusCode switch
+            {
+                HttpStatusCode.NotFound => PromoRedeemOutcome.InvalidCode,
+                HttpStatusCode.Conflict => PromoRedeemOutcome.AlreadyRedeemed,
+                HttpStatusCode.BadRequest when error == "revoked_code" => PromoRedeemOutcome.Revoked,
+                HttpStatusCode.BadRequest when error == "expired_code" => PromoRedeemOutcome.Expired,
+                HttpStatusCode.BadRequest => PromoRedeemOutcome.InvalidCode,
+                _ => PromoRedeemOutcome.NetworkError,
+            };
+            return new PromoRedeemResult(outcome, 0, 0);
+        }
+    }
+
+    private static async Task<string?> ReadErrorAsync(HttpResponseMessage response, CancellationToken ct)
+    {
+        try
+        {
+            var dto = await response.Content.ReadFromJsonAsync<ErrorResponse>(ct);
+            return dto?.Error;
+        }
+        catch
+        {
+            return null;
+        }
+    }
+
     private sealed record BalanceResponse(int Balance);
 
     private sealed record RedeemResponse(int CreditsGranted, int Balance);
+
+    private sealed record ErrorResponse(string? Error);
 }

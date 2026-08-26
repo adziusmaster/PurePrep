@@ -22,6 +22,9 @@ services:
       Gemini__Model: ${GEMINI_MODEL:-gemini-flash-lite-latest}
       # Protects POST /api/dev/grant. Soft-degrade: unset -> that dev endpoint is closed.
       Dev__Secret: ${DEV_SECRET:-}
+      # Protects the /api/admin/promo endpoints (create/list/revoke promo codes).
+      # Soft-degrade: unset -> those admin endpoints return 404.
+      Admin__Secret: ${ADMIN_SECRET:-}
     volumes:
       # SQLite credit ledger persists across redeploys.
       - pureprep-data:/data

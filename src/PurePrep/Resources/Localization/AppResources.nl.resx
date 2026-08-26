@@ -377,4 +377,52 @@ Voeg de bouillon pollepel voor pollepel toe, al roerend.</value>
   <data name="LanguagePackDeleteFailedFormat" xml:space="preserve">
     <value>Kan het pakket niet verwijderen: {0}</value>
   </data>
+  <data name="SectionSmartCredits" xml:space="preserve">
+    <value>SMART-CREDITS</value>
+  </data>
+  <data name="RedeemCode" xml:space="preserve">
+    <value>Code inwisselen</value>
+  </data>
+  <data name="RedeemCodeDesc" xml:space="preserve">
+    <value>Heb je een code? Wissel hem in voor gratis Smart-credits.</value>
+  </data>
+  <data name="RedeemCodePrompt" xml:space="preserve">
+    <value>Voer je code van 5 tekens in</value>
+  </data>
+  <data name="RedeemCodePlaceholder" xml:space="preserve">
+    <value>bijv. AB3KP</value>
+  </data>
+  <data name="Redeem" xml:space="preserve">
+    <value>Inwisselen</value>
+  </data>
+  <data name="RedeemResultTitle" xml:space="preserve">
+    <value>Code inwisselen</value>
+  </data>
+  <data name="RedeemSuccessFormat" xml:space="preserve">
+    <value>{0} Smart-credits toegevoegd. 🎉</value>
+  </data>
+  <data name="RedeemInvalid" xml:space="preserve">
+    <value>Deze code is ongeldig. Controleer hem en probeer opnieuw.</value>
+  </data>
+  <data name="RedeemRevoked" xml:space="preserve">
+    <value>Deze code is niet meer actief.</value>
+  </data>
+  <data name="RedeemExpired" xml:space="preserve">
+    <value>Deze code is verlopen.</value>
+  </data>
+  <data name="RedeemAlready" xml:space="preserve">
+    <value>Je hebt deze code al ingewisseld.</value>
+  </data>
+  <data name="RedeemNetworkError" xml:space="preserve">
+    <value>Kan de server niet bereiken. Controleer je verbinding en probeer opnieuw.</value>
+  </data>
+  <data name="SectionRecipeLanguage" xml:space="preserve">
+    <value>RECEPTTAAL</value>
+  </data>
+  <data name="RecipeLanguageDesc" xml:space="preserve">
+    <value>Nieuwe recepten die je importeert worden in deze taal gemaakt. AI vertaalt ze bij het importeren.</value>
+  </data>
+  <data name="RecipeLangSameAsApp" xml:space="preserve">
+    <value>Zelfde als app-taal</value>
+  </data>
 </root>

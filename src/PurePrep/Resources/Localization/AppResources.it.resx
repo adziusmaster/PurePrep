@@ -377,4 +377,52 @@ Aggiungi il brodo un mestolo alla volta, mescolando.</value>
   <data name="LanguagePackDeleteFailedFormat" xml:space="preserve">
     <value>Impossibile rimuovere il pacchetto: {0}</value>
   </data>
+  <data name="SectionSmartCredits" xml:space="preserve">
+    <value>CREDITI SMART</value>
+  </data>
+  <data name="RedeemCode" xml:space="preserve">
+    <value>Riscatta un codice</value>
+  </data>
+  <data name="RedeemCodeDesc" xml:space="preserve">
+    <value>Hai un codice? Riscattalo per crediti Smart gratuiti.</value>
+  </data>
+  <data name="RedeemCodePrompt" xml:space="preserve">
+    <value>Inserisci il tuo codice di 5 caratteri</value>
+  </data>
+  <data name="RedeemCodePlaceholder" xml:space="preserve">
+    <value>es. AB3KP</value>
+  </data>
+  <data name="Redeem" xml:space="preserve">
+    <value>Riscatta</value>
+  </data>
+  <data name="RedeemResultTitle" xml:space="preserve">
+    <value>Riscatta codice</value>
+  </data>
+  <data name="RedeemSuccessFormat" xml:space="preserve">
+    <value>Aggiunti {0} crediti Smart. 🎉</value>
+  </data>
+  <data name="RedeemInvalid" xml:space="preserve">
+    <value>Questo codice non è valido. Controllalo e riprova.</value>
+  </data>
+  <data name="RedeemRevoked" xml:space="preserve">
+    <value>Questo codice non è più attivo.</value>
+  </data>
+  <data name="RedeemExpired" xml:space="preserve">
+    <value>Questo codice è scaduto.</value>
+  </data>
+  <data name="RedeemAlready" xml:space="preserve">
+    <value>Hai già riscattato questo codice.</value>
+  </data>
+  <data name="RedeemNetworkError" xml:space="preserve">
+    <value>Impossibile raggiungere il server. Controlla la connessione e riprova.</value>
+  </data>
+  <data name="SectionRecipeLanguage" xml:space="preserve">
+    <value>LINGUA DELLE RICETTE</value>
+  </data>
+  <data name="RecipeLanguageDesc" xml:space="preserve">
+    <value>Le nuove ricette che importi vengono create in questa lingua. L'IA le traduce durante l'importazione.</value>
+  </data>
+  <data name="RecipeLangSameAsApp" xml:space="preserve">
+    <value>Come la lingua dell'app</value>
+  </data>
 </root>

@@ -377,4 +377,52 @@ Add stock a ladle at a time, stirring.</value>
   <data name="LanguagePackDeleteFailedFormat" xml:space="preserve">
     <value>Couldn't remove the pack: {0}</value>
   </data>
+  <data name="SectionSmartCredits" xml:space="preserve">
+    <value>SMART CREDITS</value>
+  </data>
+  <data name="RedeemCode" xml:space="preserve">
+    <value>Redeem a code</value>
+  </data>
+  <data name="RedeemCodeDesc" xml:space="preserve">
+    <value>Have a code? Redeem it for free Smart Credits.</value>
+  </data>
+  <data name="RedeemCodePrompt" xml:space="preserve">
+    <value>Enter your 5-character code</value>
+  </data>
+  <data name="RedeemCodePlaceholder" xml:space="preserve">
+    <value>e.g. AB3KP</value>
+  </data>
+  <data name="Redeem" xml:space="preserve">
+    <value>Redeem</value>
+  </data>
+  <data name="RedeemResultTitle" xml:space="preserve">
+    <value>Redeem code</value>
+  </data>
+  <data name="RedeemSuccessFormat" xml:space="preserve">
+    <value>Added {0} Smart Credits. 🎉</value>
+  </data>
+  <data name="RedeemInvalid" xml:space="preserve">
+    <value>That code isn't valid. Check it and try again.</value>
+  </data>
+  <data name="RedeemRevoked" xml:space="preserve">
+    <value>This code is no longer active.</value>
+  </data>
+  <data name="RedeemExpired" xml:space="preserve">
+    <value>This code has expired.</value>
+  </data>
+  <data name="RedeemAlready" xml:space="preserve">
+    <value>You've already redeemed this code.</value>
+  </data>
+  <data name="RedeemNetworkError" xml:space="preserve">
+    <value>Couldn't reach the server. Check your connection and try again.</value>
+  </data>
+  <data name="SectionRecipeLanguage" xml:space="preserve">
+    <value>RECIPE LANGUAGE</value>
+  </data>
+  <data name="RecipeLanguageDesc" xml:space="preserve">
+    <value>New recipes you import are produced in this language. AI translates them at import time.</value>
+  </data>
+  <data name="RecipeLangSameAsApp" xml:space="preserve">
+    <value>Same as app language</value>
+  </data>
 </root>

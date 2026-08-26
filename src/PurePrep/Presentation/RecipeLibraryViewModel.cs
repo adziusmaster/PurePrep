@@ -145,7 +145,8 @@ public sealed class RecipeLibraryViewModel : INotifyPropertyChanged
         OnPropertyChanged(nameof(NoSearchMatches));
     }
 
-    private async Task RefreshCreditsAsync()
+    /// <summary>Re-reads the credit balance from the backend (e.g. after redeeming a code).</summary>
+    public async Task RefreshCreditsAsync()
     {
         try
         {

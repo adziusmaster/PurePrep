@@ -7,6 +7,8 @@ public sealed class ServerDbContext(DbContextOptions<ServerDbContext> options) :
     public DbSet<DeviceCredit> Credits => Set<DeviceCredit>();
     public DbSet<ProcessedPurchase> Purchases => Set<ProcessedPurchase>();
     public DbSet<UsageLog> UsageLogs => Set<UsageLog>();
+    public DbSet<PromoCode> PromoCodes => Set<PromoCode>();
+    public DbSet<PromoRedemption> PromoRedemptions => Set<PromoRedemption>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -19,5 +21,8 @@ public sealed class ServerDbContext(DbContextOptions<ServerDbContext> options) :
         });
 
         modelBuilder.Entity<UsageLog>().HasKey(x => x.Id);
+
+        modelBuilder.Entity<PromoCode>().HasKey(x => x.Code);
+        modelBuilder.Entity<PromoRedemption>().HasKey(x => new { x.Code, x.DeviceId });
     }
 }

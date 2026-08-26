@@ -20,9 +20,17 @@ public partial class MainPage : ContentPage
 	protected override async void OnAppearing()
 	{
 		base.OnAppearing();
-		if (_hasLoaded) return;
-		_hasLoaded = true;
-		await ((RecipeLibraryViewModel)BindingContext).LoadAsync();
+		var vm = (RecipeLibraryViewModel)BindingContext;
+		if (!_hasLoaded)
+		{
+			_hasLoaded = true;
+			await vm.LoadAsync();
+		}
+		else
+		{
+			// Returning from another page (e.g. after redeeming a code): refresh the credit chip.
+			await vm.RefreshCreditsAsync();
+		}
 	}
 
 	private async void OnFocusRequested(object? sender, ParsedRecipe recipe)
@@ -42,9 +50,11 @@ public partial class MainPage : ContentPage
 
 	private async void OnSettingsTapped(object? sender, EventArgs e)
 	{
-		var theme = this.Handler?.MauiContext?.Services.GetService(typeof(ThemeService)) as ThemeService;
+		var services = this.Handler?.MauiContext?.Services;
+		var theme = services?.GetService(typeof(ThemeService)) as ThemeService;
+		var credits = services?.GetService(typeof(PurePrep.Application.ISmartCreditsClient)) as PurePrep.Application.ISmartCreditsClient;
 		if (theme is not null)
-			await Navigation.PushAsync(new SettingsPage(theme));
+			await Navigation.PushAsync(new SettingsPage(theme, credits));
 	}
 }
 

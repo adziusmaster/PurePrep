@@ -77,16 +77,21 @@ public sealed class PlayBillingService : IBillingService
         if (owned is not null)
             return owned;
 
-        var details = await GetProductDetailsAsync(client, productId).ConfigureAwait(false)
-            ?? throw new InvalidOperationException(
-                $"Product '{productId}' is not available in Google Play. Make sure it is published and active.");
+        var details = await GetProductDetailsAsync(client, productId).ConfigureAwait(false);
+
+        // New one-time-product model: launching requires the offer token from the product's
+        // one-time purchase offer. (The legacy tokenless path only works for old-style SKUs.)
+        var offerToken = details.OneTimePurchaseOfferDetailsList?.FirstOrDefault()?.OfferToken;
+
+        var productParamsBuilder = BillingFlowParams.ProductDetailsParams.NewBuilder()
+            .SetProductDetails(details);
+        if (!string.IsNullOrEmpty(offerToken))
+            productParamsBuilder.SetOfferToken(offerToken);
 
         var flowParams = BillingFlowParams.NewBuilder()
             .SetProductDetailsParamsList(new List<BillingFlowParams.ProductDetailsParams>
             {
-                BillingFlowParams.ProductDetailsParams.NewBuilder()
-                    .SetProductDetails(details)
-                    .Build(),
+                productParamsBuilder.Build(),
             })
             .Build();
 
@@ -124,7 +129,7 @@ public sealed class PlayBillingService : IBillingService
         await client.ConsumeAsync(consumeParams).ConfigureAwait(false);
     }
 
-    private static async Task<ProductDetails?> GetProductDetailsAsync(BillingClient client, string productId)
+    private static async Task<ProductDetails> GetProductDetailsAsync(BillingClient client, string productId)
     {
         var product = QueryProductDetailsParams.Product.NewBuilder()
             .SetProductId(productId)
@@ -136,7 +141,27 @@ public sealed class PlayBillingService : IBillingService
             .Build();
 
         var result = await client.QueryProductDetailsAsync(query).ConfigureAwait(false);
-        return result.ProductDetailsList?.FirstOrDefault();
+
+        // The binding exposes both the (Java) ProductDetailsList and a synthesized ProductDetails
+        // list; read whichever is populated.
+        var fetched = result.ProductDetailsList?.FirstOrDefault()
+                      ?? result.ProductDetails?.FirstOrDefault();
+        if (fetched is not null)
+            return fetched;
+
+        // Nothing fetched: surface exactly why so the on-device message is actionable instead of a
+        // generic "not available" (e.g. billing response code + Play's per-product status code).
+        var reasons = new List<string>();
+        if (result.Result is { } r)
+            reasons.Add($"response {r.ResponseCode}: {r.DebugMessage}");
+        if (result.UnfetchedProductList is { Count: > 0 } unfetched)
+            reasons.Add("unfetched " + string.Join(", ",
+                unfetched.Select(u => $"{u.ProductId} (status {u.StatusCodeValue})")));
+
+        var detail = reasons.Count > 0 ? " — " + string.Join("; ", reasons) : string.Empty;
+        throw new InvalidOperationException(
+            $"Product '{productId}' is not available in Google Play yet{detail}. " +
+            "It can take a little while after creating a product, and the app must be installed from a Play track.");
     }
 
     private static async Task<PurchaseResult?> FindOwnedPurchaseAsync(BillingClient client, string productId)

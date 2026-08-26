@@ -65,14 +65,14 @@ public partial class SettingsPage : ContentPage
                 return; // user cancelled the Google purchase sheet
 
             await DisplayAlert(
-                AppResources.Get("RedeemResultTitle"),
+                AppResources.Get("BuyCredits"),
                 AppResources.Format("RedeemSuccessFormat", pack.Credits),
                 AppResources.Get("Ok"));
         }
         catch (Exception ex)
         {
             await DisplayAlert(
-                AppResources.Get("RedeemResultTitle"),
+                AppResources.Get("BuyCredits"),
                 AppResources.Format("ErrCouldNotPurchaseFormat", ex.Message),
                 AppResources.Get("Ok"));
         }

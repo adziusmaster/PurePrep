@@ -83,6 +83,36 @@
                 <Label Text="{Binding ErrorMessage}" TextColor="{DynamicResource Danger}" FontSize="13"
                        Margin="4,0,0,0"
                        IsVisible="{Binding ErrorMessage, Converter={StaticResource StringNotNullOrEmptyConverter}}" />
+
+                <!-- One-time tip: recipes auto-translate into the chosen recipe language. -->
+                <Border IsVisible="{Binding IsRecipeLanguageHintVisible}" BackgroundColor="{DynamicResource BgElevated}"
+                        Stroke="{DynamicResource LineSoft}" StrokeThickness="1" Padding="14,12"
+                        StrokeShape="RoundRectangle 16" Margin="0,4,0,0">
+                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10">
+                        <VerticalStackLayout Spacing="6">
+                            <Label Text="{loc:Translate RecipeLangHintTitle}" TextColor="{DynamicResource Ink}"
+                                   FontSize="14" FontAttributes="Bold" />
+                            <Label Text="{loc:Translate RecipeLangHintBody}" TextColor="{DynamicResource Muted}"
+                                   FontSize="12.5" LineHeight="1.25" />
+                            <Label Text="{loc:Translate RecipeLangHintAction}" TextColor="{DynamicResource LimeBright}"
+                                   FontSize="13" FontAttributes="Bold" Margin="0,2,0,0">
+                                <Label.GestureRecognizers>
+                                    <TapGestureRecognizer Command="{Binding OpenRecipeLanguageSettingsCommand}" />
+                                </Label.GestureRecognizers>
+                            </Label>
+                        </VerticalStackLayout>
+                        <Border Grid.Column="1" WidthRequest="28" HeightRequest="28"
+                                BackgroundColor="{DynamicResource Surface}" Stroke="{DynamicResource Line}"
+                                StrokeThickness="1" StrokeShape="RoundRectangle 14"
+                                VerticalOptions="Start" HorizontalOptions="End">
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding DismissRecipeLanguageHintCommand}" />
+                            </Border.GestureRecognizers>
+                            <Label Text="&#10005;" TextColor="{DynamicResource Muted}" FontSize="12"
+                                   HorizontalOptions="Center" VerticalOptions="Center" />
+                        </Border>
+                    </Grid>
+                </Border>
             </VerticalStackLayout>
 
             <!-- ===== Library ===== -->

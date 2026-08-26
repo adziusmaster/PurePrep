@@ -24,6 +24,7 @@ public sealed class RecipeLibraryViewModel : INotifyPropertyChanged
     private bool _isImporting;
     private bool _isUpgradePromptVisible;
     private bool _isPurchasing;
+    private bool _isRecipeLanguageHintVisible;
     private string? _errorMessage;
     // -1 = balance not yet loaded from the backend.
     private int _creditBalance = -1;
@@ -51,6 +52,14 @@ public sealed class RecipeLibraryViewModel : INotifyPropertyChanged
         UpgradeCommand = new Command(() => IsUpgradePromptVisible = true);
         DismissUpgradeCommand = new Command(() => IsUpgradePromptVisible = false);
         TopUpCommand = new Command(async () => await TopUpAsync());
+        DismissRecipeLanguageHintCommand = new Command(DismissRecipeLanguageHint);
+        OpenRecipeLanguageSettingsCommand = new Command(() =>
+        {
+            DismissRecipeLanguageHint();
+            SettingsRequested?.Invoke(this, EventArgs.Empty);
+        });
+        // One-time hint nudging users to pick the recipe import language (auto-translation).
+        _isRecipeLanguageHintVisible = !Preferences.Get(RecipeLanguageHintDismissedKey, false);
         BuyPackCommand = new Command<CreditPackOption>(async option => await PurchaseAsync(option));
         AddManuallyCommand = new Command(() => AddManuallyRequested?.Invoke(this, EventArgs.Empty));
         OpenFocusCommand = new Command<ParsedRecipe>(recipe =>
@@ -104,6 +113,19 @@ public sealed class RecipeLibraryViewModel : INotifyPropertyChanged
 
     /// <summary>Closes the paywall sheet (called by the hardware back button and the scrim/close tap).</summary>
     public void CloseUpgradePrompt() => IsUpgradePromptVisible = false;
+
+    /// <summary>One-time tip telling users imported recipes are auto-translated into their recipe language.</summary>
+    public bool IsRecipeLanguageHintVisible { get => _isRecipeLanguageHintVisible; private set => SetField(ref _isRecipeLanguageHintVisible, value); }
+
+    private const string RecipeLanguageHintDismissedKey = "hint_recipe_language_dismissed";
+
+    private void DismissRecipeLanguageHint()
+    {
+        if (!IsRecipeLanguageHintVisible)
+            return;
+        IsRecipeLanguageHintVisible = false;
+        Preferences.Set(RecipeLanguageHintDismissedKey, true);
+    }
     public string? ErrorMessage { get => _errorMessage; private set => SetField(ref _errorMessage, value); }
 
     public int CreditBalance
@@ -131,6 +153,8 @@ public sealed class RecipeLibraryViewModel : INotifyPropertyChanged
     public ICommand UpgradeCommand { get; }
     public ICommand DismissUpgradeCommand { get; }
     public ICommand TopUpCommand { get; }
+    public ICommand DismissRecipeLanguageHintCommand { get; }
+    public ICommand OpenRecipeLanguageSettingsCommand { get; }
     public ICommand BuyPackCommand { get; }
     public ICommand AddManuallyCommand { get; }
     public ICommand OpenFocusCommand { get; }
@@ -139,6 +163,7 @@ public sealed class RecipeLibraryViewModel : INotifyPropertyChanged
     public event EventHandler<ParsedRecipe>? FocusRequested;
     public event EventHandler<ParsedRecipe>? DetailRequested;
     public event EventHandler? AddManuallyRequested;
+    public event EventHandler? SettingsRequested;
     public event PropertyChangedEventHandler? PropertyChanged;
 
     /// <summary>Loads saved recipes and the current credit balance. Called when the page appears.</summary>

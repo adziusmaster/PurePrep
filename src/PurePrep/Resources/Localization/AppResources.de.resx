@@ -443,4 +443,13 @@ Brühe kellenweise unter Rühren zugeben.</value>
   <data name="BuyCreditsChoosePack" xml:space="preserve">
     <value>Credit-Paket wählen</value>
   </data>
+  <data name="RecipeLangHintTitle" xml:space="preserve">
+    <value>Rezepte werden automatisch übersetzt</value>
+  </data>
+  <data name="RecipeLangHintBody" xml:space="preserve">
+    <value>Beim Import per Link übersetzt PurePrep das Rezept in deine Rezeptsprache. Standardmäßig folgt sie der App-Sprache — du kannst jederzeit eine feste wählen.</value>
+  </data>
+  <data name="RecipeLangHintAction" xml:space="preserve">
+    <value>Rezeptsprache festlegen ›</value>
+  </data>
 </root>

@@ -443,4 +443,13 @@ Añade el caldo cucharón a cucharón, removiendo.</value>
   <data name="BuyCreditsChoosePack" xml:space="preserve">
     <value>Elige un paquete de créditos</value>
   </data>
+  <data name="RecipeLangHintTitle" xml:space="preserve">
+    <value>Las recetas se traducen automáticamente</value>
+  </data>
+  <data name="RecipeLangHintBody" xml:space="preserve">
+    <value>Al importar por enlace, PurePrep traduce la receta a tu idioma de recetas. Por defecto sigue el idioma de la app, pero puedes fijar uno cuando quieras.</value>
+  </data>
+  <data name="RecipeLangHintAction" xml:space="preserve">
+    <value>Elegir idioma de recetas ›</value>
+  </data>
 </root>

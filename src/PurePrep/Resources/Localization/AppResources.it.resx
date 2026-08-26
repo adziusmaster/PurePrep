@@ -443,4 +443,13 @@ Aggiungi il brodo un mestolo alla volta, mescolando.</value>
   <data name="BuyCreditsChoosePack" xml:space="preserve">
     <value>Scegli un pacchetto di crediti</value>
   </data>
+  <data name="RecipeLangHintTitle" xml:space="preserve">
+    <value>Le ricette si traducono automaticamente</value>
+  </data>
+  <data name="RecipeLangHintBody" xml:space="preserve">
+    <value>Quando importi da un link, PurePrep traduce la ricetta nella tua lingua delle ricette. Per impostazione predefinita segue la lingua dell'app — puoi sceglierne una in qualsiasi momento.</value>
+  </data>
+  <data name="RecipeLangHintAction" xml:space="preserve">
+    <value>Imposta la lingua delle ricette ›</value>
+  </data>
 </root>

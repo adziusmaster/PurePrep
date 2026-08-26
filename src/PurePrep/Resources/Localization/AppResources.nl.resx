@@ -443,4 +443,13 @@ Voeg de bouillon pollepel voor pollepel toe, al roerend.</value>
   <data name="BuyCreditsChoosePack" xml:space="preserve">
     <value>Kies een creditpakket</value>
   </data>
+  <data name="RecipeLangHintTitle" xml:space="preserve">
+    <value>Recepten worden automatisch vertaald</value>
+  </data>
+  <data name="RecipeLangHintBody" xml:space="preserve">
+    <value>Bij importeren via een link vertaalt PurePrep het recept naar je receptentaal. Standaard volgt die de app-taal — je kunt altijd een vaste taal instellen.</value>
+  </data>
+  <data name="RecipeLangHintAction" xml:space="preserve">
+    <value>Receptentaal instellen ›</value>
+  </data>
 </root>

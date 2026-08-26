@@ -443,4 +443,13 @@ Dodawaj bulion po chochli, mieszając.</value>
   <data name="BuyCreditsChoosePack" xml:space="preserve">
     <value>Wybierz pakiet kredytów</value>
   </data>
+  <data name="RecipeLangHintTitle" xml:space="preserve">
+    <value>Przepisy tłumaczą się automatycznie</value>
+  </data>
+  <data name="RecipeLangHintBody" xml:space="preserve">
+    <value>Przy imporcie z linku PurePrep tłumaczy przepis na Twój język przepisów. Domyślnie zależy on od języka aplikacji — możesz w każdej chwili wybrać konkretny.</value>
+  </data>
+  <data name="RecipeLangHintAction" xml:space="preserve">
+    <value>Ustaw język przepisów ›</value>
+  </data>
 </root>

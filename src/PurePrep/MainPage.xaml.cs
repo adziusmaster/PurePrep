@@ -14,6 +14,7 @@ public partial class MainPage : ContentPage
 		viewModel.FocusRequested += OnFocusRequested;
 		viewModel.DetailRequested += OnDetailRequested;
 		viewModel.AddManuallyRequested += OnAddManuallyRequested;
+		viewModel.SettingsRequested += OnSettingsTapped;
 		BindingContext = viewModel;
 	}
 

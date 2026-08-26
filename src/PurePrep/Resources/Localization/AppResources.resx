@@ -443,4 +443,13 @@ Add stock a ladle at a time, stirring.</value>
   <data name="BuyCreditsChoosePack" xml:space="preserve">
     <value>Choose a credit pack</value>
   </data>
+  <data name="RecipeLangHintTitle" xml:space="preserve">
+    <value>Recipes translate automatically</value>
+  </data>
+  <data name="RecipeLangHintBody" xml:space="preserve">
+    <value>When you import by link, PurePrep translates the recipe into your recipe language. By default that follows the app language — you can set a specific one anytime.</value>
+  </data>
+  <data name="RecipeLangHintAction" xml:space="preserve">
+    <value>Set recipe language ›</value>
+  </data>
 </root>

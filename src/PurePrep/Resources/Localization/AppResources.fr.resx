@@ -443,4 +443,13 @@ Ajoutez le bouillon louche par louche en remuant.</value>
   <data name="BuyCreditsChoosePack" xml:space="preserve">
     <value>Choisissez un pack de crédits</value>
   </data>
+  <data name="RecipeLangHintTitle" xml:space="preserve">
+    <value>Les recettes sont traduites automatiquement</value>
+  </data>
+  <data name="RecipeLangHintBody" xml:space="preserve">
+    <value>Lors d'un import par lien, PurePrep traduit la recette dans votre langue de recettes. Par défaut, elle suit la langue de l'app — vous pouvez en fixer une à tout moment.</value>
+  </data>
+  <data name="RecipeLangHintAction" xml:space="preserve">
+    <value>Définir la langue des recettes ›</value>
+  </data>
 </root>

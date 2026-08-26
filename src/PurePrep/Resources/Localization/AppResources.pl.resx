@@ -425,4 +425,13 @@ Dodawaj bulion po chochli, mieszając.</value>
   <data name="RecipeLangSameAsApp" xml:space="preserve">
     <value>Tak jak język aplikacji</value>
   </data>
+  <data name="WhyCreditsTitle" xml:space="preserve">
+    <value>Dlaczego Smart Credits?</value>
+  </data>
+  <data name="WhyCreditsBody" xml:space="preserve">
+    <value>Import przez link używa AI, aby odczytać stronę i zrozumieć przepis. To AI działa na płatnych serwerach, więc każdy import kosztuje jeden Smart Credit. Zapisywanie, edycja i gotowanie przepisów są zawsze darmowe.</value>
+  </data>
+  <data name="PackOptionFormat" xml:space="preserve">
+    <value>{0} kredytów · {1}</value>
+  </data>
 </root>

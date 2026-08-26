@@ -38,7 +38,11 @@ public static class MauiProgram
 		// Anonymous device identity + in-app billing (Google Play). Billing is stubbed until the
 		// Play-signed build; the paywall degrades gracefully when it is unsupported.
 		builder.Services.AddSingleton<IDeviceIdentity, SecureStorageDeviceIdentity>();
-		builder.Services.AddSingleton<IBillingService, PlayBillingService>();
+#if ANDROID
+		builder.Services.AddSingleton<IBillingService, PurePrep.Platforms.Android.PlayBillingService>();
+#else
+		builder.Services.AddSingleton<IBillingService, UnsupportedBillingService>();
+#endif
 		builder.Services.AddSingleton<ThemeService>();
 
 		// Language newly imported recipes are produced in (defaults to the app UI language).

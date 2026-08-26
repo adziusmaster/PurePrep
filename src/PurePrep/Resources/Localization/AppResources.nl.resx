@@ -425,4 +425,13 @@ Voeg de bouillon pollepel voor pollepel toe, al roerend.</value>
   <data name="RecipeLangSameAsApp" xml:space="preserve">
     <value>Zelfde als app-taal</value>
   </data>
+  <data name="WhyCreditsTitle" xml:space="preserve">
+    <value>Waarom Smart Credits?</value>
+  </data>
+  <data name="WhyCreditsBody" xml:space="preserve">
+    <value>Importeren via een link gebruikt AI om de pagina te lezen en het recept te begrijpen. Die AI draait op betaalde servers, dus elke import kost een Smart Credit. Je recepten opslaan, bewerken en koken is altijd gratis.</value>
+  </data>
+  <data name="PackOptionFormat" xml:space="preserve">
+    <value>{0} credits · {1}</value>
+  </data>
 </root>

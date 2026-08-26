@@ -20,7 +20,16 @@ public interface IBillingService
 
     /// <summary>
     /// Launches the platform purchase flow for <paramref name="productId"/>. Returns the purchase on
-    /// success, or <c>null</c> if the user cancelled.
+    /// success, or <c>null</c> if the user cancelled. The purchase is intentionally left un-consumed so
+    /// the caller can grant credits on the backend first; call <see cref="ConsumeAsync"/> only after the
+    /// server has confirmed the grant.
     /// </summary>
     Task<PurchaseResult?> BuyAsync(string productId, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Consumes a purchased consumable so it can be bought again, and acknowledges it with Google Play.
+    /// Must be called after the backend has granted the credits for the purchase; if it is never called,
+    /// Google auto-refunds the purchase after a few days. No-op where billing is unsupported.
+    /// </summary>
+    Task ConsumeAsync(string purchaseToken, CancellationToken cancellationToken = default);
 }

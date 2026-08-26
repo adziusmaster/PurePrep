@@ -425,4 +425,13 @@ Brühe kellenweise unter Rühren zugeben.</value>
   <data name="RecipeLangSameAsApp" xml:space="preserve">
     <value>Wie App-Sprache</value>
   </data>
+  <data name="WhyCreditsTitle" xml:space="preserve">
+    <value>Warum Smart Credits?</value>
+  </data>
+  <data name="WhyCreditsBody" xml:space="preserve">
+    <value>Der Import per Link nutzt KI, um die Seite zu lesen und das Rezept zu verstehen. Diese KI läuft auf kostenpflichtigen Servern, daher kostet jeder Import einen Smart Credit. Speichern, Bearbeiten und Kochen deiner Rezepte ist immer kostenlos.</value>
+  </data>
+  <data name="PackOptionFormat" xml:space="preserve">
+    <value>{0} Credits · {1}</value>
+  </data>
 </root>

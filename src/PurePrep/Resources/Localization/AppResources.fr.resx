@@ -425,4 +425,13 @@ Ajoutez le bouillon louche par louche en remuant.</value>
   <data name="RecipeLangSameAsApp" xml:space="preserve">
     <value>Comme la langue de l'app</value>
   </data>
+  <data name="WhyCreditsTitle" xml:space="preserve">
+    <value>Pourquoi les Smart Credits ?</value>
+  </data>
+  <data name="WhyCreditsBody" xml:space="preserve">
+    <value>L'import par lien utilise l'IA pour lire la page et comprendre la recette. Cette IA tourne sur des serveurs payants, donc chaque import coûte un Smart Credit. Enregistrer, modifier et cuisiner vos recettes reste toujours gratuit.</value>
+  </data>
+  <data name="PackOptionFormat" xml:space="preserve">
+    <value>{0} crédits · {1}</value>
+  </data>
 </root>

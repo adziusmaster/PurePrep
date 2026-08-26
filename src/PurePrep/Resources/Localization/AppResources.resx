@@ -425,4 +425,13 @@ Add stock a ladle at a time, stirring.</value>
   <data name="RecipeLangSameAsApp" xml:space="preserve">
     <value>Same as app language</value>
   </data>
+  <data name="WhyCreditsTitle" xml:space="preserve">
+    <value>Why Smart Credits?</value>
+  </data>
+  <data name="WhyCreditsBody" xml:space="preserve">
+    <value>Importing by link uses AI to read the page and understand the recipe. That AI runs on paid servers, so each import costs a Smart Credit. Saving, editing and cooking your recipes is always free.</value>
+  </data>
+  <data name="PackOptionFormat" xml:space="preserve">
+    <value>{0} credits · {1}</value>
+  </data>
 </root>

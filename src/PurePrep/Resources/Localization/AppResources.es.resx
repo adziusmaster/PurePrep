@@ -425,4 +425,13 @@ Añade el caldo cucharón a cucharón, removiendo.</value>
   <data name="RecipeLangSameAsApp" xml:space="preserve">
     <value>Igual que la app</value>
   </data>
+  <data name="WhyCreditsTitle" xml:space="preserve">
+    <value>¿Por qué Smart Credits?</value>
+  </data>
+  <data name="WhyCreditsBody" xml:space="preserve">
+    <value>Importar por enlace usa IA para leer la página y entender la receta. Esa IA se ejecuta en servidores de pago, así que cada importación cuesta un Smart Credit. Guardar, editar y cocinar tus recetas siempre es gratis.</value>
+  </data>
+  <data name="PackOptionFormat" xml:space="preserve">
+    <value>{0} créditos · {1}</value>
+  </data>
 </root>

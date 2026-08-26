@@ -235,9 +235,40 @@
                     <Label Text="{loc:Translate OutOfCreditsBody}"
                            TextColor="{DynamicResource Muted}" FontSize="13.5" LineHeight="1.25" />
                 </VerticalStackLayout>
+
+                <!-- Why credits cost money -->
+                <Border BackgroundColor="{DynamicResource BgElevated}" Stroke="Transparent" Padding="12"
+                        StrokeShape="RoundRectangle 14">
+                    <VerticalStackLayout Spacing="3">
+                        <Label Text="{loc:Translate WhyCreditsTitle}" TextColor="{DynamicResource Ink}"
+                               FontSize="13.5" FontAttributes="Bold" />
+                        <Label Text="{loc:Translate WhyCreditsBody}" TextColor="{DynamicResource Muted}"
+                               FontSize="12.5" LineHeight="1.25" />
+                    </VerticalStackLayout>
+                </Border>
+
+                <!-- Pack picker: one button per pack (hidden where billing is unavailable) -->
+                <VerticalStackLayout Spacing="8" BindableLayout.ItemsSource="{Binding CreditPacks}"
+                                     IsVisible="{Binding IsBillingSupported}">
+                    <BindableLayout.ItemTemplate>
+                        <DataTemplate>
+                            <Button Text="{Binding Label}"
+                                    Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.BuyPackCommand}"
+                                    CommandParameter="{Binding .}"
+                                    BackgroundColor="{DynamicResource Lime}" TextColor="{DynamicResource LimeInk}"
+                                    FontAttributes="Bold" FontSize="15" HeightRequest="50" CornerRadius="15" />
+                        </DataTemplate>
+                    </BindableLayout.ItemTemplate>
+                </VerticalStackLayout>
+
+                <!-- Fallback for platforms without in-app billing (iOS/web preview) -->
                 <Button Text="{loc:Translate TopUpCredits}" Command="{Binding TopUpCommand}"
+                        IsVisible="{Binding IsBillingSupported, Converter={StaticResource InvertedBoolConverter}}"
                         BackgroundColor="{DynamicResource Lime}" TextColor="{DynamicResource LimeInk}"
                         FontAttributes="Bold" FontSize="15" HeightRequest="50" CornerRadius="15" />
+
+                <ActivityIndicator IsRunning="{Binding IsPurchasing}" IsVisible="{Binding IsPurchasing}"
+                                   Color="{DynamicResource Lime}" HeightRequest="24" />
             </VerticalStackLayout>
         </Border>
     </Grid>

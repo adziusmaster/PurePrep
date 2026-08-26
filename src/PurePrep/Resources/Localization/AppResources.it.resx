@@ -425,4 +425,13 @@ Aggiungi il brodo un mestolo alla volta, mescolando.</value>
   <data name="RecipeLangSameAsApp" xml:space="preserve">
     <value>Come la lingua dell'app</value>
   </data>
+  <data name="WhyCreditsTitle" xml:space="preserve">
+    <value>Perché i Smart Credits?</value>
+  </data>
+  <data name="WhyCreditsBody" xml:space="preserve">
+    <value>L'importazione tramite link usa l'IA per leggere la pagina e capire la ricetta. Questa IA gira su server a pagamento, quindi ogni importazione costa uno Smart Credit. Salvare, modificare e cucinare le tue ricette è sempre gratis.</value>
+  </data>
+  <data name="PackOptionFormat" xml:space="preserve">
+    <value>{0} crediti · {1}</value>
+  </data>
 </root>

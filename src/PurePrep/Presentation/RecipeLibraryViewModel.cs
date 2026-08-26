@@ -1,5 +1,6 @@
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Windows.Input;
 using PurePrep.Application;
@@ -22,6 +23,7 @@ public sealed class RecipeLibraryViewModel : INotifyPropertyChanged
     private string _searchText = string.Empty;
     private bool _isImporting;
     private bool _isUpgradePromptVisible;
+    private bool _isPurchasing;
     private string? _errorMessage;
     // -1 = balance not yet loaded from the backend.
     private int _creditBalance = -1;
@@ -36,11 +38,19 @@ public sealed class RecipeLibraryViewModel : INotifyPropertyChanged
         _repository = repository;
         _credits = credits;
         _billing = billing;
+        CreditPacks = billing.Packs
+            .Select(p => new CreditPackOption(
+                p.ProductId,
+                p.Credits,
+                p.DisplayPrice,
+                AppResources.Format("PackOptionFormat", p.Credits, p.DisplayPrice)))
+            .ToList();
         Recipes = new ObservableCollection<ParsedRecipe>();
 
         ImportCommand = new Command(async () => await ImportAsync());
         UpgradeCommand = new Command(() => IsUpgradePromptVisible = true);
         TopUpCommand = new Command(async () => await TopUpAsync());
+        BuyPackCommand = new Command<CreditPackOption>(async option => await PurchaseAsync(option));
         AddManuallyCommand = new Command(() => AddManuallyRequested?.Invoke(this, EventArgs.Empty));
         OpenFocusCommand = new Command<ParsedRecipe>(recipe =>
         {
@@ -55,6 +65,12 @@ public sealed class RecipeLibraryViewModel : INotifyPropertyChanged
     }
 
     public ObservableCollection<ParsedRecipe> Recipes { get; }
+
+    /// <summary>Selectable Smart Credit packs shown in the paywall picker (empty where billing is unavailable).</summary>
+    public IReadOnlyList<CreditPackOption> CreditPacks { get; }
+
+    /// <summary>True when in-app billing works on this build, so the pack picker can be shown.</summary>
+    public bool IsBillingSupported => _billing.IsSupported;
 
     public string UrlInput { get => _urlInput; set => SetField(ref _urlInput, value); }
 
@@ -82,6 +98,7 @@ public sealed class RecipeLibraryViewModel : INotifyPropertyChanged
     /// <summary>True when a search is active but no recipe matched (drives the empty-state copy).</summary>
     public bool NoSearchMatches => IsSearching && Recipes.Count == 0;
     public bool IsImporting { get => _isImporting; private set => SetField(ref _isImporting, value); }
+    public bool IsPurchasing { get => _isPurchasing; private set => SetField(ref _isPurchasing, value); }
     public bool IsUpgradePromptVisible { get => _isUpgradePromptVisible; private set => SetField(ref _isUpgradePromptVisible, value); }
     public string? ErrorMessage { get => _errorMessage; private set => SetField(ref _errorMessage, value); }
 
@@ -109,6 +126,7 @@ public sealed class RecipeLibraryViewModel : INotifyPropertyChanged
     public ICommand ImportCommand { get; }
     public ICommand UpgradeCommand { get; }
     public ICommand TopUpCommand { get; }
+    public ICommand BuyPackCommand { get; }
     public ICommand AddManuallyCommand { get; }
     public ICommand OpenFocusCommand { get; }
     public ICommand OpenDetailCommand { get; }
@@ -200,30 +218,55 @@ public sealed class RecipeLibraryViewModel : INotifyPropertyChanged
         }
     }
 
-    private async Task TopUpAsync()
+    private Task TopUpAsync()
+    {
+        // Backward-compatible entry point (single button): buy the smallest pack.
+        var first = CreditPacks.Count > 0 ? CreditPacks[0] : null;
+        return PurchaseAsync(first);
+    }
+
+    /// <summary>Buys the given Smart Credit pack, grants the credits server-side, then consumes the purchase.</summary>
+    private async Task PurchaseAsync(CreditPackOption? option)
     {
         ErrorMessage = null;
 
-        if (!_billing.IsSupported || _billing.Packs.Count == 0)
+        if (option is null || !_billing.IsSupported || CreditPacks.Count == 0)
         {
             ErrorMessage = AppResources.Get("ErrPacksPlayStore");
             return;
         }
 
+        if (IsPurchasing)
+            return;
+
+        IsPurchasing = true;
         try
         {
-            // Minimal flow: purchase the smallest pack. A full pack-picker sheet can replace this later.
-            var pack = _billing.Packs[0];
-            var purchase = await _billing.BuyAsync(pack.ProductId);
+            var purchase = await _billing.BuyAsync(option.ProductId);
             if (purchase is null)
                 return; // user cancelled
 
             CreditBalance = await _credits.RedeemAsync(purchase.ProductId, purchase.PurchaseToken);
             IsUpgradePromptVisible = false;
+
+            // Credits are granted server-side: only now consume the purchase so Google marks it
+            // fulfilled (and re-purchasable). A failed consume is non-fatal — reconciled on next buy.
+            try
+            {
+                await _billing.ConsumeAsync(purchase.PurchaseToken);
+            }
+            catch
+            {
+                // Ignore: the purchase is already redeemed on the backend; consume retries on next buy.
+            }
         }
         catch (Exception ex)
         {
             ErrorMessage = AppResources.Format("ErrCouldNotPurchaseFormat", ex.Message);
+        }
+        finally
+        {
+            IsPurchasing = false;
         }
     }
 
@@ -301,3 +344,6 @@ public sealed class RecipeLibraryViewModel : INotifyPropertyChanged
 
     private void OnPropertyChanged(string? propertyName) => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
 }
+
+/// <summary>A Smart Credit pack shown in the paywall picker, with a display label ("10 credits · €0.99").</summary>
+public sealed record CreditPackOption(string ProductId, int Credits, string DisplayPrice, string Label);

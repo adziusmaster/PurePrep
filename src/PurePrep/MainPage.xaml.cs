@@ -23,12 +23,8 @@ public partial class MainPage : ContentPage
 	private void OnViewModelPropertyChanged(object? sender, PropertyChangedEventArgs e)
 	{
 		if (e.PropertyName == nameof(RecipeLibraryViewModel.IsUpgradePromptVisible))
-			SetBackgroundBlur(((RecipeLibraryViewModel)BindingContext).IsUpgradePromptVisible);
+			BackgroundBlur.Apply(ContentRoot, ((RecipeLibraryViewModel)BindingContext).IsUpgradePromptVisible);
 	}
-
-	// Blurs the page content behind the upgrade sheet. Implemented per-platform (Android uses a
-	// RenderEffect); a no-op where the platform has no native blur.
-	partial void SetBackgroundBlur(bool enabled);
 
 	protected override async void OnAppearing()
 	{

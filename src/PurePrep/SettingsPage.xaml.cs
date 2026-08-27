@@ -36,34 +36,62 @@ public partial class SettingsPage : ContentPage
 
     private async void OnBuyCreditsTapped(object? sender, EventArgs e)
     {
-        if (_billing is null || _credits is null || !_billing.IsSupported)
+        if (_billing is null || _credits is null || !_billing.IsSupported || BuySheet.IsVisible)
             return;
 
-        var packs = _billing.Packs;
+        // Resolve live, tax-inclusive Play prices (falls back to placeholder labels if unavailable),
+        // so the displayed price matches what the user is charged at checkout.
+        var packs = await _billing.GetPacksAsync();
         if (packs.Count == 0)
             return;
 
-        var labels = packs
-            .Select(p => AppResources.Format("PackOptionFormat", p.Credits, p.DisplayPrice))
-            .ToArray();
+        BuildPackButtons(packs);
+        ShowBuySheet(true);
+    }
 
-        var choice = await DisplayActionSheet(
-            AppResources.Get("BuyCreditsChoosePack"),
-            AppResources.Get("Cancel"),
-            null,
-            labels);
+    private void BuildPackButtons(IReadOnlyList<CreditPack> packs)
+    {
+        BuyPackContainer.Children.Clear();
+        foreach (var pack in packs)
+        {
+            var button = new Button
+            {
+                Text = AppResources.Format("PackOptionFormat", pack.Credits, pack.DisplayPrice),
+                FontAttributes = FontAttributes.Bold,
+                FontSize = 15,
+                HeightRequest = 50,
+                CornerRadius = 15,
+                BackgroundColor = Token("Lime"),
+                TextColor = Token("LimeInk"),
+            };
+            var captured = pack;
+            button.Clicked += (_, _) => _ = PurchasePackAsync(captured);
+            BuyPackContainer.Children.Add(button);
+        }
+    }
 
-        var index = Array.IndexOf(labels, choice);
-        if (index < 0)
-            return; // cancelled or dismissed
+    private void ShowBuySheet(bool show)
+    {
+        BuySheetScrim.IsVisible = show;
+        BuySheet.IsVisible = show;
+        BackgroundBlur.Apply(ContentRoot, show);
+    }
 
-        var pack = packs[index];
+    private void OnDismissBuySheet(object? sender, EventArgs e) => ShowBuySheet(false);
+
+    private async Task PurchasePackAsync(CreditPack pack)
+    {
+        if (_billing is null || _credits is null)
+            return;
+
+        SetBuyBusy(true);
         try
         {
             var newBalance = await CreditPurchaseFlow.PurchaseAsync(_billing, _credits, pack.ProductId);
             if (newBalance is null)
                 return; // user cancelled the Google purchase sheet
 
+            ShowBuySheet(false);
             await DisplayAlert(
                 AppResources.Get("BuyCredits"),
                 AppResources.Format("RedeemSuccessFormat", pack.Credits),
@@ -76,6 +104,30 @@ public partial class SettingsPage : ContentPage
                 AppResources.Format("ErrCouldNotPurchaseFormat", ex.Message),
                 AppResources.Get("Ok"));
         }
+        finally
+        {
+            SetBuyBusy(false);
+        }
+    }
+
+    private void SetBuyBusy(bool busy)
+    {
+        BuyBusyIndicator.IsRunning = busy;
+        BuyBusyIndicator.IsVisible = busy;
+        BuyPackContainer.IsEnabled = !busy;
+    }
+
+    // The buy sheet is an in-page overlay, so the hardware back button should close it rather than
+    // pop the page.
+    protected override bool OnBackButtonPressed()
+    {
+        if (BuySheet.IsVisible)
+        {
+            ShowBuySheet(false);
+            return true;
+        }
+
+        return base.OnBackButtonPressed();
     }
 
     private void BuildLanguagePicker()

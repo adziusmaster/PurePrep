@@ -7,9 +7,10 @@
              NavigationPage.HasNavigationBar="False"
              BackgroundColor="{DynamicResource Bg}">
 
-    <ScrollView>
-        <Grid MaximumWidthRequest="760" HorizontalOptions="Center"
-              Padding="20,12,20,24" RowDefinitions="Auto,Auto" RowSpacing="22">
+    <Grid>
+        <ScrollView x:Name="ContentRoot">
+            <Grid MaximumWidthRequest="760" HorizontalOptions="Center"
+                  Padding="20,12,20,24" RowDefinitions="Auto,Auto" RowSpacing="22">
 
             <!-- Header -->
             <Grid ColumnDefinitions="Auto,*" ColumnSpacing="12" VerticalOptions="Center">
@@ -228,5 +229,42 @@
 
             </VerticalStackLayout>
         </Grid>
-    </ScrollView>
+        </ScrollView>
+
+        <!-- Light scrim (tap outside the sheet to dismiss); background is blurred natively on Android. -->
+        <BoxView x:Name="BuySheetScrim" Color="#26000000" IsVisible="False">
+            <BoxView.GestureRecognizers>
+                <TapGestureRecognizer Tapped="OnDismissBuySheet" />
+            </BoxView.GestureRecognizers>
+        </BoxView>
+
+        <!-- Buy-credits sheet (mirrors the main paywall). Pack buttons are built in code-behind from
+             the live Play prices so the displayed price matches checkout. -->
+        <Border x:Name="BuySheet" IsVisible="False"
+                BackgroundColor="{DynamicResource Surface}" Stroke="{DynamicResource LimeDim}"
+                StrokeThickness="1" Padding="18" Margin="14,0,14,18" StrokeShape="RoundRectangle 22"
+                VerticalOptions="End" MaximumWidthRequest="720" HorizontalOptions="Center">
+            <VerticalStackLayout Spacing="14">
+                <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10">
+                    <Label Text="{loc:Translate BuyCreditsChoosePack}" TextColor="{DynamicResource Ink}"
+                           FontSize="17" FontAttributes="Bold" VerticalOptions="Center" />
+                    <Border Grid.Column="1" WidthRequest="32" HeightRequest="32"
+                            BackgroundColor="{DynamicResource BgElevated}" Stroke="{DynamicResource Line}"
+                            StrokeThickness="1" StrokeShape="RoundRectangle 16"
+                            VerticalOptions="Start" HorizontalOptions="End">
+                        <Border.GestureRecognizers>
+                            <TapGestureRecognizer Tapped="OnDismissBuySheet" />
+                        </Border.GestureRecognizers>
+                        <Label Text="&#10005;" TextColor="{DynamicResource Muted}" FontSize="14"
+                               HorizontalOptions="Center" VerticalOptions="Center" />
+                    </Border>
+                </Grid>
+
+                <VerticalStackLayout x:Name="BuyPackContainer" Spacing="8" />
+
+                <ActivityIndicator x:Name="BuyBusyIndicator" IsRunning="False" IsVisible="False"
+                                   Color="{DynamicResource Lime}" HeightRequest="24" />
+            </VerticalStackLayout>
+        </Border>
+    </Grid>
 </ContentPage>

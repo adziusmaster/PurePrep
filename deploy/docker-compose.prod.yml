@@ -8,7 +8,12 @@
 # Deploy (run from /opt/pureprep on the server):
 #   docker compose --env-file .env -f deploy/docker-compose.prod.yml up -d --build
 services:
-  web:
+  # Named "pureprep", not "web". This stack shares Coldstart's Docker network, and
+  # Compose publishes the service name as a network alias — so a service called
+  # "web" here collided with Coldstart's own "web" container. Docker's DNS then
+  # resolved their reverse_proxy upstream to THIS container, and getcoldstart.nl
+  # served 404s from PurePrep's API until the collision was found.
+  pureprep:
     build:
       context: ..
       dockerfile: Dockerfile
@@ -34,6 +39,10 @@ services:
       - "8080"
 
 # Coldstart's Caddy lives on this network; joining it lets Caddy reach us by name.
+# NOTE: Compose registers the SERVICE NAME as a DNS alias on this shared network,
+# so the service must not be called something Coldstart's stack already uses
+# ("web", "db", "caddy", "umami"). A generic name here silently hijacks their
+# traffic — see the service comment below.
 networks:
   coldstart_default:
     external: true

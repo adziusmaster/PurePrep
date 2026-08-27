@@ -13,7 +13,14 @@ public sealed class HttpSmartCreditsClient(HttpClient http, IDeviceIdentity iden
     public async Task<int> GetBalanceAsync(CancellationToken cancellationToken = default)
     {
         var deviceId = await identity.GetDeviceIdAsync(cancellationToken);
-        var dto = await http.GetFromJsonAsync<BalanceResponse>($"api/credits/{deviceId}", cancellationToken);
+
+        // POST, not GET: reading a balance is now side-effect free on the server, so the free
+        // allowance for a brand-new install is seeded by this dedicated endpoint instead.
+        using var response = await http.PostAsJsonAsync(
+            "api/credits/ensure", new { deviceId }, cancellationToken);
+        response.EnsureSuccessStatusCode();
+
+        var dto = await response.Content.ReadFromJsonAsync<BalanceResponse>(cancellationToken);
         return dto?.Balance ?? 0;
     }
 

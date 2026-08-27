@@ -67,6 +67,7 @@ public static class UnitConverter
             foreach (Match match in Token.Matches(segment))
             {
                 if (!TryResolveUnit(match.Groups["unit"].Value, out var unit)) continue;
+                if (IsAmbiguousBareTemperature(match.Groups["unit"].Value, match.Groups["qty"].Value)) continue;
                 if (unit.System == MeasurementSystem.Metric) metric++;
                 else if (unit.System == MeasurementSystem.Imperial) imperial++;
             }
@@ -90,6 +91,8 @@ public static class UnitConverter
         return Token.Replace(text, match =>
         {
             if (!TryResolveUnit(match.Groups["unit"].Value, out var unit))
+                return match.Value;
+            if (IsAmbiguousBareTemperature(match.Groups["unit"].Value, match.Groups["qty"].Value))
                 return match.Value;
             if (unit.System == to) // already in the target system for this dimension
                 return match.Value;
@@ -247,6 +250,31 @@ public static class UnitConverter
     {
         alias = alias.Trim().ToLowerInvariant().TrimEnd('.');
         return AliasToUnit.TryGetValue(alias, out unit!);
+    }
+
+    // "c" is the standard American abbreviation for "cup" as well as for Celsius, and "f" is
+    // similarly weak on its own. Reading "2 c flour" as two degrees Celsius silently corrupted the
+    // ingredient. Recipes do also write "Bake at 200 C" with no degree sign, so rather than dropping
+    // the bare aliases entirely we accept them only at magnitudes that can only be an oven
+    // temperature: no recipe calls for 180 cups, and none bakes at 2 degrees.
+    private const double MinBareCelsius = 100;
+    private const double MinBareFahrenheit = 200;
+
+    private static bool IsAmbiguousBareTemperature(string rawAlias, string quantityText)
+    {
+        var alias = rawAlias.Trim().ToLowerInvariant().TrimEnd('.');
+        if (alias is not ("c" or "f"))
+            return false;
+
+        // Take the first number of a range: "180-200 C" is still an oven temperature.
+        var firstPart = Regex.Split(quantityText, @"\s*(?:-|–|—|to)\s*")
+            .FirstOrDefault(p => p.Trim().Length > 0) ?? quantityText;
+
+        if (!TryParseQuantity(firstPart, out var value))
+            return true;
+
+        var threshold = alias == "c" ? MinBareCelsius : MinBareFahrenheit;
+        return value < threshold;
     }
 
     private static Dictionary<string, Unit> BuildAliasLookup()

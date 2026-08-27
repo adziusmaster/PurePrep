@@ -28,7 +28,6 @@ public sealed class SqliteCreditStore(IDbContextFactory<ServerDbContext> factory
     public async Task<int> GetBalanceAsync(Guid deviceId, CancellationToken ct = default)
     {
         await using var db = await factory.CreateDbContextAsync(ct);
-        await db.Database.EnsureCreatedAsync(ct);
         var row = await db.Credits.AsNoTracking().FirstOrDefaultAsync(x => x.DeviceId == deviceId, ct);
         return row?.Balance ?? 0;
     }
@@ -36,7 +35,6 @@ public sealed class SqliteCreditStore(IDbContextFactory<ServerDbContext> factory
     public async Task<int> EnsureDeviceAsync(Guid deviceId, int initialCredits, CancellationToken ct = default)
     {
         await using var db = await factory.CreateDbContextAsync(ct);
-        await db.Database.EnsureCreatedAsync(ct);
         var existing = await db.Credits.AsNoTracking().FirstOrDefaultAsync(x => x.DeviceId == deviceId, ct);
         if (existing is not null) return existing.Balance;
 
@@ -57,7 +55,6 @@ public sealed class SqliteCreditStore(IDbContextFactory<ServerDbContext> factory
     public async Task<bool> TrySpendAsync(Guid deviceId, int amount, CancellationToken ct = default)
     {
         await using var db = await factory.CreateDbContextAsync(ct);
-        await db.Database.EnsureCreatedAsync(ct);
         // Atomic conditional decrement: only succeeds when the device has enough credits.
         var affected = await db.Database.ExecuteSqlRawAsync(
             "UPDATE Credits SET Balance = Balance - {0}, UpdatedAt = {1} WHERE DeviceId = {2} AND Balance >= {0}",
@@ -68,7 +65,6 @@ public sealed class SqliteCreditStore(IDbContextFactory<ServerDbContext> factory
     public async Task RefundAsync(Guid deviceId, int amount, CancellationToken ct = default)
     {
         await using var db = await factory.CreateDbContextAsync(ct);
-        await db.Database.EnsureCreatedAsync(ct);
         await db.Database.ExecuteSqlRawAsync(
             "UPDATE Credits SET Balance = Balance + {0}, UpdatedAt = {1} WHERE DeviceId = {2}",
             [amount, DateTimeOffset.UtcNow, deviceId], ct);
@@ -77,7 +73,6 @@ public sealed class SqliteCreditStore(IDbContextFactory<ServerDbContext> factory
     public async Task<int> GrantAsync(Guid deviceId, int amount, CancellationToken ct = default)
     {
         await using var db = await factory.CreateDbContextAsync(ct);
-        await db.Database.EnsureCreatedAsync(ct);
         var now = DateTimeOffset.UtcNow;
         var row = await db.Credits.FirstOrDefaultAsync(x => x.DeviceId == deviceId, ct);
         if (row is null)

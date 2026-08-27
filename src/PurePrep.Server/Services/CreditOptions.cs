@@ -23,4 +23,14 @@ public sealed class CreditOptions
 
     /// <summary>Free AI Smart Credits seeded to every new device on first contact.</summary>
     public int FreeCredits { get; set; } = 10;
+
+    /// <summary>
+    /// How many brand-new devices a single origin may be granted free credits for per day.
+    /// Device ids are client-generated, so without this a script mints unlimited free parses.
+    /// Set generously enough for a shared household or office NAT.
+    /// </summary>
+    public int MaxNewDevicesPerIpPerDay { get; set; } = 5;
+
+    /// <summary>Window the above cap is measured over.</summary>
+    public TimeSpan NewDeviceWindow { get; set; } = TimeSpan.FromDays(1);
 }

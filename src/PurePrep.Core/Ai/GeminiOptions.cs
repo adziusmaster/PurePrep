@@ -9,8 +9,12 @@ public sealed class GeminiOptions
 
     public string Model { get; set; } = "gemini-flash-lite-latest";
 
-    /// <summary>Max characters of page text sent to the model (cost + prompt-injection surface control).</summary>
-    public int MaxInputChars { get; set; } = 24000;
+    /// <summary>
+    /// Max characters of extraction input sent to the model. Raised well above the original 24k:
+    /// that cap silently truncated long blog posts, and on those pages the recipe itself could fall
+    /// outside the window. The caller budgets within this so structured data is never the part cut.
+    /// </summary>
+    public int MaxInputChars { get; set; } = 120000;
 }
 
 /// <summary>Structured recipe returned by the AI extractor (before unit normalization).</summary>

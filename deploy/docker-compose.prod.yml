@@ -30,9 +30,19 @@ services:
       # Protects the /api/admin/promo endpoints (create/list/revoke promo codes).
       # Soft-degrade: unset -> those admin endpoints return 404.
       Admin__Secret: ${ADMIN_SECRET:-}
+      # Google Play purchase validation. NOT soft-degrade: in Production the server refuses to
+      # start without a readable key, because running without it means any forged purchase token
+      # is accepted as proof of payment. See docs/play-validation-setup.md.
+      Play__ServiceAccountJsonPath: /run/secrets/play-service-account.json
+      Play__PackageName: ${PLAY_PACKAGE_NAME:-com.adziusmaster.pureprep}
+      # Salts the origin hash behind the free-credit seed cap. Keep it stable, or the cap resets
+      # on every deploy; keep it secret, or the stored hashes become reversible.
+      Security__IpHashSalt: ${IP_HASH_SALT:?set IP_HASH_SALT in .env}
     volumes:
       # SQLite credit ledger persists across redeploys.
       - pureprep-data:/data
+      # Google Play service-account key, read-only. Kept out of the image and out of env vars.
+      - ${PLAY_KEY_PATH:?set PLAY_KEY_PATH in .env}:/run/secrets/play-service-account.json:ro
     networks:
       - coldstart_default
     expose:

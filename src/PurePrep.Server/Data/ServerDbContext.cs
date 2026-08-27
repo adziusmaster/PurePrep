@@ -9,6 +9,7 @@ public sealed class ServerDbContext(DbContextOptions<ServerDbContext> options) :
     public DbSet<UsageLog> UsageLogs => Set<UsageLog>();
     public DbSet<PromoCode> PromoCodes => Set<PromoCode>();
     public DbSet<PromoRedemption> PromoRedemptions => Set<PromoRedemption>();
+    public DbSet<DeviceSeed> DeviceSeeds => Set<DeviceSeed>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -20,9 +21,29 @@ public sealed class ServerDbContext(DbContextOptions<ServerDbContext> options) :
             e.HasIndex(x => x.OrderId).IsUnique();
         });
 
-        modelBuilder.Entity<UsageLog>().HasKey(x => x.Id);
+        modelBuilder.Entity<UsageLog>(e =>
+        {
+            e.HasKey(x => x.Id);
+            // Same SQLite constraint as DeviceSeed: the retention sweep filters on this column.
+            e.Property(x => x.At).HasConversion(
+                v => v.UtcTicks,
+                v => new DateTimeOffset(v, TimeSpan.Zero));
+            e.HasIndex(x => x.At);
+        });
 
         modelBuilder.Entity<PromoCode>().HasKey(x => x.Code);
         modelBuilder.Entity<PromoRedemption>().HasKey(x => new { x.Code, x.DeviceId });
+
+        modelBuilder.Entity<DeviceSeed>(e =>
+        {
+            e.HasKey(x => x.DeviceId);
+            // EF Core's SQLite provider cannot translate DateTimeOffset comparisons, and the cap
+            // query is exactly such a comparison. Persisting UTC ticks keeps the filter in SQL.
+            e.Property(x => x.SeededAt).HasConversion(
+                v => v.UtcTicks,
+                v => new DateTimeOffset(v, TimeSpan.Zero));
+            // The cap query is always "how many devices did this origin seed recently".
+            e.HasIndex(x => new { x.IpHash, x.SeededAt });
+        });
     }
 }

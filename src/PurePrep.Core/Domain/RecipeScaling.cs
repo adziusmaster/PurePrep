@@ -25,6 +25,29 @@ public static partial class RecipeScaling
         RegexOptions.CultureInvariant)]
     private static partial Regex LeadingQuantity();
 
+    /// <summary>
+    /// Returns a copy of <paramref name="recipe"/> with every ingredient quantity multiplied by
+    /// <paramref name="factor"/>. Method steps are deliberately untouched: doubling a batch does
+    /// not double "bake for 20 minutes". Identity fields are preserved so the result can stand in
+    /// for the original on screen.
+    /// </summary>
+    public static ParsedRecipe ScaleRecipe(ParsedRecipe recipe, double factor)
+    {
+        if (Math.Abs(factor - 1d) < 0.0001)
+            return recipe;
+
+        return new ParsedRecipe
+        {
+            Id = recipe.Id,
+            Title = recipe.Title,
+            SourceUrl = recipe.SourceUrl,
+            SourceSystem = recipe.SourceSystem,
+            SavedAt = recipe.SavedAt,
+            Ingredients = recipe.Ingredients.Select(i => Scale(i, factor)).ToArray(),
+            Steps = recipe.Steps.ToArray(),
+        };
+    }
+
     public static string Scale(string ingredient, double factor)
     {
         if (string.IsNullOrWhiteSpace(ingredient) || Math.Abs(factor - 1d) < 0.0001)

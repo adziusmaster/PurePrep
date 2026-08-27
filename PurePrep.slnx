@@ -1,0 +1,11 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/PurePrep.Core/PurePrep.Core.csproj" />
+    <Project Path="src/PurePrep.Server/PurePrep.Server.csproj" />
+    <Project Path="src/PurePrep.Web/PurePrep.Web.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/PurePrep.Core.Tests/PurePrep.Core.Tests.csproj" />
+    <Project Path="tests/PurePrep.Server.Tests/PurePrep.Server.Tests.csproj" />
+  </Folder>
+</Solution>

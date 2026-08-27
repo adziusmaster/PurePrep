@@ -58,7 +58,10 @@ public partial class MainPage : ContentPage
 
 	private async void OnFocusRequested(object? sender, ParsedRecipe recipe)
 	{
-		await Navigation.PushAsync(new FocusPage(recipe));
+		// Convert to the user's chosen units first. Cooking straight from a library card used to
+		// hand Focus Mode the raw recipe, so the same button behaved differently here and on the
+		// detail screen — metric quantities for someone who had selected imperial.
+		await Navigation.PushAsync(new FocusPage(RecipeUnits.ForDisplay(recipe)));
 	}
 
 	private async void OnDetailRequested(object? sender, ParsedRecipe recipe)

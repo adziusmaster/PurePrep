@@ -44,12 +44,32 @@ public sealed class PromoRedemption
     public DateTimeOffset RedeemedAt { get; set; }
 }
 
-/// <summary>Lightweight audit trail for observability and abuse detection (no full URLs / PII).</summary>
+/// <summary>
+/// Lightweight audit trail for observability and abuse detection.
+///
+/// Deliberately stores a salted <see cref="DeviceHash"/> rather than the device id: host alone is
+/// innocuous, but joined to a stable device id it reconstructs which sites a person cooks from.
+/// Rows are swept on a retention schedule (see <c>UsageLogRetention</c>).
+/// </summary>
 public sealed class UsageLog
 {
     public long Id { get; set; }
-    public Guid DeviceId { get; set; }
+    /// <summary>Salted, non-reversible token for the device. Not the device id.</summary>
+    public string DeviceHash { get; set; } = string.Empty;
     public string Host { get; set; } = string.Empty;
     public bool Success { get; set; }
     public DateTimeOffset At { get; set; }
+}
+
+/// <summary>
+/// Records that a device was seeded with free credits, and from which origin. The origin is stored
+/// as a salted hash, never a raw IP, so the table can enforce the per-origin cap without becoming a
+/// log of which addresses used the app.
+/// </summary>
+public sealed class DeviceSeed
+{
+    public Guid DeviceId { get; set; }
+    /// <summary>Salted hash of the client IP, or null when the origin could not be determined.</summary>
+    public string? IpHash { get; set; }
+    public DateTimeOffset SeededAt { get; set; }
 }

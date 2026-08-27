@@ -39,8 +39,16 @@ public sealed class RecipeDetailViewModel : INotifyPropertyChanged
 
     public ParsedRecipe Recipe => _recipe;
 
-    /// <summary>The recipe with units already converted to the user's preference, for Focus Mode.</summary>
+    /// <summary>The recipe with units already converted to the user's preference.</summary>
     public ParsedRecipe DisplayRecipe => _display;
+
+    /// <summary>
+    /// The recipe as it should be cooked: units converted <b>and</b> the chosen serving multiplier
+    /// applied. Focus Mode previously received <see cref="DisplayRecipe"/>, which is only
+    /// unit-converted — so scaling to 2x and tapping Cook still showed the original quantities,
+    /// at exactly the moment the scaled ones are needed.
+    /// </summary>
+    public ParsedRecipe CookRecipe => RecipeScaling.ScaleRecipe(_display, _factor);
 
     public string Title => _recipe.Title;
     public int StepCount => _recipe.StepCount;

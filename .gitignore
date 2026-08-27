@@ -61,3 +61,6 @@ nunit-*.xml
 src/PurePrep.Web/pureprep.web.db*
 
 src/PurePrep.Server/pureprep.server.db*
+
+# MAUI SDK resolver scratch files
+*.SdkResolver.*.proj.Backup.tmp

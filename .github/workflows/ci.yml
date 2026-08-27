@@ -1,0 +1,32 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  backend:
+    name: Build & test backend
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      # The MAUI app is deliberately not built here: net10.0-android needs the maui-android
+      # workload, which adds minutes to every run. All of the app's testable logic lives in
+      # PurePrep.Core, which is covered below. See BUILD.md for the app build.
+      - name: Restore
+        run: dotnet restore PurePrep.slnx
+
+      - name: Build
+        run: dotnet build PurePrep.slnx --configuration Release --no-restore
+
+      - name: Test
+        run: dotnet test PurePrep.slnx --configuration Release --no-build --verbosity normal

@@ -22,7 +22,6 @@ public static class BillingEndpoint
             return Results.BadRequest(new { error = $"Unknown product '{request.ProductId}'." });
 
         await using var db = await dbFactory.CreateDbContextAsync(ct);
-        await db.Database.EnsureCreatedAsync(ct);
 
         // Replay protection: a purchase token can only ever be redeemed once.
         if (await db.Purchases.AnyAsync(p => p.PurchaseToken == request.PurchaseToken, ct))

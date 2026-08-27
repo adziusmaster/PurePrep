@@ -25,9 +25,10 @@ public partial class RecipeDetailPage : ContentPage
     {
         base.OnAppearing();
 
-        // The recipe may have been edited on a page pushed above this one. Re-read from the
-        // library (which holds the updated immutable instance) and refresh the view.
-        var current = _library.Recipes.FirstOrDefault(r => r.Id == _recipe.Id);
+        // The recipe may have been edited on a page pushed above this one. Re-read from the full
+        // library rather than the bound Recipes collection: that one is search-filtered, so an edit
+        // made while a search was active could leave this page showing a stale copy.
+        var current = _library.FindById(_recipe.Id);
         if (current is not null && !ReferenceEquals(current, _recipe))
         {
             _recipe = current;
@@ -103,7 +104,7 @@ public partial class RecipeDetailPage : ContentPage
     }
 
     private async void OnCookClicked(object? sender, EventArgs e) =>
-        await Navigation.PushAsync(new FocusPage(_viewModel.DisplayRecipe));
+        await Navigation.PushAsync(new FocusPage(_viewModel.CookRecipe));
 
     private async void OnDeleteTapped(object? sender, EventArgs e)
     {

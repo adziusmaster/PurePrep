@@ -43,7 +43,6 @@ public sealed class SqlitePromoStore(IDbContextFactory<ServerDbContext> factory,
     {
         var normalized = Normalize(code);
         await using var db = await factory.CreateDbContextAsync(ct);
-        await db.Database.EnsureCreatedAsync(ct);
 
         var promo = await db.PromoCodes.AsNoTracking().FirstOrDefaultAsync(x => x.Code == normalized, ct);
         if (promo is null)
@@ -78,7 +77,6 @@ public sealed class SqlitePromoStore(IDbContextFactory<ServerDbContext> factory,
     public async Task<PromoCode> CreateAsync(string? code, int credits, int? expiresInDays, CancellationToken ct = default)
     {
         await using var db = await factory.CreateDbContextAsync(ct);
-        await db.Database.EnsureCreatedAsync(ct);
 
         var normalized = string.IsNullOrWhiteSpace(code) ? await GenerateUniqueAsync(db, ct) : Normalize(code);
         var promo = new PromoCode
@@ -97,7 +95,6 @@ public sealed class SqlitePromoStore(IDbContextFactory<ServerDbContext> factory,
     public async Task<IReadOnlyList<PromoSummary>> ListAsync(CancellationToken ct = default)
     {
         await using var db = await factory.CreateDbContextAsync(ct);
-        await db.Database.EnsureCreatedAsync(ct);
 
         var codes = await db.PromoCodes.AsNoTracking().ToListAsync(ct);
         var counts = await db.PromoRedemptions.AsNoTracking()
@@ -116,7 +113,6 @@ public sealed class SqlitePromoStore(IDbContextFactory<ServerDbContext> factory,
     {
         var normalized = Normalize(code);
         await using var db = await factory.CreateDbContextAsync(ct);
-        await db.Database.EnsureCreatedAsync(ct);
         var promo = await db.PromoCodes.FirstOrDefaultAsync(x => x.Code == normalized, ct);
         if (promo is null) return false;
         promo.Revoked = true;

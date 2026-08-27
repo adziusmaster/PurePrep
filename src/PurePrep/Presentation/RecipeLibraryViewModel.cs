@@ -368,6 +368,13 @@ public sealed class RecipeLibraryViewModel : INotifyPropertyChanged
         ApplyFilter();
     }
 
+    /// <summary>
+    /// Finds a recipe in the <b>full</b> library by id. Callers must not search <see cref="Recipes"/>
+    /// for this: that collection is the search-filtered view, so a recipe the current query excludes
+    /// would appear to have vanished.
+    /// </summary>
+    public ParsedRecipe? FindById(Guid id) => _all.FirstOrDefault(r => r.Id == id);
+
     /// <summary>Removes a saved recipe from storage and the library list.</summary>
     public async Task DeleteRecipeAsync(ParsedRecipe recipe)
     {

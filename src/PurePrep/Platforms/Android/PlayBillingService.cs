@@ -116,6 +116,45 @@ public sealed class PlayBillingService : IBillingService
             return await tcs.Task.ConfigureAwait(false);
     }
 
+    public async Task<IReadOnlyList<CreditPack>> GetPacksAsync(CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            var client = await EnsureConnectedAsync().ConfigureAwait(false);
+
+            var resolved = new List<CreditPack>(Packs.Count);
+            foreach (var pack in Packs)
+            {
+                var price = await TryGetFormattedPriceAsync(client, pack.ProductId).ConfigureAwait(false);
+                // Keep the placeholder label for any pack Play couldn't price (e.g. not live yet).
+                resolved.Add(price is null ? pack : pack with { DisplayPrice = price });
+            }
+
+            return resolved;
+        }
+        catch
+        {
+            // Offline or billing unavailable: fall back to the placeholder labels.
+            return Packs;
+        }
+    }
+
+    // Google Play's FormattedPrice is the localized, tax-inclusive string the user is actually charged,
+    // so showing it guarantees the paywall matches checkout in every country (VAT rates vary by market).
+    private static async Task<string?> TryGetFormattedPriceAsync(BillingClient client, string productId)
+    {
+        try
+        {
+            var details = await GetProductDetailsAsync(client, productId).ConfigureAwait(false);
+            var formatted = details.OneTimePurchaseOfferDetailsList?.FirstOrDefault()?.FormattedPrice;
+            return string.IsNullOrEmpty(formatted) ? null : formatted;
+        }
+        catch
+        {
+            return null;
+        }
+    }
+
     public async Task ConsumeAsync(string purchaseToken, CancellationToken cancellationToken = default)
     {
         if (string.IsNullOrWhiteSpace(purchaseToken))

@@ -1,5 +1,6 @@
 namespace PurePrep;
 
+using System.ComponentModel;
 using PurePrep.Domain;
 using PurePrep.Presentation;
 using PurePrep.Services;
@@ -15,8 +16,19 @@ public partial class MainPage : ContentPage
 		viewModel.DetailRequested += OnDetailRequested;
 		viewModel.AddManuallyRequested += OnAddManuallyRequested;
 		viewModel.SettingsRequested += OnSettingsTapped;
+		viewModel.PropertyChanged += OnViewModelPropertyChanged;
 		BindingContext = viewModel;
 	}
+
+	private void OnViewModelPropertyChanged(object? sender, PropertyChangedEventArgs e)
+	{
+		if (e.PropertyName == nameof(RecipeLibraryViewModel.IsUpgradePromptVisible))
+			SetBackgroundBlur(((RecipeLibraryViewModel)BindingContext).IsUpgradePromptVisible);
+	}
+
+	// Blurs the page content behind the upgrade sheet. Implemented per-platform (Android uses a
+	// RenderEffect); a no-op where the platform has no native blur.
+	partial void SetBackgroundBlur(bool enabled);
 
 	protected override async void OnAppearing()
 	{

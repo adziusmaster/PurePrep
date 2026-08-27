@@ -15,8 +15,20 @@ public interface IBillingService
     /// <summary>True when in-app billing is available on this platform/build.</summary>
     bool IsSupported { get; }
 
-    /// <summary>The credit packs offered for sale.</summary>
+    /// <summary>
+    /// The credit packs offered for sale, with placeholder <see cref="CreditPack.DisplayPrice"/> labels.
+    /// These are fallbacks only; prefer <see cref="GetPacksAsync"/> for the price actually shown to users.
+    /// </summary>
     IReadOnlyList<CreditPack> Packs { get; }
+
+    /// <summary>
+    /// Returns the credit packs with prices resolved from the store — Google Play's localized,
+    /// tax-inclusive <c>FormattedPrice</c>, i.e. the exact string the user is charged at checkout.
+    /// VAT rates differ per country, so this is the only way the displayed price can match checkout
+    /// everywhere. Falls back to the corresponding <see cref="Packs"/> label for any pack whose price
+    /// can't be fetched (offline, billing unavailable, product not live yet).
+    /// </summary>
+    Task<IReadOnlyList<CreditPack>> GetPacksAsync(CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Launches the platform purchase flow for <paramref name="productId"/>. Returns the purchase on

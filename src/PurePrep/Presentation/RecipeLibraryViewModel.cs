@@ -28,6 +28,7 @@ public sealed class RecipeLibraryViewModel : INotifyPropertyChanged
     private string? _errorMessage;
     // -1 = balance not yet loaded from the backend.
     private int _creditBalance = -1;
+    private IReadOnlyList<CreditPackOption> _creditPacks = [];
 
     public RecipeLibraryViewModel(
         IRecipeParser parser,
@@ -39,13 +40,7 @@ public sealed class RecipeLibraryViewModel : INotifyPropertyChanged
         _repository = repository;
         _credits = credits;
         _billing = billing;
-        CreditPacks = billing.Packs
-            .Select(p => new CreditPackOption(
-                p.ProductId,
-                p.Credits,
-                p.DisplayPrice,
-                AppResources.Format("PackOptionFormat", p.Credits, p.DisplayPrice)))
-            .ToList();
+        CreditPacks = BuildPackOptions(billing.Packs);
         Recipes = new ObservableCollection<ParsedRecipe>();
 
         ImportCommand = new Command(async () => await ImportAsync());
@@ -77,7 +72,16 @@ public sealed class RecipeLibraryViewModel : INotifyPropertyChanged
     public ObservableCollection<ParsedRecipe> Recipes { get; }
 
     /// <summary>Selectable Smart Credit packs shown in the paywall picker (empty where billing is unavailable).</summary>
-    public IReadOnlyList<CreditPackOption> CreditPacks { get; }
+    public IReadOnlyList<CreditPackOption> CreditPacks { get => _creditPacks; private set => SetField(ref _creditPacks, value); }
+
+    private static IReadOnlyList<CreditPackOption> BuildPackOptions(IReadOnlyList<CreditPack> packs) =>
+        packs
+            .Select(p => new CreditPackOption(
+                p.ProductId,
+                p.Credits,
+                p.DisplayPrice,
+                AppResources.Format("PackOptionFormat", p.Credits, p.DisplayPrice)))
+            .ToList();
 
     /// <summary>True when in-app billing works on this build, so the pack picker can be shown.</summary>
     public bool IsBillingSupported => _billing.IsSupported;
@@ -176,6 +180,27 @@ public sealed class RecipeLibraryViewModel : INotifyPropertyChanged
         OnPropertyChanged(nameof(HasRecipes));
 
         await RefreshCreditsAsync();
+        await RefreshPricesAsync();
+    }
+
+    /// <summary>
+    /// Replaces the placeholder pack prices with Google Play's real localized, tax-inclusive prices so
+    /// the paywall matches what the user is charged at checkout. No-op / best-effort where unsupported.
+    /// </summary>
+    public async Task RefreshPricesAsync()
+    {
+        if (!_billing.IsSupported)
+            return;
+
+        try
+        {
+            var packs = await _billing.GetPacksAsync();
+            CreditPacks = BuildPackOptions(packs);
+        }
+        catch
+        {
+            // Keep the placeholder labels if Play can't be queried.
+        }
     }
 
     /// <summary>Rebuilds the bound <see cref="Recipes"/> collection from the full list + search text.</summary>

@@ -9,7 +9,7 @@
 
     <!-- Outer grid lets the upgrade sheet float above the content. -->
     <Grid>
-        <Grid MaximumWidthRequest="760" HorizontalOptions="Center"
+        <Grid x:Name="ContentRoot" MaximumWidthRequest="760" HorizontalOptions="Center"
               Padding="20,12,20,0" RowSpacing="20" RowDefinitions="Auto,Auto,*">
 
             <!-- ===== Header ===== -->
@@ -254,8 +254,9 @@
         </Grid>
 
         <!-- ===== Upgrade sheet (floats above content) ===== -->
-        <!-- Dim scrim: tap outside the sheet to dismiss. -->
-        <BoxView Color="#B3000000" IsVisible="{Binding IsUpgradePromptVisible}">
+        <!-- Light scrim (tap outside the sheet to dismiss). The background is blurred natively on
+             Android via a RenderEffect; other platforms fall back to this subtle tint alone. -->
+        <BoxView Color="#26000000" IsVisible="{Binding IsUpgradePromptVisible}">
             <BoxView.GestureRecognizers>
                 <TapGestureRecognizer Command="{Binding DismissUpgradeCommand}" />
             </BoxView.GestureRecognizers>

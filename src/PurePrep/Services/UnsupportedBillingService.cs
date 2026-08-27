@@ -26,6 +26,9 @@ public sealed class UnsupportedBillingService : IBillingService
     public Task<PurchaseResult?> BuyAsync(string productId, CancellationToken cancellationToken = default)
         => Task.FromResult<PurchaseResult?>(null);
 
+    public Task<IReadOnlyList<CreditPack>> GetPacksAsync(CancellationToken cancellationToken = default)
+        => Task.FromResult(Packs);
+
     public Task ConsumeAsync(string purchaseToken, CancellationToken cancellationToken = default)
         => Task.CompletedTask;
 }

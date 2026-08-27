@@ -49,8 +49,10 @@ scrapped).
   VM state).
 - `deploy/` — `promo.sh` admin helper, prod compose files.
 
-No `.sln` file. MAUI **cannot be built on this machine** (maui-android workload
-not installed → NETSDK1147). The Web and Server projects build/run fine.
+No `.sln` file. Building the MAUI app needs the maui-android workload from the
+maintainer's user-local SDK at `~/dotnet-maui` (the global dotnet SDK lacks it).
+See **[BUILD.md](BUILD.md)** for the full verified local build + signed-AAB recipe.
+The Web and Server projects build/run with a plain `dotnet build`.
 
 ---
 

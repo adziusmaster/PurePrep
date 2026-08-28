@@ -91,6 +91,45 @@ public sealed class RecipeBackupTests
         act.Should().Throw<InvalidBackupException>();
     }
 
+    [Theory]
+    [InlineData("javascript:alert(1)")]
+    [InlineData("file:///etc/passwd")]
+    [InlineData("intent://evil#Intent;end")]
+    [InlineData("not a url")]
+    public void Import_ShouldDropASourceUrlThatIsNotAnHttpLink(string sourceUrl)
+    {
+        // Arrange — a backup file is user-editable, so a stored URL is untrusted and must not be
+        // able to smuggle a non-web scheme through to a link launcher.
+        var json = $$"""
+            {"version":1,"recipes":[
+              {"id":"11111111-1111-1111-1111-111111111111","title":"Crafted","sourceUrl":{{System.Text.Json.JsonSerializer.Serialize(sourceUrl)}},"ingredients":["a"],"steps":["Do it."],"sourceSystem":"Metric"}
+            ]}
+            """;
+
+        // Act
+        var restored = RecipeBackup.Import(json).Single();
+
+        // Assert
+        restored.SourceUrl.Should().BeNull();
+    }
+
+    [Fact]
+    public void Import_ShouldKeepAnHttpSourceUrl()
+    {
+        // Arrange
+        var json = """
+            {"version":1,"recipes":[
+              {"id":"11111111-1111-1111-1111-111111111111","title":"Good","sourceUrl":"https://example.com/pasta","ingredients":["a"],"steps":["Do it."],"sourceSystem":"Metric"}
+            ]}
+            """;
+
+        // Act
+        var restored = RecipeBackup.Import(json).Single();
+
+        // Assert
+        restored.SourceUrl.Should().Be("https://example.com/pasta");
+    }
+
     [Fact]
     public void Import_ShouldSkipEntriesWithNoTitle()
     {

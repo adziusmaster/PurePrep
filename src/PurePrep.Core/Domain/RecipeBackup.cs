@@ -72,7 +72,7 @@ public static class RecipeBackup
     {
         Id = r.Id == Guid.Empty ? Guid.NewGuid() : r.Id,
         Title = r.Title.Trim(),
-        SourceUrl = r.SourceUrl,
+        SourceUrl = SafeSourceUrl(r.SourceUrl),
         SourceSystem = Enum.TryParse<MeasurementSystem>(r.SourceSystem, out var system)
             ? system
             : MeasurementSystem.Metric,
@@ -83,6 +83,18 @@ public static class RecipeBackup
             .Select((text, index) => new RecipeStep { Order = index + 1, Instruction = text })
             .ToArray(),
     };
+
+    /// <summary>
+    /// Keeps a backup's source URL only when it is an http(s) link. A backup file is user-supplied
+    /// and may be edited by hand, so a stored URL is untrusted: dropping other schemes stops a
+    /// crafted <c>file:</c> or <c>javascript:</c> value ever reaching a link launcher.
+    /// </summary>
+    private static string? SafeSourceUrl(string? sourceUrl) =>
+        !string.IsNullOrWhiteSpace(sourceUrl)
+        && Uri.TryCreate(sourceUrl, UriKind.Absolute, out var parsed)
+        && (parsed.Scheme == Uri.UriSchemeHttp || parsed.Scheme == Uri.UriSchemeHttps)
+            ? sourceUrl
+            : null;
 
     /// <summary>Renders one recipe as plain text, for sharing into a message or note.</summary>
     public static string ToPlainText(ParsedRecipe recipe)

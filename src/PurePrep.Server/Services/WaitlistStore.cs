@@ -15,7 +15,7 @@ public sealed record WaitlistResult(WaitlistOutcome Outcome);
 
 public interface IWaitlistStore
 {
-    Task<WaitlistResult> JoinAsync(string email, string source, string? ipHash, CancellationToken ct = default);
+    Task<WaitlistResult> JoinAsync(string email, string source, string? ipHash, bool consent, CancellationToken ct = default);
 
     /// <summary>Every signup, newest first. Admin-only: this is the raw list of registered addresses.</summary>
     Task<IReadOnlyList<WaitlistSignup>> ListAsync(CancellationToken ct = default);
@@ -40,7 +40,7 @@ public sealed partial class SqliteWaitlistStore(IDbContextFactory<ServerDbContex
         return trimmed;
     }
 
-    public async Task<WaitlistResult> JoinAsync(string email, string source, string? ipHash, CancellationToken ct = default)
+    public async Task<WaitlistResult> JoinAsync(string email, string source, string? ipHash, bool consent, CancellationToken ct = default)
     {
         var normalized = Normalize(email);
         if (normalized is null)
@@ -48,12 +48,16 @@ public sealed partial class SqliteWaitlistStore(IDbContextFactory<ServerDbContex
 
         await using var db = await factory.CreateDbContextAsync(ct);
 
+        var now = DateTimeOffset.UtcNow;
         db.WaitlistSignups.Add(new WaitlistSignup
         {
             Email = normalized,
             Source = string.IsNullOrWhiteSpace(source) ? "landing" : source,
             IpHash = ipHash,
-            CreatedAt = DateTimeOffset.UtcNow,
+            CreatedAt = now,
+            // Consent is enforced at the endpoint, so a stored signup always carries the moment it
+            // was given — the record GDPR needs to show the email was solicited, not scraped.
+            ConsentedAt = consent ? now : null,
         });
 
         try

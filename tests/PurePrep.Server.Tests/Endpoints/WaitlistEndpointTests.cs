@@ -29,7 +29,7 @@ public sealed class WaitlistEndpointTests : IDisposable
     {
         var client = _factory.CreateClient();
 
-        var res = await client.PostAsJsonAsync("/api/waitlist", new { email = $"cook-{Guid.NewGuid():N}@example.com" });
+        var res = await client.PostAsJsonAsync("/api/waitlist", new { email = $"cook-{Guid.NewGuid():N}@example.com", consent = true });
 
         res.StatusCode.Should().Be(HttpStatusCode.OK);
         var body = await res.Content.ReadFromJsonAsync<WaitlistDto>();
@@ -45,8 +45,8 @@ public sealed class WaitlistEndpointTests : IDisposable
         var email = $"repeat-{Guid.NewGuid():N}@example.com";
 
         // Act
-        await client.PostAsJsonAsync("/api/waitlist", new { email });
-        var second = await client.PostAsJsonAsync("/api/waitlist", new { email });
+        await client.PostAsJsonAsync("/api/waitlist", new { email, consent = true });
+        var second = await client.PostAsJsonAsync("/api/waitlist", new { email, consent = true });
 
         // Assert
         second.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -62,7 +62,19 @@ public sealed class WaitlistEndpointTests : IDisposable
     {
         var client = _factory.CreateClient();
 
-        var res = await client.PostAsJsonAsync("/api/waitlist", new { email });
+        var res = await client.PostAsJsonAsync("/api/waitlist", new { email, consent = true });
+
+        res.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+    }
+
+    [Fact]
+    public async Task Join_WithoutConsent_ShouldBeRejected()
+    {
+        // Arrange — no ticked box means no lawful basis to email, so the address must not be stored.
+        var client = _factory.CreateClient();
+
+        var res = await client.PostAsJsonAsync("/api/waitlist",
+            new { email = $"noconsent-{Guid.NewGuid():N}@example.com", consent = false });
 
         res.StatusCode.Should().Be(HttpStatusCode.BadRequest);
     }
@@ -73,8 +85,8 @@ public sealed class WaitlistEndpointTests : IDisposable
         var client = _factory.CreateClient();
         var token = Guid.NewGuid().ToString("N");
 
-        var first = await client.PostAsJsonAsync("/api/waitlist", new { email = $"  Mixed-{token}@Example.COM " });
-        var second = await client.PostAsJsonAsync("/api/waitlist", new { email = $"mixed-{token}@example.com" });
+        var first = await client.PostAsJsonAsync("/api/waitlist", new { email = $"  Mixed-{token}@Example.COM ", consent = true });
+        var second = await client.PostAsJsonAsync("/api/waitlist", new { email = $"mixed-{token}@example.com", consent = true });
 
         first.StatusCode.Should().Be(HttpStatusCode.OK);
         second.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -106,8 +118,8 @@ public sealed class WaitlistEndpointTests : IDisposable
         var joiner = factory.CreateClient();
         var older = $"older-{Guid.NewGuid():N}@example.com";
         var newer = $"newer-{Guid.NewGuid():N}@example.com";
-        await joiner.PostAsJsonAsync("/api/waitlist", new { email = older });
-        await joiner.PostAsJsonAsync("/api/waitlist", new { email = newer });
+        await joiner.PostAsJsonAsync("/api/waitlist", new { email = older, consent = true });
+        await joiner.PostAsJsonAsync("/api/waitlist", new { email = newer, consent = true });
 
         var admin = factory.CreateClient();
         admin.DefaultRequestHeaders.Add("X-Admin-Secret", "top-secret");
@@ -120,6 +132,8 @@ public sealed class WaitlistEndpointTests : IDisposable
         var entries = await res.Content.ReadFromJsonAsync<List<WaitlistEntryDto>>();
         entries!.Select(e => e.Email).Should().ContainInOrder(newer, older);
         entries.Should().OnlyContain(e => e.Source == "landing");
+        // Consent must be captured for GDPR provability, not just accepted client-side.
+        entries.Should().OnlyContain(e => e.ConsentedAt != null);
     }
 
     private WebApplicationFactory<Program> FactoryWithAdminSecret(string secret)
@@ -132,5 +146,5 @@ public sealed class WaitlistEndpointTests : IDisposable
     }
 
     private sealed record WaitlistDto(string Status);
-    private sealed record WaitlistEntryDto(string Email, string Source, DateTimeOffset CreatedAt);
+    private sealed record WaitlistEntryDto(string Email, string Source, DateTimeOffset CreatedAt, DateTimeOffset? ConsentedAt);
 }

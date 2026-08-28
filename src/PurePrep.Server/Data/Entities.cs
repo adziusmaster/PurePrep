@@ -89,4 +89,9 @@ public sealed class WaitlistSignup
     /// <summary>Salted, non-reversible hash of the client IP, or null when the origin is unknown.</summary>
     public string? IpHash { get; set; }
     public DateTimeOffset CreatedAt { get; set; }
+    /// <summary>
+    /// When the person ticked the "email me about testing/launch" consent box. GDPR requires consent
+    /// to be demonstrable, so we record the moment it was given rather than a bare boolean.
+    /// </summary>
+    public DateTimeOffset? ConsentedAt { get; set; }
 }

@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>PurePrep — the recipe, without the noise</title>
-<meta name="description" content="PurePrep turns any recipe link into just the title, ingredients and steps. No ads, no life stories, no pop-ups. Join the open beta.">
+<meta name="description" content="PurePrep turns any recipe link into just the title, ingredients and steps. No ads, no life stories, no pop-ups. Now in closed testing — join the list to hear when it opens.">
 <meta name="color-scheme" content="light">
 <meta name="theme-color" content="#F7F4EC">
 <link rel="canonical" href="https://pureprep.lechdigital.nl/">
@@ -13,14 +13,14 @@
 <meta property="og:site_name" content="PurePrep">
 <meta property="og:url" content="https://pureprep.lechdigital.nl/">
 <meta property="og:title" content="PurePrep — the recipe, without the noise">
-<meta property="og:description" content="Paste a link. Keep the recipe. Lose the ads, the pop-ups and the ten-paragraph backstory.">
+<meta property="og:description" content="Paste a link. Keep the recipe. Lose the ads, the pop-ups and the ten-paragraph backstory. Now in closed testing.">
 <meta property="og:image" content="https://pureprep.lechdigital.nl/before-after.png">
 
 <style>
 :root{
   --cream:#F7F4EC; --paper:#FFFFFF; --charcoal:#2B2B28; --ink-soft:#4A4C45;
   --muted:#8A8F82; --sage:#7C9473; --forest:#3E5641; --line:#E3DECF; --sage-wash:#EEF1E7;
-  --radius:16px; --wrap:1120px;
+  --radius:16px; --wrap:1120px; --gutter:32px;
   --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
 }
 *{box-sizing:border-box;margin:0;padding:0}
@@ -28,7 +28,7 @@ html{scroll-behavior:smooth}
 body{background:var(--cream);color:var(--charcoal);font-family:var(--sans);line-height:1.6;-webkit-font-smoothing:antialiased}
 a{color:var(--forest)}
 img{max-width:100%;height:auto;display:block}
-.wrap{max-width:var(--wrap);margin:0 auto;padding:0 22px}
+.wrap{max-width:var(--wrap);margin:0 auto;padding:0 var(--gutter);width:100%}
 
 /* Header */
 .masthead{display:flex;align-items:center;justify-content:space-between;padding:22px 0}
@@ -38,7 +38,12 @@ img{max-width:100%;height:auto;display:block}
 .nav-link:hover{color:var(--forest)}
 
 /* Hero */
-.hero{display:grid;grid-template-columns:1fr 1fr;gap:56px;align-items:center;padding:48px 0 64px}
+.hero{display:grid;grid-template-columns:1fr 1fr;gap:56px;align-items:center;padding:56px 0 72px}
+.status-pill{display:inline-flex;align-items:center;gap:8px;padding:7px 14px;border-radius:999px;
+  background:var(--sage-wash);border:1px solid var(--line);font-size:12.5px;font-weight:700;
+  letter-spacing:.04em;color:var(--forest);margin-bottom:20px}
+.status-pill .dot{width:8px;height:8px;border-radius:50%;background:var(--sage);
+  box-shadow:0 0 0 4px rgba(124,148,115,.22)}
 .eyebrow{font-size:12px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--sage);margin-bottom:16px}
 h1{font-size:clamp(34px,5vw,54px);line-height:1.05;letter-spacing:-.02em;color:var(--charcoal);font-weight:800}
 h1 em{font-style:normal;color:var(--forest)}
@@ -57,7 +62,13 @@ h1 em{font-style:normal;color:var(--forest)}
 .field button:hover{background:#33482f}
 .field button:active{transform:translateY(1px)}
 .field button:disabled{opacity:.6;cursor:default}
-.form-note{margin-top:12px;font-size:13px;color:var(--muted)}
+.form-note{margin-top:14px;font-size:13px;color:var(--muted);line-height:1.5}
+/* Consent */
+.consent{display:flex;gap:11px;align-items:flex-start;margin-top:16px}
+.consent input[type=checkbox]{flex:0 0 auto;width:19px;height:19px;margin-top:2px;
+  accent-color:var(--forest);cursor:pointer}
+.consent label{font-size:13px;color:var(--ink-soft);line-height:1.5;cursor:pointer}
+.consent a{color:var(--forest);text-decoration:underline;text-underline-offset:2px}
 .form-msg{margin-top:14px;font-size:15px;font-weight:600;min-height:1.2em}
 .form-msg.ok{color:var(--forest)}
 .form-msg.err{color:#b5563f}
@@ -66,7 +77,7 @@ h1 em{font-style:normal;color:var(--forest)}
 .hero-visual{border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;background:var(--paper);box-shadow:0 24px 60px -34px rgba(62,86,65,.5)}
 
 /* Features */
-.features{padding:16px 0 72px}
+.features{padding:8px 0 84px}
 .features h2{font-size:clamp(24px,3vw,32px);letter-spacing:-.01em;margin-bottom:8px}
 .features .sub{color:var(--muted);margin-bottom:34px}
 .grid{display:grid;grid-template-columns:repeat(4,1fr);gap:18px}
@@ -84,11 +95,12 @@ h1 em{font-style:normal;color:var(--forest)}
 .footer-links{display:flex;gap:20px}
 
 @media(max-width:860px){
-  .hero{grid-template-columns:1fr;gap:36px;padding:24px 0 48px}
+  .hero{grid-template-columns:1fr;gap:36px;padding:32px 0 56px}
   .hero-visual{order:-1}
   .grid{grid-template-columns:repeat(2,1fr)}
 }
 @media(max-width:520px){
+  :root{--gutter:20px}
   .grid{grid-template-columns:1fr}
   .field button{flex:1 1 100%}
 }
@@ -104,7 +116,7 @@ h1 em{font-style:normal;color:var(--forest)}
 <main>
   <section class="wrap hero">
     <div class="hero-copy">
-      <p class="eyebrow">Anti-bloatware cooking</p>
+      <span class="status-pill"><span class="dot"></span>Now in closed testing</span>
       <h1>The recipe.<br><em>Without the noise.</em></h1>
       <p class="lede">
         Paste any recipe link and PurePrep keeps only what matters — the title,
@@ -115,9 +127,20 @@ h1 em{font-style:normal;color:var(--forest)}
         <div class="field">
           <input id="email" name="email" type="email" inputmode="email" autocomplete="email"
                  placeholder="you@email.com" aria-label="Email address" required>
-          <button type="submit" id="submit">Join Open Beta</button>
+          <button type="submit" id="submit">Join the list</button>
         </div>
-        <p class="form-note">Free during the open beta. One email when it opens — nothing else.</p>
+
+        <div class="consent">
+          <input type="checkbox" id="consent" name="consent" required>
+          <label for="consent">
+            Email me <strong>once</strong> when PurePrep opens to everyone. One message about
+            availability — no marketing, no sharing your address. See our
+            <a href="/privacy">Privacy Policy</a>.
+          </label>
+        </div>
+
+        <p class="form-note">PurePrep is in closed testing today. Leave your email and we'll let you
+          know the moment it's open to everyone — then you can delete it, no strings.</p>
         <p class="form-msg" id="msg" role="status" aria-live="polite"></p>
       </form>
     </div>
@@ -169,6 +192,7 @@ h1 em{font-style:normal;color:var(--forest)}
 (function () {
   var form = document.getElementById('waitlist');
   var email = document.getElementById('email');
+  var consent = document.getElementById('consent');
   var btn = document.getElementById('submit');
   var msg = document.getElementById('msg');
 
@@ -185,6 +209,11 @@ h1 em{font-style:normal;color:var(--forest)}
       email.focus();
       return;
     }
+    if (!consent.checked) {
+      show('Please tick the box so we can email you when it opens.', 'err');
+      consent.focus();
+      return;
+    }
     btn.disabled = true;
     var original = btn.textContent;
     btn.textContent = 'Joining…';
@@ -192,11 +221,11 @@ h1 em{font-style:normal;color:var(--forest)}
       var res = await fetch('/api/waitlist', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: value, source: 'landing' })
+        body: JSON.stringify({ email: value, source: 'landing', consent: true })
       });
       if (res.ok) {
         form.reset();
-        show("You're on the list. We'll email you when the beta opens.", 'ok');
+        show("You're on the list. We'll email you once — when PurePrep opens to everyone.", 'ok');
       } else if (res.status === 429) {
         show('A few too many tries — please wait a minute and retry.', 'err');
       } else {

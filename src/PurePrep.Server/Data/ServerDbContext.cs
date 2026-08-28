@@ -54,6 +54,9 @@ public sealed class ServerDbContext(DbContextOptions<ServerDbContext> options) :
             e.Property(x => x.CreatedAt).HasConversion(
                 v => v.UtcTicks,
                 v => new DateTimeOffset(v, TimeSpan.Zero));
+            e.Property(x => x.ConsentedAt).HasConversion(
+                v => v.HasValue ? v.Value.UtcTicks : (long?)null,
+                v => v.HasValue ? new DateTimeOffset(v.Value, TimeSpan.Zero) : (DateTimeOffset?)null);
         });
     }
 }

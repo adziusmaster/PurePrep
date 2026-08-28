@@ -63,13 +63,17 @@ public static class SchemaInitializer
                 "Email" TEXT NOT NULL CONSTRAINT "PK_WaitlistSignups" PRIMARY KEY,
                 "Source" TEXT NOT NULL,
                 "IpHash" TEXT NULL,
-                "CreatedAt" INTEGER NOT NULL
+                "CreatedAt" INTEGER NOT NULL,
+                "ConsentedAt" INTEGER NULL
             );
             """, ct);
 
         // UsageLogs predates the switch from DeviceId to a salted DeviceHash.
         await AddColumnIfMissingAsync(db, "UsageLogs", "DeviceHash", "TEXT NOT NULL DEFAULT ''", ct);
         await DropColumnIfPresentAsync(db, "UsageLogs", "DeviceId", ct);
+
+        // ConsentedAt was added after the first signups: backfill the column on existing databases.
+        await AddColumnIfMissingAsync(db, "WaitlistSignups", "ConsentedAt", "INTEGER NULL", ct);
     }
 
     private static async Task<bool> HasColumnAsync(ServerDbContext db, string table, string column, CancellationToken ct)

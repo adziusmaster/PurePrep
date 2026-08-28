@@ -19,8 +19,14 @@ public static class WaitlistEndpoint
         if (request is null || string.IsNullOrWhiteSpace(request.Email))
             return Results.BadRequest(new { error = "An email address is required." });
 
+        // Consent is mandatory: without it we have no lawful basis to email the address, so we do not
+        // store it at all. The landing form gates the button on the same checkbox; this is the guard
+        // for anything calling the endpoint directly.
+        if (!request.Consent)
+            return Results.BadRequest(new { error = "Please tick the box to let us email you." });
+
         var ipHash = ipHasher.Hash(http.Connection.RemoteIpAddress?.ToString());
-        var result = await waitlist.JoinAsync(request.Email, request.Source ?? "landing", ipHash, ct);
+        var result = await waitlist.JoinAsync(request.Email, request.Source ?? "landing", ipHash, request.Consent, ct);
 
         return result.Outcome switch
         {
@@ -40,6 +46,6 @@ public static class WaitlistEndpoint
     public static async Task<IResult> List(IWaitlistStore waitlist, CancellationToken ct)
     {
         var signups = await waitlist.ListAsync(ct);
-        return Results.Ok(signups.Select(s => new WaitlistEntryResponse(s.Email, s.Source, s.CreatedAt)));
+        return Results.Ok(signups.Select(s => new WaitlistEntryResponse(s.Email, s.Source, s.CreatedAt, s.ConsentedAt)));
     }
 }

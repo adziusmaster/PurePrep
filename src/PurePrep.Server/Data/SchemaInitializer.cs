@@ -57,6 +57,16 @@ public static class SchemaInitializer
             CREATE INDEX IF NOT EXISTS "IX_DeviceSeeds_IpHash_SeededAt" ON "DeviceSeeds" ("IpHash", "SeededAt");
             """, ct);
 
+        await db.Database.ExecuteSqlRawAsync(
+            """
+            CREATE TABLE IF NOT EXISTS "WaitlistSignups" (
+                "Email" TEXT NOT NULL CONSTRAINT "PK_WaitlistSignups" PRIMARY KEY,
+                "Source" TEXT NOT NULL,
+                "IpHash" TEXT NULL,
+                "CreatedAt" INTEGER NOT NULL
+            );
+            """, ct);
+
         // UsageLogs predates the switch from DeviceId to a salted DeviceHash.
         await AddColumnIfMissingAsync(db, "UsageLogs", "DeviceHash", "TEXT NOT NULL DEFAULT ''", ct);
         await DropColumnIfPresentAsync(db, "UsageLogs", "DeviceId", ct);

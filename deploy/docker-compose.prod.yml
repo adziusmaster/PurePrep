@@ -2,8 +2,14 @@
 #
 # Deployed alongside Coldstart on the same Hetzner host. It reuses Coldstart's
 # Caddy (the `coldstart_default` network) for automatic HTTPS, so this stack only
-# needs to run the app container; TLS + routing are handled by that shared Caddy
-# via a reverse_proxy block for api.pureprep.lechdigital.nl.
+# needs to run the app container; TLS + routing are handled by that shared Caddy.
+#
+# This one container now serves two hostnames, both reverse-proxied to it by Caddy:
+#   • api.pureprep.lechdigital.nl  → the JSON API (parse, credits, billing, promo, waitlist)
+#   • pureprep.lechdigital.nl      → the marketing landing page + /privacy (static wwwroot),
+#                                     plus POST /api/waitlist (same-origin, so no CORS needed)
+# Add the second hostname to Coldstart's Caddyfile as another reverse_proxy block
+# pointing at pureprep:8080 (same upstream as the api block).
 #
 # Deploy (run from /opt/pureprep on the server):
 #   docker compose --env-file .env -f deploy/docker-compose.prod.yml up -d --build

@@ -1,0 +1,216 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PurePrep — the recipe, without the noise</title>
+<meta name="description" content="PurePrep turns any recipe link into just the title, ingredients and steps. No ads, no life stories, no pop-ups. Join the open beta.">
+<meta name="color-scheme" content="light">
+<meta name="theme-color" content="#F7F4EC">
+<link rel="canonical" href="https://pureprep.lechdigital.nl/">
+
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="PurePrep">
+<meta property="og:url" content="https://pureprep.lechdigital.nl/">
+<meta property="og:title" content="PurePrep — the recipe, without the noise">
+<meta property="og:description" content="Paste a link. Keep the recipe. Lose the ads, the pop-ups and the ten-paragraph backstory.">
+<meta property="og:image" content="https://pureprep.lechdigital.nl/before-after.png">
+
+<style>
+:root{
+  --cream:#F7F4EC; --paper:#FFFFFF; --charcoal:#2B2B28; --ink-soft:#4A4C45;
+  --muted:#8A8F82; --sage:#7C9473; --forest:#3E5641; --line:#E3DECF; --sage-wash:#EEF1E7;
+  --radius:16px; --wrap:1120px;
+  --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:var(--cream);color:var(--charcoal);font-family:var(--sans);line-height:1.6;-webkit-font-smoothing:antialiased}
+a{color:var(--forest)}
+img{max-width:100%;height:auto;display:block}
+.wrap{max-width:var(--wrap);margin:0 auto;padding:0 22px}
+
+/* Header */
+.masthead{display:flex;align-items:center;justify-content:space-between;padding:22px 0}
+.brand{font-weight:800;letter-spacing:.18em;font-size:15px;color:var(--charcoal);text-decoration:none}
+.brand span{color:var(--sage)}
+.nav-link{font-size:14px;color:var(--muted);text-decoration:none;letter-spacing:.02em}
+.nav-link:hover{color:var(--forest)}
+
+/* Hero */
+.hero{display:grid;grid-template-columns:1fr 1fr;gap:56px;align-items:center;padding:48px 0 64px}
+.eyebrow{font-size:12px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--sage);margin-bottom:16px}
+h1{font-size:clamp(34px,5vw,54px);line-height:1.05;letter-spacing:-.02em;color:var(--charcoal);font-weight:800}
+h1 em{font-style:normal;color:var(--forest)}
+.lede{margin-top:20px;font-size:clamp(16px,2vw,19px);color:var(--ink-soft);max-width:46ch}
+
+/* Form */
+.waitlist{margin-top:32px;max-width:460px}
+.field{display:flex;gap:10px;flex-wrap:wrap}
+.field input[type=email]{
+  flex:1 1 220px;min-width:0;padding:15px 16px;font-size:16px;font-family:inherit;color:var(--charcoal);
+  background:var(--paper);border:1.5px solid var(--line);border-radius:12px;outline:none;transition:border-color .15s}
+.field input[type=email]:focus{border-color:var(--sage)}
+.field button{
+  flex:0 0 auto;padding:15px 22px;font-size:16px;font-weight:700;font-family:inherit;color:#fff;cursor:pointer;
+  background:var(--forest);border:none;border-radius:12px;transition:background .15s,transform .05s}
+.field button:hover{background:#33482f}
+.field button:active{transform:translateY(1px)}
+.field button:disabled{opacity:.6;cursor:default}
+.form-note{margin-top:12px;font-size:13px;color:var(--muted)}
+.form-msg{margin-top:14px;font-size:15px;font-weight:600;min-height:1.2em}
+.form-msg.ok{color:var(--forest)}
+.form-msg.err{color:#b5563f}
+
+/* Hero visual */
+.hero-visual{border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;background:var(--paper);box-shadow:0 24px 60px -34px rgba(62,86,65,.5)}
+
+/* Features */
+.features{padding:16px 0 72px}
+.features h2{font-size:clamp(24px,3vw,32px);letter-spacing:-.01em;margin-bottom:8px}
+.features .sub{color:var(--muted);margin-bottom:34px}
+.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:18px}
+.card{background:var(--paper);border:1px solid var(--line);border-radius:var(--radius);padding:26px 22px}
+.card .ico{width:42px;height:42px;border-radius:11px;background:var(--sage-wash);display:flex;align-items:center;justify-content:center;margin-bottom:16px}
+.card .ico svg{width:22px;height:22px;stroke:var(--forest);fill:none;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+.card h3{font-size:17px;margin-bottom:6px;color:var(--charcoal)}
+.card p{font-size:14.5px;color:var(--ink-soft)}
+
+/* Footer */
+.site-footer{border-top:1px solid var(--line);padding:26px 0 40px}
+.footer-inner{display:flex;flex-wrap:wrap;gap:12px 22px;align-items:center;justify-content:space-between;font-size:13.5px;color:var(--muted)}
+.footer-inner a{color:var(--muted);text-decoration:none}
+.footer-inner a:hover{color:var(--forest)}
+.footer-links{display:flex;gap:20px}
+
+@media(max-width:860px){
+  .hero{grid-template-columns:1fr;gap:36px;padding:24px 0 48px}
+  .hero-visual{order:-1}
+  .grid{grid-template-columns:repeat(2,1fr)}
+}
+@media(max-width:520px){
+  .grid{grid-template-columns:1fr}
+  .field button{flex:1 1 100%}
+}
+</style>
+</head>
+<body>
+
+<header class="wrap masthead">
+  <a class="brand" href="/">PURE<span>PREP</span></a>
+  <a class="nav-link" href="/privacy">Terms &amp; Privacy</a>
+</header>
+
+<main>
+  <section class="wrap hero">
+    <div class="hero-copy">
+      <p class="eyebrow">Anti-bloatware cooking</p>
+      <h1>The recipe.<br><em>Without the noise.</em></h1>
+      <p class="lede">
+        Paste any recipe link and PurePrep keeps only what matters — the title,
+        the ingredients and the steps. No ads, no ten-paragraph backstory, no pop-ups.
+      </p>
+
+      <form class="waitlist" id="waitlist" novalidate>
+        <div class="field">
+          <input id="email" name="email" type="email" inputmode="email" autocomplete="email"
+                 placeholder="you@email.com" aria-label="Email address" required>
+          <button type="submit" id="submit">Join Open Beta</button>
+        </div>
+        <p class="form-note">Free during the open beta. One email when it opens — nothing else.</p>
+        <p class="form-msg" id="msg" role="status" aria-live="polite"></p>
+      </form>
+    </div>
+
+    <div class="hero-visual">
+      <img src="/before-after.png" alt="PurePrep extraction comparison: a cluttered recipe page on the left, a clean title, ingredients and steps on the right" width="1600" height="1000">
+    </div>
+  </section>
+
+  <section class="wrap features">
+    <h2>Quiet by design</h2>
+    <p class="sub">Everything you need to cook, and nothing you don't.</p>
+    <div class="grid">
+      <div class="card">
+        <div class="ico"><svg viewBox="0 0 24 24"><path d="M12 3v2M12 19v2M5 12H3M21 12h-2M6 6l1.5 1.5M18 18l-1.5-1.5"/><circle cx="12" cy="12" r="4"/></svg></div>
+        <h3>Focus Mode</h3>
+        <p>The screen stays awake while you cook, so nothing dims mid-step with wet hands.</p>
+      </div>
+      <div class="card">
+        <div class="ico"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M5 5l14 14"/></svg></div>
+        <h3>Zero ads</h3>
+        <p>No banners, no pop-ups, no cookie walls, no tracking. Ever.</p>
+      </div>
+      <div class="card">
+        <div class="ico"><svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16M8 4v16"/></svg></div>
+        <h3>Instant scaling</h3>
+        <p>Change the servings or flip units and every quantity re-scales on the spot.</p>
+      </div>
+      <div class="card">
+        <div class="ico"><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg></div>
+        <h3>Yours offline</h3>
+        <p>Saved recipes live on your device. No account, works in aeroplane mode.</p>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap footer-inner">
+    <span>&copy; 2026 PurePrep</span>
+    <div class="footer-links">
+      <a href="https://lechdigital.nl">lechdigital.nl</a>
+      <a href="/privacy">Terms &amp; Privacy</a>
+    </div>
+  </div>
+</footer>
+
+<script>
+(function () {
+  var form = document.getElementById('waitlist');
+  var email = document.getElementById('email');
+  var btn = document.getElementById('submit');
+  var msg = document.getElementById('msg');
+
+  function show(text, kind) {
+    msg.textContent = text;
+    msg.className = 'form-msg ' + kind;
+  }
+
+  form.addEventListener('submit', async function (e) {
+    e.preventDefault();
+    var value = email.value.trim();
+    if (!value || value.indexOf('@') < 1) {
+      show('Please enter a valid email address.', 'err');
+      email.focus();
+      return;
+    }
+    btn.disabled = true;
+    var original = btn.textContent;
+    btn.textContent = 'Joining…';
+    try {
+      var res = await fetch('/api/waitlist', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: value, source: 'landing' })
+      });
+      if (res.ok) {
+        form.reset();
+        show("You're on the list. We'll email you when the beta opens.", 'ok');
+      } else if (res.status === 429) {
+        show('A few too many tries — please wait a minute and retry.', 'err');
+      } else {
+        var data = await res.json().catch(function () { return {}; });
+        show(data.error || 'Something went wrong. Please try again.', 'err');
+      }
+    } catch (err) {
+      show('Network error. Please check your connection and try again.', 'err');
+    } finally {
+      btn.disabled = false;
+      btn.textContent = original;
+    }
+  });
+})();
+</script>
+</body>
+</html>

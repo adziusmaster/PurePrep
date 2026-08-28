@@ -44,4 +44,4 @@ autoplay videos and endless life stories.
 
 Free to use for up to 10 saved recipes. Import more by link with Smart Credits.
 
-Privacy policy: https://lechdigital.nl/PurePrep/
+Privacy policy: https://pureprep.lechdigital.nl/privacy

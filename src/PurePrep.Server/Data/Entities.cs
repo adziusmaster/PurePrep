@@ -73,3 +73,20 @@ public sealed class DeviceSeed
     public string? IpHash { get; set; }
     public DateTimeOffset SeededAt { get; set; }
 }
+
+/// <summary>
+/// One email address on the open-beta waitlist, captured from the public landing page. The
+/// normalized address is the primary key, so a second submission of the same address is a no-op
+/// rather than a duplicate row. The salted <see cref="IpHash"/> supports light abuse triage without
+/// retaining raw IP addresses, mirroring the rest of the schema.
+/// </summary>
+public sealed class WaitlistSignup
+{
+    /// <summary>Trimmed, lower-cased email address. Primary key.</summary>
+    public string Email { get; set; } = string.Empty;
+    /// <summary>Where the signup came from, e.g. "landing". Free-form, for future segmentation.</summary>
+    public string Source { get; set; } = string.Empty;
+    /// <summary>Salted, non-reversible hash of the client IP, or null when the origin is unknown.</summary>
+    public string? IpHash { get; set; }
+    public DateTimeOffset CreatedAt { get; set; }
+}

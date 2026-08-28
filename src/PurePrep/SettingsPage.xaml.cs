@@ -9,7 +9,7 @@ namespace PurePrep;
 
 public partial class SettingsPage : ContentPage
 {
-    private const string PrivacyUrl = "https://lechdigital.nl/PurePrep/";
+    private const string PrivacyUrl = "https://pureprep.lechdigital.nl/privacy";
     private readonly ThemeService _theme;
     private readonly ISmartCreditsClient? _credits;
     private readonly IBillingService? _billing;

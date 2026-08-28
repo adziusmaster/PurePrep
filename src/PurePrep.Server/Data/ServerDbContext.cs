@@ -10,6 +10,7 @@ public sealed class ServerDbContext(DbContextOptions<ServerDbContext> options) :
     public DbSet<PromoCode> PromoCodes => Set<PromoCode>();
     public DbSet<PromoRedemption> PromoRedemptions => Set<PromoRedemption>();
     public DbSet<DeviceSeed> DeviceSeeds => Set<DeviceSeed>();
+    public DbSet<WaitlistSignup> WaitlistSignups => Set<WaitlistSignup>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -44,6 +45,15 @@ public sealed class ServerDbContext(DbContextOptions<ServerDbContext> options) :
                 v => new DateTimeOffset(v, TimeSpan.Zero));
             // The cap query is always "how many devices did this origin seed recently".
             e.HasIndex(x => new { x.IpHash, x.SeededAt });
+        });
+
+        modelBuilder.Entity<WaitlistSignup>(e =>
+        {
+            e.HasKey(x => x.Email);
+            // Same UTC-ticks trick as DeviceSeed: keeps any date-range admin query translatable.
+            e.Property(x => x.CreatedAt).HasConversion(
+                v => v.UtcTicks,
+                v => new DateTimeOffset(v, TimeSpan.Zero));
         });
     }
 }

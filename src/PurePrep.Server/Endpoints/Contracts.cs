@@ -30,3 +30,7 @@ public sealed record PromoResponse(
 
 // --- Dev grant ---
 public sealed record GrantRequest(Guid DeviceId, int Amount);
+
+// --- Waitlist ---
+public sealed record WaitlistRequest(string Email, string? Source = null);
+public sealed record WaitlistResponse(string status);

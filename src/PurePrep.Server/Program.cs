@@ -19,6 +19,7 @@ builder.Services.AddDbContextFactory<ServerDbContext>(o => o.UseSqlite(connectio
 
 builder.Services.AddScoped<ICreditStore, SqliteCreditStore>();
 builder.Services.AddScoped<IPromoStore, SqlitePromoStore>();
+builder.Services.AddScoped<IWaitlistStore, SqliteWaitlistStore>();
 builder.Services.AddSingleton<IUrlGuard, UrlGuard>();
 
 // ---- Origin hashing -------------------------------------------------------------------------
@@ -82,6 +83,9 @@ builder.Services.AddRateLimiter(options =>
     options.AddPolicy(RateLimitPolicies.Promo, PerClient(limit: 5, window: TimeSpan.FromMinutes(5)));
     options.AddPolicy(RateLimitPolicies.Billing, PerClient(limit: 10, window: TimeSpan.FromMinutes(1)));
     options.AddPolicy(RateLimitPolicies.Credits, PerClient(limit: 30, window: TimeSpan.FromMinutes(1)));
+    // Waitlist is an unauthenticated public write, so it gets a tight per-origin budget to blunt
+    // scripted list-stuffing while leaving ample room for a human who mistypes their address.
+    options.AddPolicy(RateLimitPolicies.Waitlist, PerClient(limit: 8, window: TimeSpan.FromMinutes(5)));
 
     static Func<HttpContext, RateLimitPartition<string>> PerClient(int limit, TimeSpan window) =>
         context => RateLimitPartition.GetFixedWindowLimiter(
@@ -109,6 +113,15 @@ forwarded.KnownNetworks.Add(new IPNetwork(System.Net.IPAddress.Parse("172.16.0.0
 forwarded.KnownNetworks.Add(new IPNetwork(System.Net.IPAddress.Parse("192.168.0.0"), 16));
 app.UseForwardedHeaders(forwarded);
 
+// The public landing page and its privacy policy are static files served straight from wwwroot on
+// the marketing hostname (pureprep.lechdigital.nl), which Caddy routes to this same container. Doing
+// so keeps the waitlist form same-origin with /api/waitlist, so no CORS handling is required.
+app.UseDefaultFiles();
+app.UseStaticFiles();
+// Friendly extensionless URL for the privacy policy (…/privacy rather than …/privacy.html).
+app.MapGet("/privacy", () => Results.File(
+    Path.Combine(app.Environment.WebRootPath ?? "wwwroot", "privacy.html"), "text/html; charset=utf-8"));
+
 app.UseRateLimiter();
 
 app.MapPost("/api/ai/parse", ParseEndpoint.Parse).RequireRateLimiting(RateLimitPolicies.Parse);
@@ -124,8 +137,9 @@ app.MapPost("/api/credits/ensure", CreditsEndpoint.Ensure)
 
 app.MapPost("/api/dev/grant", DevEndpoint.Grant).AddEndpointFilter(DevEndpoint.SecretFilter);
 
-app.MapPost("/api/promo/redeem", PromoEndpoint.Redeem).RequireRateLimiting(RateLimitPolicies.Promo);
-app.MapPost("/api/admin/promo", PromoEndpoint.Create).AddEndpointFilter(PromoEndpoint.SecretFilter);
+app.MapPost("/api/waitlist", WaitlistEndpoint.Join).RequireRateLimiting(RateLimitPolicies.Waitlist);
+
+app.MapPost("/api/promo/redeem", PromoEndpoint.Redeem).RequireRateLimiting(RateLimitPolicies.Promo);app.MapPost("/api/admin/promo", PromoEndpoint.Create).AddEndpointFilter(PromoEndpoint.SecretFilter);
 app.MapGet("/api/admin/promo", PromoEndpoint.List).AddEndpointFilter(PromoEndpoint.SecretFilter);
 app.MapPost("/api/admin/promo/{code}/revoke", PromoEndpoint.Revoke).AddEndpointFilter(PromoEndpoint.SecretFilter);
 
@@ -159,6 +173,7 @@ public static class RateLimitPolicies
     public const string Promo = "promo";
     public const string Billing = "billing";
     public const string Credits = "credits";
+    public const string Waitlist = "waitlist";
 }
 
 /// <summary>Exposed so the integration tests can host the real application.</summary>

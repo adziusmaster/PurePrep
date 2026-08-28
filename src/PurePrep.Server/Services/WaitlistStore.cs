@@ -16,6 +16,9 @@ public sealed record WaitlistResult(WaitlistOutcome Outcome);
 public interface IWaitlistStore
 {
     Task<WaitlistResult> JoinAsync(string email, string source, string? ipHash, CancellationToken ct = default);
+
+    /// <summary>Every signup, newest first. Admin-only: this is the raw list of registered addresses.</summary>
+    Task<IReadOnlyList<WaitlistSignup>> ListAsync(CancellationToken ct = default);
 }
 
 public sealed partial class SqliteWaitlistStore(IDbContextFactory<ServerDbContext> factory) : IWaitlistStore
@@ -64,5 +67,14 @@ public sealed partial class SqliteWaitlistStore(IDbContextFactory<ServerDbContex
             // the caller's point of view: the address is on the list either way.
             return new WaitlistResult(WaitlistOutcome.AlreadyJoined);
         }
+    }
+
+    public async Task<IReadOnlyList<WaitlistSignup>> ListAsync(CancellationToken ct = default)
+    {
+        await using var db = await factory.CreateDbContextAsync(ct);
+        return await db.WaitlistSignups
+            .AsNoTracking()
+            .OrderByDescending(s => s.CreatedAt)
+            .ToListAsync(ct);
     }
 }

@@ -34,3 +34,4 @@ public sealed record GrantRequest(Guid DeviceId, int Amount);
 // --- Waitlist ---
 public sealed record WaitlistRequest(string Email, string? Source = null);
 public sealed record WaitlistResponse(string status);
+public sealed record WaitlistEntryResponse(string Email, string Source, DateTimeOffset CreatedAt);

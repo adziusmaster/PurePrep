@@ -138,6 +138,8 @@ app.MapPost("/api/credits/ensure", CreditsEndpoint.Ensure)
 app.MapPost("/api/dev/grant", DevEndpoint.Grant).AddEndpointFilter(DevEndpoint.SecretFilter);
 
 app.MapPost("/api/waitlist", WaitlistEndpoint.Join).RequireRateLimiting(RateLimitPolicies.Waitlist);
+// Admin-only readout of registered addresses, behind the same shared-secret gate as the promo admin routes.
+app.MapGet("/api/admin/waitlist", WaitlistEndpoint.List).AddEndpointFilter(PromoEndpoint.SecretFilter);
 
 app.MapPost("/api/promo/redeem", PromoEndpoint.Redeem).RequireRateLimiting(RateLimitPolicies.Promo);app.MapPost("/api/admin/promo", PromoEndpoint.Create).AddEndpointFilter(PromoEndpoint.SecretFilter);
 app.MapGet("/api/admin/promo", PromoEndpoint.List).AddEndpointFilter(PromoEndpoint.SecretFilter);

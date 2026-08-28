@@ -31,4 +31,15 @@ public static class WaitlistEndpoint
             _ => Results.BadRequest(new { error = "That doesn't look like a valid email address." }),
         };
     }
+
+    /// <summary>
+    /// Admin-only: returns every waitlist signup, newest first. Gated by the same shared-secret filter
+    /// as the promo admin endpoints, so an unauthenticated caller cannot enumerate registered addresses.
+    /// The salted IP hash is deliberately not returned — it exists only for abuse containment.
+    /// </summary>
+    public static async Task<IResult> List(IWaitlistStore waitlist, CancellationToken ct)
+    {
+        var signups = await waitlist.ListAsync(ct);
+        return Results.Ok(signups.Select(s => new WaitlistEntryResponse(s.Email, s.Source, s.CreatedAt)));
+    }
 }

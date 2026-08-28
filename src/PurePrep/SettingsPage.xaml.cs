@@ -1,4 +1,6 @@
+using Microsoft.Extensions.DependencyInjection;
 using PurePrep.Application;
+using PurePrep.Domain;
 using PurePrep.Localization;
 using PurePrep.Services;
 using MauiApp = Microsoft.Maui.Controls.Application;
@@ -240,6 +242,82 @@ public partial class SettingsPage : ContentPage
     }
 
     private void OnBackTapped(object? sender, EventArgs e) => _ = Navigation.PopAsync();
+
+    private async void OnExportTapped(object? sender, EventArgs e)
+    {
+        var repository = IPlatformApplication.Current?.Services.GetService<IRecipeRepository>();
+        if (repository is null)
+            return;
+
+        var recipes = await repository.GetAllAsync();
+        if (recipes.Count == 0)
+        {
+            await DisplayAlert(AppResources.Get("ExportRecipes"),
+                AppResources.Get("NoRecipesToExport"), AppResources.Get("Ok"));
+            return;
+        }
+
+        // Written to the cache directory and handed straight to the share sheet: the user chooses
+        // where it lands (Drive, email, Files), so the app needs no storage permission.
+        var path = Path.Combine(FileSystem.CacheDirectory,
+            $"pureprep-recipes-{DateTime.Now:yyyy-MM-dd}.json");
+        await File.WriteAllTextAsync(path, RecipeBackup.Export(recipes));
+
+        await Share.Default.RequestAsync(new ShareFileRequest
+        {
+            Title = AppResources.Get("ExportRecipes"),
+            File = new ShareFile(path),
+        });
+    }
+
+    private async void OnImportTapped(object? sender, EventArgs e)
+    {
+        var repository = IPlatformApplication.Current?.Services.GetService<IRecipeRepository>();
+        if (repository is null)
+            return;
+
+        FileResult? file;
+        try
+        {
+            file = await FilePicker.Default.PickAsync(new PickOptions
+            {
+                PickerTitle = AppResources.Get("ImportRecipes"),
+            });
+        }
+        catch (Exception)
+        {
+            // No picker available on this device/emulator.
+            return;
+        }
+
+        if (file is null)
+            return;
+
+        try
+        {
+            using var stream = await file.OpenReadAsync();
+            using var reader = new StreamReader(stream);
+            var restored = RecipeBackup.Import(await reader.ReadToEndAsync());
+
+            // Existing recipes keep their place: a restore adds what is missing rather than
+            // replacing a library the user may have added to since the backup was taken.
+            var existing = (await repository.GetAllAsync()).Select(r => r.Id).ToHashSet();
+            var added = 0;
+            foreach (var recipe in restored.Where(r => !existing.Contains(r.Id)))
+            {
+                await repository.SaveAsync(recipe);
+                added++;
+            }
+
+            await DisplayAlert(AppResources.Get("ImportRecipes"),
+                AppResources.Format("ImportedFormat", added), AppResources.Get("Ok"));
+        }
+        catch (InvalidBackupException)
+        {
+            await DisplayAlert(AppResources.Get("ImportRecipes"),
+                AppResources.Get("ImportFailed"), AppResources.Get("Ok"));
+        }
+    }
 
     private async void OnLanguagePacksTapped(object? sender, EventArgs e) =>
         await Navigation.PushAsync(new LanguagePacksPage());

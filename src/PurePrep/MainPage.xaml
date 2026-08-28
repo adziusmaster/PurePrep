@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:local="clr-namespace:PurePrep"
              xmlns:loc="clr-namespace:PurePrep.Localization"
              x:Class="PurePrep.MainPage"
              Shell.NavBarIsVisible="False"
@@ -20,7 +21,8 @@
                     <HorizontalStackLayout Grid.Column="1" Spacing="10" VerticalOptions="Center">
                         <Border BackgroundColor="{DynamicResource LimeWash}"
                                 Stroke="{DynamicResource LineSoft}" StrokeThickness="1"
-                                Padding="12,7" StrokeShape="RoundRectangle 20">
+                                Padding="12,9" MinimumHeightRequest="48" StrokeShape="RoundRectangle 20"
+                                local:TapFeedback.IsEnabled="True" AutomationProperties.IsInAccessibleTree="True" AutomationProperties.Name="{loc:Translate SmartCredits}">
                             <Border.GestureRecognizers>
                                 <TapGestureRecognizer Command="{Binding UpgradeCommand}" />
                             </Border.GestureRecognizers>
@@ -31,9 +33,21 @@
                                        FontSize="12.5" FontAttributes="Bold" VerticalOptions="Center" />
                             </HorizontalStackLayout>
                         </Border>
-                        <Border WidthRequest="40" HeightRequest="40" BackgroundColor="{DynamicResource Surface}"
+                        <Border WidthRequest="48" HeightRequest="48" BackgroundColor="{DynamicResource Surface}"
                                 Stroke="{DynamicResource Line}" StrokeThickness="1"
-                                StrokeShape="RoundRectangle 20" VerticalOptions="Center">
+                                StrokeShape="RoundRectangle 24" VerticalOptions="Center"
+                                local:TapFeedback.IsEnabled="True" AutomationProperties.IsInAccessibleTree="True"
+                                AutomationProperties.Name="{loc:Translate ShoppingList}">
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer Tapped="OnShoppingListTapped" />
+                            </Border.GestureRecognizers>
+                            <Label Text="&#128722;" FontSize="18"
+                                   HorizontalOptions="Center" VerticalOptions="Center" />
+                        </Border>
+                        <Border WidthRequest="48" HeightRequest="48" BackgroundColor="{DynamicResource Surface}"
+                                Stroke="{DynamicResource Line}" StrokeThickness="1"
+                                StrokeShape="RoundRectangle 24" VerticalOptions="Center"
+                                local:TapFeedback.IsEnabled="True" AutomationProperties.IsInAccessibleTree="True" AutomationProperties.Name="{loc:Translate Settings}">
                             <Border.GestureRecognizers>
                                 <TapGestureRecognizer Tapped="OnSettingsTapped" />
                             </Border.GestureRecognizers>
@@ -56,21 +70,35 @@
 
             <!-- ===== Import ===== -->
             <VerticalStackLayout Grid.Row="1" Spacing="9">
-                <Border BackgroundColor="{DynamicResource Surface}" Stroke="{DynamicResource Line}"
+                <!-- Stroke brightens when a shared link has just landed, so the ready-to-import
+                     box is the first thing the eye goes to after coming in from the share sheet. -->
+                <Border BackgroundColor="{DynamicResource Surface}"
+                        Stroke="{Binding IsSharedUrlReady, Converter={StaticResource SharedLinkStrokeConverter}}"
                         StrokeThickness="1" Padding="7" StrokeShape="RoundRectangle 20">
-                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="7">
-                        <Entry Text="{Binding UrlInput}" Placeholder="{loc:Translate PasteUrlPlaceholder}"
-                               Margin="10,0,0,0" TextColor="{DynamicResource Ink}"
+                    <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="7">
+                        <Border Grid.Column="0" WidthRequest="48" HeightRequest="48"
+                                BackgroundColor="{DynamicResource BgElevated}" StrokeThickness="0"
+                                StrokeShape="RoundRectangle 14" VerticalOptions="Center" local:TapFeedback.IsEnabled="True"
+                                AutomationProperties.IsInAccessibleTree="True"
+                                AutomationProperties.Name="{loc:Translate PasteLink}">
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer Tapped="OnPasteTapped" />
+                            </Border.GestureRecognizers>
+                            <Label Text="&#128203;" FontSize="16"
+                                   HorizontalOptions="Center" VerticalOptions="Center" />
+                        </Border>
+                        <Entry Grid.Column="1" Text="{Binding UrlInput}" Placeholder="{loc:Translate PasteUrlPlaceholder}"
+                               Margin="4,0,0,0" TextColor="{DynamicResource Ink}"
                                PlaceholderColor="{DynamicResource Faint}" Keyboard="Url"
                                ClearButtonVisibility="WhileEditing" VerticalOptions="Center"
                                ReturnCommand="{Binding ImportCommand}" />
 
-                        <Button Grid.Column="1" Text="{loc:Translate Import}" Command="{Binding ImportCommand}"
+                        <Button Grid.Column="2" Text="{loc:Translate Import}" Command="{Binding ImportCommand}"
                                 IsVisible="{Binding IsImporting, Converter={StaticResource InvertedBoolConverter}}"
                                 BackgroundColor="{DynamicResource Lime}" TextColor="{DynamicResource LimeInk}"
                                 FontAttributes="Bold" FontSize="15" Padding="22,12" CornerRadius="14" />
 
-                        <Border Grid.Column="1" IsVisible="{Binding IsImporting}"
+                        <Border Grid.Column="2" IsVisible="{Binding IsImporting}"
                                 BackgroundColor="{DynamicResource LimeWash}" StrokeThickness="0"
                                 Padding="22,10" StrokeShape="RoundRectangle 14">
                             <ActivityIndicator IsRunning="{Binding IsImporting}"
@@ -101,10 +129,11 @@
                                 </Label.GestureRecognizers>
                             </Label>
                         </VerticalStackLayout>
-                        <Border Grid.Column="1" WidthRequest="28" HeightRequest="28"
+                        <Border Grid.Column="1" WidthRequest="44" HeightRequest="44"
                                 BackgroundColor="{DynamicResource Surface}" Stroke="{DynamicResource Line}"
-                                StrokeThickness="1" StrokeShape="RoundRectangle 14"
-                                VerticalOptions="Start" HorizontalOptions="End">
+                                StrokeThickness="1" StrokeShape="RoundRectangle 22"
+                                VerticalOptions="Start" HorizontalOptions="End"
+                                local:TapFeedback.IsEnabled="True" AutomationProperties.IsInAccessibleTree="True" AutomationProperties.Name="{loc:Translate Dismiss}">
                             <Border.GestureRecognizers>
                                 <TapGestureRecognizer Command="{Binding DismissRecipeLanguageHintCommand}" />
                             </Border.GestureRecognizers>
@@ -126,7 +155,8 @@
                     </VerticalStackLayout>
                     <Border Grid.Column="1" BackgroundColor="{DynamicResource LimeWash}"
                             Stroke="{DynamicResource LineSoft}" StrokeThickness="1"
-                            Padding="13,8" StrokeShape="RoundRectangle 13" VerticalOptions="Center">
+                            Padding="13,8" MinimumHeightRequest="48" StrokeShape="RoundRectangle 13"
+                            VerticalOptions="Center" local:TapFeedback.IsEnabled="True">
                         <Border.GestureRecognizers>
                             <TapGestureRecognizer Command="{Binding AddManuallyCommand}" />
                         </Border.GestureRecognizers>
@@ -186,8 +216,10 @@
                                     </HorizontalStackLayout>
 
                                     <Border Grid.Column="2" Grid.RowSpan="2" BackgroundColor="{DynamicResource LimeWash}"
-                                            StrokeThickness="0" Padding="13,8" StrokeShape="RoundRectangle 12"
-                                            VerticalOptions="Center">
+                                            StrokeThickness="0" Padding="13,10" MinimumHeightRequest="48"
+                                            StrokeShape="RoundRectangle 12" VerticalOptions="Center" local:TapFeedback.IsEnabled="True"
+                                            AutomationProperties.IsInAccessibleTree="True"
+                                            AutomationProperties.Name="{loc:Translate Cook}">
                                         <Border.GestureRecognizers>
                                             <TapGestureRecognizer
                                                 Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.OpenFocusCommand}"
@@ -256,7 +288,8 @@
         <!-- ===== Upgrade sheet (floats above content) ===== -->
         <!-- Light scrim (tap outside the sheet to dismiss). The background is blurred natively on
              Android via a RenderEffect; other platforms fall back to this subtle tint alone. -->
-        <BoxView Color="#26000000" IsVisible="{Binding IsUpgradePromptVisible}">
+        <BoxView Color="#26000000" IsVisible="{Binding IsUpgradePromptVisible}"
+                 AutomationProperties.IsInAccessibleTree="True" AutomationProperties.Name="{loc:Translate Close}">
             <BoxView.GestureRecognizers>
                 <TapGestureRecognizer Command="{Binding DismissUpgradeCommand}" />
             </BoxView.GestureRecognizers>
@@ -274,10 +307,11 @@
                         <Label Text="{loc:Translate OutOfCreditsBody}"
                                TextColor="{DynamicResource Muted}" FontSize="13.5" LineHeight="1.25" />
                     </VerticalStackLayout>
-                    <Border Grid.Column="1" WidthRequest="32" HeightRequest="32"
+                    <Border Grid.Column="1" WidthRequest="44" HeightRequest="44"
                             BackgroundColor="{DynamicResource BgElevated}" Stroke="{DynamicResource Line}"
-                            StrokeThickness="1" StrokeShape="RoundRectangle 16"
-                            VerticalOptions="Start" HorizontalOptions="End">
+                            StrokeThickness="1" StrokeShape="RoundRectangle 22"
+                            VerticalOptions="Start" HorizontalOptions="End"
+                            local:TapFeedback.IsEnabled="True" AutomationProperties.IsInAccessibleTree="True" AutomationProperties.Name="{loc:Translate Close}">
                         <Border.GestureRecognizers>
                             <TapGestureRecognizer Command="{Binding DismissUpgradeCommand}" />
                         </Border.GestureRecognizers>

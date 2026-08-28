@@ -9,9 +9,17 @@ public partial class MainPage : ContentPage
 {
 	private bool _hasLoaded;
 
+	private readonly SharedUrlRelay? _sharedUrls;
+
 	public MainPage(RecipeLibraryViewModel viewModel)
 	{
 		InitializeComponent();
+		_sharedUrls = IPlatformApplication.Current?.Services.GetService<SharedUrlRelay>();
+		if (_sharedUrls is not null)
+		{
+			_sharedUrls.Received += OnSharedUrlReceived;
+			_sharedUrls.ReceivedWithoutUrl += OnSharedUrlMissing;
+		}
 		viewModel.FocusRequested += OnFocusRequested;
 		viewModel.DetailRequested += OnDetailRequested;
 		viewModel.AddManuallyRequested += OnAddManuallyRequested;
@@ -26,10 +34,27 @@ public partial class MainPage : ContentPage
 			BackgroundBlur.Apply(ContentRoot, ((RecipeLibraryViewModel)BindingContext).IsUpgradePromptVisible);
 	}
 
+	private void OnSharedUrlReceived(object? sender, string url) =>
+		Dispatcher.Dispatch(() =>
+		{
+			((RecipeLibraryViewModel)BindingContext).ApplySharedUrl(url);
+			_sharedUrls?.Clear();
+		});
+
+	private void OnSharedUrlMissing(object? sender, EventArgs e) =>
+		Dispatcher.Dispatch(() => ((RecipeLibraryViewModel)BindingContext).ReportSharedUrlMissing());
+
+	private async void OnPasteTapped(object? sender, EventArgs e) =>
+		await ((RecipeLibraryViewModel)BindingContext).PasteFromClipboardAsync();
+
 	protected override async void OnAppearing()
 	{
 		base.OnAppearing();
 		var vm = (RecipeLibraryViewModel)BindingContext;
+
+		// A share that arrived before this page existed (cold start) is waiting to be collected.
+		if (_sharedUrls?.TakePending() is { } sharedUrl)
+			vm.ApplySharedUrl(sharedUrl);
 		if (!_hasLoaded)
 		{
 			_hasLoaded = true;
@@ -73,6 +98,9 @@ public partial class MainPage : ContentPage
 	{
 		await Navigation.PushAsync(new ManualAddPage((RecipeLibraryViewModel)BindingContext));
 	}
+
+	private async void OnShoppingListTapped(object? sender, EventArgs e) =>
+		await Navigation.PushAsync(new ShoppingListPage());
 
 	private async void OnSettingsTapped(object? sender, EventArgs e)
 	{

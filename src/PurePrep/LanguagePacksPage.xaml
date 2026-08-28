@@ -1,6 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:local="clr-namespace:PurePrep"
              xmlns:loc="clr-namespace:PurePrep.Localization"
              x:Class="PurePrep.LanguagePacksPage"
              Shell.NavBarIsVisible="False"
@@ -12,8 +13,9 @@
 
         <!-- Header -->
         <Grid ColumnDefinitions="Auto,*" ColumnSpacing="12" VerticalOptions="Center">
-            <Border WidthRequest="42" HeightRequest="42" BackgroundColor="{DynamicResource Surface}"
-                    Stroke="{DynamicResource Line}" StrokeThickness="1" StrokeShape="RoundRectangle 13">
+            <Border WidthRequest="48" HeightRequest="48" BackgroundColor="{DynamicResource Surface}"
+                    Stroke="{DynamicResource Line}" StrokeThickness="1" StrokeShape="RoundRectangle 14"
+                    local:TapFeedback.IsEnabled="True" AutomationProperties.IsInAccessibleTree="True" AutomationProperties.Name="{loc:Translate Back}">
                 <Border.GestureRecognizers>
                     <TapGestureRecognizer Tapped="OnBackTapped" />
                 </Border.GestureRecognizers>

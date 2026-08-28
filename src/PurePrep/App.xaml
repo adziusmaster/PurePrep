@@ -8,6 +8,8 @@
         <ResourceDictionary>
             <local:StringNotNullOrEmptyConverter x:Key="StringNotNullOrEmptyConverter" />
             <local:InvertedBoolConverter x:Key="InvertedBoolConverter" />
+            <local:SharedLinkStrokeConverter x:Key="SharedLinkStrokeConverter" />
+            <local:CheckedOpacityConverter x:Key="CheckedOpacityConverter" />
             <loc:ResourceFormatConverter x:Key="ResourceFormatConverter" />
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="Resources/Styles/Colors.xaml" />

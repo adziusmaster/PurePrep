@@ -452,4 +452,85 @@ Ajoutez le bouillon louche par louche en remuant.</value>
   <data name="RecipeLangHintAction" xml:space="preserve">
     <value>Définir la langue des recettes ›</value>
   </data>
+  <data name="PasteLink" xml:space="preserve">
+    <value>Coller le lien</value>
+  </data>
+  <data name="ErrSharedNoLink" xml:space="preserve">
+    <value>Ce partage ne contenait pas de lien de recette.</value>
+  </data>
+  <data name="ErrClipboardNoLink" xml:space="preserve">
+    <value>Aucun lien de recette trouvé dans le presse-papiers.</value>
+  </data>
+  <data name="Close" xml:space="preserve">
+    <value>Fermer</value>
+  </data>
+  <data name="Dismiss" xml:space="preserve">
+    <value>Ignorer</value>
+  </data>
+  <data name="Edit" xml:space="preserve">
+    <value>Modifier</value>
+  </data>
+  <data name="SmartCredits" xml:space="preserve">
+    <value>Smart Credits</value>
+  </data>
+  <data name="Privacy" xml:space="preserve">
+    <value>Confidentialité</value>
+  </data>
+  <data name="Appearance" xml:space="preserve">
+    <value>Apparence</value>
+  </data>
+  <data name="Units" xml:space="preserve">
+    <value>Unités</value>
+  </data>
+  <data name="ShowIngredients" xml:space="preserve">
+    <value>Afficher les ingrédients</value>
+  </data>
+  <data name="StartTimer" xml:space="preserve">
+    <value>Démarrer le minuteur</value>
+  </data>
+  <data name="ShoppingList" xml:space="preserve">
+    <value>Liste de courses</value>
+  </data>
+  <data name="AddToShoppingList" xml:space="preserve">
+    <value>Ajouter à la liste</value>
+  </data>
+  <data name="AddedToListFormat" xml:space="preserve">
+    <value>{0} ajoutés à votre liste.</value>
+  </data>
+  <data name="ClearTicked" xml:space="preserve">
+    <value>Effacer les cochés</value>
+  </data>
+  <data name="ClearAll" xml:space="preserve">
+    <value>Tout effacer</value>
+  </data>
+  <data name="ShoppingEmptyTitle" xml:space="preserve">
+    <value>Rien à acheter</value>
+  </data>
+  <data name="ShoppingEmptyBody" xml:space="preserve">
+    <value>Ouvrez une recette et ajoutez ses ingrédients.</value>
+  </data>
+  <data name="ShareRecipe" xml:space="preserve">
+    <value>Partager</value>
+  </data>
+  <data name="ExportRecipes" xml:space="preserve">
+    <value>Exporter les recettes</value>
+  </data>
+  <data name="ExportRecipesHint" xml:space="preserve">
+    <value>Enregistrer une sauvegarde restaurable</value>
+  </data>
+  <data name="ImportRecipes" xml:space="preserve">
+    <value>Restaurer les recettes</value>
+  </data>
+  <data name="ImportedFormat" xml:space="preserve">
+    <value>{0} recettes restaurées.</value>
+  </data>
+  <data name="ImportFailed" xml:space="preserve">
+    <value>Ce fichier n'est pas une sauvegarde PurePrep.</value>
+  </data>
+  <data name="NoRecipesToExport" xml:space="preserve">
+    <value>Aucune recette à exporter.</value>
+  </data>
+  <data name="SectionBackup" xml:space="preserve">
+    <value>SAUVEGARDE</value>
+  </data>
 </root>

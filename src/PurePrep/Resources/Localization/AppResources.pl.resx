@@ -452,4 +452,85 @@ Dodawaj bulion po chochli, mieszając.</value>
   <data name="RecipeLangHintAction" xml:space="preserve">
     <value>Ustaw język przepisów ›</value>
   </data>
+  <data name="PasteLink" xml:space="preserve">
+    <value>Wklej link</value>
+  </data>
+  <data name="ErrSharedNoLink" xml:space="preserve">
+    <value>To udostępnienie nie zawierało linku do przepisu.</value>
+  </data>
+  <data name="ErrClipboardNoLink" xml:space="preserve">
+    <value>Nie znaleziono linku do przepisu w schowku.</value>
+  </data>
+  <data name="Close" xml:space="preserve">
+    <value>Zamknij</value>
+  </data>
+  <data name="Dismiss" xml:space="preserve">
+    <value>Odrzuć</value>
+  </data>
+  <data name="Edit" xml:space="preserve">
+    <value>Edytuj</value>
+  </data>
+  <data name="SmartCredits" xml:space="preserve">
+    <value>Smart Credits</value>
+  </data>
+  <data name="Privacy" xml:space="preserve">
+    <value>Prywatność</value>
+  </data>
+  <data name="Appearance" xml:space="preserve">
+    <value>Wygląd</value>
+  </data>
+  <data name="Units" xml:space="preserve">
+    <value>Jednostki</value>
+  </data>
+  <data name="ShowIngredients" xml:space="preserve">
+    <value>Pokaż składniki</value>
+  </data>
+  <data name="StartTimer" xml:space="preserve">
+    <value>Uruchom minutnik</value>
+  </data>
+  <data name="ShoppingList" xml:space="preserve">
+    <value>Lista zakupów</value>
+  </data>
+  <data name="AddToShoppingList" xml:space="preserve">
+    <value>Dodaj do listy</value>
+  </data>
+  <data name="AddedToListFormat" xml:space="preserve">
+    <value>Dodano {0} do listy.</value>
+  </data>
+  <data name="ClearTicked" xml:space="preserve">
+    <value>Usuń zaznaczone</value>
+  </data>
+  <data name="ClearAll" xml:space="preserve">
+    <value>Wyczyść wszystko</value>
+  </data>
+  <data name="ShoppingEmptyTitle" xml:space="preserve">
+    <value>Nic do kupienia</value>
+  </data>
+  <data name="ShoppingEmptyBody" xml:space="preserve">
+    <value>Otwórz przepis i dodaj jego składniki.</value>
+  </data>
+  <data name="ShareRecipe" xml:space="preserve">
+    <value>Udostępnij</value>
+  </data>
+  <data name="ExportRecipes" xml:space="preserve">
+    <value>Eksportuj przepisy</value>
+  </data>
+  <data name="ExportRecipesHint" xml:space="preserve">
+    <value>Zapisz kopię do przywrócenia</value>
+  </data>
+  <data name="ImportRecipes" xml:space="preserve">
+    <value>Przywróć przepisy</value>
+  </data>
+  <data name="ImportedFormat" xml:space="preserve">
+    <value>Przywrócono {0} przepisów.</value>
+  </data>
+  <data name="ImportFailed" xml:space="preserve">
+    <value>Ten plik nie jest kopią PurePrep.</value>
+  </data>
+  <data name="NoRecipesToExport" xml:space="preserve">
+    <value>Nie ma jeszcze przepisów do eksportu.</value>
+  </data>
+  <data name="SectionBackup" xml:space="preserve">
+    <value>KOPIA</value>
+  </data>
 </root>

@@ -103,6 +103,29 @@ public partial class RecipeDetailPage : ContentPage
         }
     }
 
+    private async void OnShareTapped(object? sender, EventArgs e)
+    {
+        // Shares the display copy, so the recipient gets the units and scaling on screen rather
+        // than whatever the source site happened to use.
+        var text = RecipeBackup.ToPlainText(_viewModel.CookRecipe);
+        await Share.Default.RequestAsync(new ShareTextRequest(text, _recipe.Title));
+    }
+
+    private async void OnAddToShoppingListTapped(object? sender, EventArgs e)
+    {
+        var store = IPlatformApplication.Current?.Services.GetService<Services.ShoppingListStore>();
+        if (store is null)
+            return;
+
+        // Adds the scaled, unit-converted ingredients: doubling a recipe should double the shopping.
+        var added = await store.AddAsync(_viewModel.CookRecipe.Ingredients, _recipe.Title);
+
+        await DisplayAlert(
+            AppResources.Get("ShoppingList"),
+            AppResources.Format("AddedToListFormat", added),
+            AppResources.Get("Ok"));
+    }
+
     private async void OnCookClicked(object? sender, EventArgs e) =>
         await Navigation.PushAsync(new FocusPage(_viewModel.CookRecipe));
 

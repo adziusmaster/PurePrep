@@ -25,6 +25,7 @@ public sealed class RecipeLibraryViewModel : INotifyPropertyChanged
     private bool _isUpgradePromptVisible;
     private bool _isPurchasing;
     private bool _isRecipeLanguageHintVisible;
+    private bool _isSharedUrlReady;
     private string? _errorMessage;
     // -1 = balance not yet loaded from the backend.
     private int _creditBalance = -1;
@@ -234,6 +235,7 @@ public sealed class RecipeLibraryViewModel : INotifyPropertyChanged
     private async Task ImportAsync()
     {
         ErrorMessage = null;
+        IsSharedUrlReady = false;
 
         if (CreditBalance == 0)
         {
@@ -366,6 +368,48 @@ public sealed class RecipeLibraryViewModel : INotifyPropertyChanged
         if (index >= 0)
             _all[index] = updated;
         ApplyFilter();
+    }
+
+    /// <summary>
+    /// Applies a link shared into the app from elsewhere. The URL is placed in the import box but
+    /// deliberately <b>not</b> imported automatically: an import spends a Smart Credit, and a share
+    /// can easily be a mis-tap or a page that is not a recipe. One explicit tap keeps the spend
+    /// intentional while still saving the copy-switch-paste dance.
+    /// </summary>
+    public void ApplySharedUrl(string url)
+    {
+        ErrorMessage = null;
+        UrlInput = url;
+        IsSharedUrlReady = true;
+    }
+
+    /// <summary>Reports a share that carried no usable link, so the user is not left wondering.</summary>
+    public void ReportSharedUrlMissing()
+    {
+        IsSharedUrlReady = false;
+        ErrorMessage = AppResources.Get("ErrSharedNoLink");
+    }
+
+    /// <summary>True just after a shared link lands, to draw the eye to the ready-to-import box.</summary>
+    public bool IsSharedUrlReady
+    {
+        get => _isSharedUrlReady;
+        private set => SetField(ref _isSharedUrlReady, value);
+    }
+
+    /// <summary>Pastes a link from the clipboard into the import box.</summary>
+    public async Task PasteFromClipboardAsync()
+    {
+        var text = await Clipboard.Default.GetTextAsync();
+        var url = Domain.SharedText.ExtractUrl(text);
+        if (url is null)
+        {
+            ErrorMessage = AppResources.Get("ErrClipboardNoLink");
+            return;
+        }
+
+        ErrorMessage = null;
+        UrlInput = url;
     }
 
     /// <summary>

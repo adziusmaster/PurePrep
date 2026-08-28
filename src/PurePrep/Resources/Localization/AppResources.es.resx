@@ -452,4 +452,85 @@ Añade el caldo cucharón a cucharón, removiendo.</value>
   <data name="RecipeLangHintAction" xml:space="preserve">
     <value>Elegir idioma de recetas ›</value>
   </data>
+  <data name="PasteLink" xml:space="preserve">
+    <value>Pegar enlace</value>
+  </data>
+  <data name="ErrSharedNoLink" xml:space="preserve">
+    <value>Ese contenido no incluía un enlace de receta.</value>
+  </data>
+  <data name="ErrClipboardNoLink" xml:space="preserve">
+    <value>No se encontró ningún enlace de receta en el portapapeles.</value>
+  </data>
+  <data name="Close" xml:space="preserve">
+    <value>Cerrar</value>
+  </data>
+  <data name="Dismiss" xml:space="preserve">
+    <value>Descartar</value>
+  </data>
+  <data name="Edit" xml:space="preserve">
+    <value>Editar</value>
+  </data>
+  <data name="SmartCredits" xml:space="preserve">
+    <value>Smart Credits</value>
+  </data>
+  <data name="Privacy" xml:space="preserve">
+    <value>Privacidad</value>
+  </data>
+  <data name="Appearance" xml:space="preserve">
+    <value>Apariencia</value>
+  </data>
+  <data name="Units" xml:space="preserve">
+    <value>Unidades</value>
+  </data>
+  <data name="ShowIngredients" xml:space="preserve">
+    <value>Mostrar ingredientes</value>
+  </data>
+  <data name="StartTimer" xml:space="preserve">
+    <value>Iniciar temporizador</value>
+  </data>
+  <data name="ShoppingList" xml:space="preserve">
+    <value>Lista de la compra</value>
+  </data>
+  <data name="AddToShoppingList" xml:space="preserve">
+    <value>Añadir a la lista</value>
+  </data>
+  <data name="AddedToListFormat" xml:space="preserve">
+    <value>{0} añadidos a tu lista.</value>
+  </data>
+  <data name="ClearTicked" xml:space="preserve">
+    <value>Borrar marcados</value>
+  </data>
+  <data name="ClearAll" xml:space="preserve">
+    <value>Borrar todo</value>
+  </data>
+  <data name="ShoppingEmptyTitle" xml:space="preserve">
+    <value>Nada que comprar aún</value>
+  </data>
+  <data name="ShoppingEmptyBody" xml:space="preserve">
+    <value>Abre una receta y añade sus ingredientes.</value>
+  </data>
+  <data name="ShareRecipe" xml:space="preserve">
+    <value>Compartir</value>
+  </data>
+  <data name="ExportRecipes" xml:space="preserve">
+    <value>Exportar recetas</value>
+  </data>
+  <data name="ExportRecipesHint" xml:space="preserve">
+    <value>Guarda una copia que puedas restaurar</value>
+  </data>
+  <data name="ImportRecipes" xml:space="preserve">
+    <value>Restaurar recetas</value>
+  </data>
+  <data name="ImportedFormat" xml:space="preserve">
+    <value>{0} recetas restauradas.</value>
+  </data>
+  <data name="ImportFailed" xml:space="preserve">
+    <value>Ese archivo no es una copia de PurePrep.</value>
+  </data>
+  <data name="NoRecipesToExport" xml:space="preserve">
+    <value>Aún no hay recetas para exportar.</value>
+  </data>
+  <data name="SectionBackup" xml:space="preserve">
+    <value>COPIA</value>
+  </data>
 </root>

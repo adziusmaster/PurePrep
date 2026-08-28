@@ -5,4 +5,11 @@
 	<uses-permission android:name="android.permission.INTERNET" />
 	<!-- Required by Google Play Billing so in-app products / purchases work. -->
 	<uses-permission android:name="com.android.vending.BILLING" />
+	<!-- Cook-timer alerts. POST_NOTIFICATIONS is a runtime grant from Android 13; it is requested
+	     the first time a timer is started, and the in-app countdown still works if refused. -->
+	<uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+	<!-- Lets a timer fire on time while the device is idle. Deliberately SCHEDULE_EXACT_ALARM and
+	     not USE_EXACT_ALARM: the latter is reserved for alarm-clock apps and draws Play review.
+	     Where it is not granted the alarm is scheduled inexactly rather than not at all. -->
+	<uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
 </manifest>

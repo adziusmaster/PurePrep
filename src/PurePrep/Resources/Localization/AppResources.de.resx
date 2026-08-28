@@ -452,4 +452,85 @@ Brühe kellenweise unter Rühren zugeben.</value>
   <data name="RecipeLangHintAction" xml:space="preserve">
     <value>Rezeptsprache festlegen ›</value>
   </data>
+  <data name="PasteLink" xml:space="preserve">
+    <value>Link einfügen</value>
+  </data>
+  <data name="ErrSharedNoLink" xml:space="preserve">
+    <value>Diese Freigabe enthielt keinen Rezept-Link.</value>
+  </data>
+  <data name="ErrClipboardNoLink" xml:space="preserve">
+    <value>Kein Rezept-Link in der Zwischenablage gefunden.</value>
+  </data>
+  <data name="Close" xml:space="preserve">
+    <value>Schließen</value>
+  </data>
+  <data name="Dismiss" xml:space="preserve">
+    <value>Ausblenden</value>
+  </data>
+  <data name="Edit" xml:space="preserve">
+    <value>Bearbeiten</value>
+  </data>
+  <data name="SmartCredits" xml:space="preserve">
+    <value>Smart Credits</value>
+  </data>
+  <data name="Privacy" xml:space="preserve">
+    <value>Datenschutz</value>
+  </data>
+  <data name="Appearance" xml:space="preserve">
+    <value>Darstellung</value>
+  </data>
+  <data name="Units" xml:space="preserve">
+    <value>Einheiten</value>
+  </data>
+  <data name="ShowIngredients" xml:space="preserve">
+    <value>Zutaten anzeigen</value>
+  </data>
+  <data name="StartTimer" xml:space="preserve">
+    <value>Timer starten</value>
+  </data>
+  <data name="ShoppingList" xml:space="preserve">
+    <value>Einkaufsliste</value>
+  </data>
+  <data name="AddToShoppingList" xml:space="preserve">
+    <value>Zur Einkaufsliste</value>
+  </data>
+  <data name="AddedToListFormat" xml:space="preserve">
+    <value>{0} zur Einkaufsliste hinzugefügt.</value>
+  </data>
+  <data name="ClearTicked" xml:space="preserve">
+    <value>Erledigte entfernen</value>
+  </data>
+  <data name="ClearAll" xml:space="preserve">
+    <value>Alle löschen</value>
+  </data>
+  <data name="ShoppingEmptyTitle" xml:space="preserve">
+    <value>Noch nichts einzukaufen</value>
+  </data>
+  <data name="ShoppingEmptyBody" xml:space="preserve">
+    <value>Öffne ein Rezept und füge seine Zutaten hinzu.</value>
+  </data>
+  <data name="ShareRecipe" xml:space="preserve">
+    <value>Teilen</value>
+  </data>
+  <data name="ExportRecipes" xml:space="preserve">
+    <value>Rezepte exportieren</value>
+  </data>
+  <data name="ExportRecipesHint" xml:space="preserve">
+    <value>Sicherung zum späteren Wiederherstellen</value>
+  </data>
+  <data name="ImportRecipes" xml:space="preserve">
+    <value>Rezepte wiederherstellen</value>
+  </data>
+  <data name="ImportedFormat" xml:space="preserve">
+    <value>{0} Rezepte wiederhergestellt.</value>
+  </data>
+  <data name="ImportFailed" xml:space="preserve">
+    <value>Diese Datei ist keine PurePrep-Sicherung.</value>
+  </data>
+  <data name="NoRecipesToExport" xml:space="preserve">
+    <value>Es gibt noch keine Rezepte zum Exportieren.</value>
+  </data>
+  <data name="SectionBackup" xml:space="preserve">
+    <value>SICHERUNG</value>
+  </data>
 </root>

@@ -452,4 +452,85 @@ Voeg de bouillon pollepel voor pollepel toe, al roerend.</value>
   <data name="RecipeLangHintAction" xml:space="preserve">
     <value>Receptentaal instellen ›</value>
   </data>
+  <data name="PasteLink" xml:space="preserve">
+    <value>Link plakken</value>
+  </data>
+  <data name="ErrSharedNoLink" xml:space="preserve">
+    <value>Dat gedeelde bericht bevatte geen receptlink.</value>
+  </data>
+  <data name="ErrClipboardNoLink" xml:space="preserve">
+    <value>Geen receptlink op het klembord gevonden.</value>
+  </data>
+  <data name="Close" xml:space="preserve">
+    <value>Sluiten</value>
+  </data>
+  <data name="Dismiss" xml:space="preserve">
+    <value>Negeren</value>
+  </data>
+  <data name="Edit" xml:space="preserve">
+    <value>Bewerken</value>
+  </data>
+  <data name="SmartCredits" xml:space="preserve">
+    <value>Smart Credits</value>
+  </data>
+  <data name="Privacy" xml:space="preserve">
+    <value>Privacy</value>
+  </data>
+  <data name="Appearance" xml:space="preserve">
+    <value>Weergave</value>
+  </data>
+  <data name="Units" xml:space="preserve">
+    <value>Eenheden</value>
+  </data>
+  <data name="ShowIngredients" xml:space="preserve">
+    <value>Toon ingrediënten</value>
+  </data>
+  <data name="StartTimer" xml:space="preserve">
+    <value>Timer starten</value>
+  </data>
+  <data name="ShoppingList" xml:space="preserve">
+    <value>Boodschappenlijst</value>
+  </data>
+  <data name="AddToShoppingList" xml:space="preserve">
+    <value>Aan lijst toevoegen</value>
+  </data>
+  <data name="AddedToListFormat" xml:space="preserve">
+    <value>{0} toegevoegd aan je lijst.</value>
+  </data>
+  <data name="ClearTicked" xml:space="preserve">
+    <value>Afgevinkte wissen</value>
+  </data>
+  <data name="ClearAll" xml:space="preserve">
+    <value>Alles wissen</value>
+  </data>
+  <data name="ShoppingEmptyTitle" xml:space="preserve">
+    <value>Nog niets te kopen</value>
+  </data>
+  <data name="ShoppingEmptyBody" xml:space="preserve">
+    <value>Open een recept en voeg de ingrediënten toe.</value>
+  </data>
+  <data name="ShareRecipe" xml:space="preserve">
+    <value>Delen</value>
+  </data>
+  <data name="ExportRecipes" xml:space="preserve">
+    <value>Recepten exporteren</value>
+  </data>
+  <data name="ExportRecipesHint" xml:space="preserve">
+    <value>Bewaar een herstelbare back-up</value>
+  </data>
+  <data name="ImportRecipes" xml:space="preserve">
+    <value>Recepten herstellen</value>
+  </data>
+  <data name="ImportedFormat" xml:space="preserve">
+    <value>{0} recepten hersteld.</value>
+  </data>
+  <data name="ImportFailed" xml:space="preserve">
+    <value>Dat bestand is geen PurePrep-back-up.</value>
+  </data>
+  <data name="NoRecipesToExport" xml:space="preserve">
+    <value>Er zijn nog geen recepten om te exporteren.</value>
+  </data>
+  <data name="SectionBackup" xml:space="preserve">
+    <value>BACK-UP</value>
+  </data>
 </root>

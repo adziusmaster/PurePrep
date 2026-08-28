@@ -45,6 +45,20 @@ public static class MauiProgram
 #endif
 		builder.Services.AddSingleton<ThemeService>();
 
+		// Carries links shared into the app from the Android share sheet across to the library page.
+		builder.Services.AddSingleton<SharedUrlRelay>();
+
+		// Cook timers outlive the Focus Mode page, so the countdown survives navigating away.
+#if ANDROID
+		builder.Services.AddSingleton<PurePrep.Application.ICookTimerNotifier, PurePrep.Platforms.Android.CookTimerNotifier>();
+#else
+		builder.Services.AddSingleton<PurePrep.Application.ICookTimerNotifier, PurePrep.Application.UnsupportedCookTimerNotifier>();
+#endif
+		builder.Services.AddSingleton<CookTimerService>();
+
+		// Shopping list, persisted as a small JSON file alongside the recipe database.
+		builder.Services.AddSingleton<ShoppingListStore>();
+
 		// Language newly imported recipes are produced in (defaults to the app UI language).
 		builder.Services.AddSingleton<IRecipeLanguageProvider, RecipeLanguageSettings>();
 

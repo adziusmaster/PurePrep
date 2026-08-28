@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:local="clr-namespace:PurePrep"
              xmlns:loc="clr-namespace:PurePrep.Localization"
              x:Class="PurePrep.FocusPage"
              x:Name="FocusRoot"
@@ -13,8 +14,9 @@
 
         <!-- Top bar: back + keep-awake toggle -->
         <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="10">
-            <Border WidthRequest="42" HeightRequest="42" BackgroundColor="{DynamicResource Surface}"
-                    Stroke="{DynamicResource Line}" StrokeThickness="1" StrokeShape="RoundRectangle 13">
+            <Border WidthRequest="48" HeightRequest="48" BackgroundColor="{DynamicResource Surface}"
+                    Stroke="{DynamicResource Line}" StrokeThickness="1" StrokeShape="RoundRectangle 14"
+                    local:TapFeedback.IsEnabled="True" AutomationProperties.IsInAccessibleTree="True" AutomationProperties.Name="{loc:Translate Back}">
                 <Border.GestureRecognizers>
                     <TapGestureRecognizer Tapped="OnBackTapped" />
                 </Border.GestureRecognizers>
@@ -51,8 +53,9 @@
                        CharacterSpacing="1.6" FontAttributes="Bold" />
             </VerticalStackLayout>
             <Border Grid.Column="1" BackgroundColor="{DynamicResource LimeWash}" Stroke="{DynamicResource LineSoft}"
-                    StrokeThickness="1" Padding="13,9" StrokeShape="RoundRectangle 12" VerticalOptions="Center"
-                    IsVisible="{Binding HasIngredients}">
+                    StrokeThickness="1" Padding="13,9" MinimumHeightRequest="48" StrokeShape="RoundRectangle 12"
+                    VerticalOptions="Center" IsVisible="{Binding HasIngredients}"
+                    local:TapFeedback.IsEnabled="True" AutomationProperties.IsInAccessibleTree="True" AutomationProperties.Name="{loc:Translate ShowIngredients}">
                 <Border.GestureRecognizers>
                     <TapGestureRecognizer Command="{Binding ToggleIngredientsCommand}" />
                 </Border.GestureRecognizers>
@@ -62,10 +65,13 @@
         </Grid>
 
         <!-- Step card (hidden while the ingredients panel is open) -->
+        <!-- Fill, not Center, with the content in a ScrollView: a long instruction at this size used
+             to overflow the card and clip, and did so sooner at larger system font scales. -->
         <Border Grid.Row="3" BackgroundColor="{DynamicResource Surface}" Stroke="{DynamicResource LineSoft}"
-                StrokeThickness="1" Padding="24" StrokeShape="RoundRectangle 22" VerticalOptions="Center"
+                StrokeThickness="1" Padding="24" StrokeShape="RoundRectangle 22" VerticalOptions="Fill"
                 IsVisible="{Binding ShowIngredients, Converter={StaticResource InvertedBoolConverter}}">
-            <VerticalStackLayout Spacing="20">
+          <ScrollView VerticalScrollBarVisibility="Never">
+            <VerticalStackLayout Spacing="20" VerticalOptions="Center">
                 <Label Text="{Binding CurrentStep.Instruction}" TextColor="{DynamicResource Ink}" FontSize="27"
                        FontAttributes="Bold" LineHeight="1.18" />
                 <BoxView HeightRequest="1" Color="{DynamicResource Line}" />
@@ -82,8 +88,9 @@
                                    FontSize="34" FontAttributes="Bold" />
                         </VerticalStackLayout>
                         <Border Grid.Column="1" BackgroundColor="{DynamicResource Surface}"
-                                Stroke="{DynamicResource Line}" StrokeThickness="1" Padding="16,10"
-                                StrokeShape="RoundRectangle 12" VerticalOptions="Center">
+                                Stroke="{DynamicResource Line}" StrokeThickness="1" Padding="16,12"
+                                MinimumHeightRequest="48" StrokeShape="RoundRectangle 12" VerticalOptions="Center"
+                                local:TapFeedback.IsEnabled="True" AutomationProperties.IsInAccessibleTree="True" AutomationProperties.Name="{loc:Translate Stop}">
                             <Border.GestureRecognizers>
                                 <TapGestureRecognizer Command="{Binding CancelTimerCommand}" />
                             </Border.GestureRecognizers>
@@ -101,8 +108,10 @@
                         <BindableLayout.ItemTemplate>
                             <DataTemplate>
                                 <Border BackgroundColor="{DynamicResource Surface}" Stroke="{DynamicResource Lime}"
-                                        StrokeThickness="1" Padding="16,11" StrokeShape="RoundRectangle 13"
-                                        Margin="0,0,8,8">
+                                        StrokeThickness="1" Padding="16,13" MinimumHeightRequest="48"
+                                        StrokeShape="RoundRectangle 13" Margin="0,0,8,8" local:TapFeedback.IsEnabled="True"
+                                        AutomationProperties.IsInAccessibleTree="True"
+                                        AutomationProperties.Name="{Binding Label}">
                                     <Border.GestureRecognizers>
                                         <TapGestureRecognizer
                                             Command="{Binding Source={x:Reference FocusRoot}, Path=BindingContext.StartTimerCommand}"
@@ -123,6 +132,7 @@
                 <Label Text="{loc:Translate FocusHint}"
                        TextColor="{DynamicResource Muted}" FontSize="13.5" />
             </VerticalStackLayout>
+          </ScrollView>
         </Border>
 
         <!-- Ingredients panel -->
@@ -133,10 +143,18 @@
                 <VerticalStackLayout Padding="14,12" Spacing="0" BindableLayout.ItemsSource="{Binding Ingredients}">
                     <BindableLayout.ItemTemplate>
                         <DataTemplate>
-                            <Grid ColumnDefinitions="Auto,*" ColumnSpacing="12" Padding="0,10">
-                                <Ellipse Fill="{DynamicResource Lime}" WidthRequest="6" HeightRequest="6"
-                                         VerticalOptions="Center" />
-                                <Label Grid.Column="1" Text="{Binding .}" TextColor="{DynamicResource Ink}"
+                            <Grid ColumnDefinitions="Auto,*" ColumnSpacing="12" Padding="0,4"
+                                  MinimumHeightRequest="48"
+                                  AutomationProperties.IsInAccessibleTree="True"
+                                  AutomationProperties.Name="{Binding Text}">
+                                <Grid.GestureRecognizers>
+                                    <TapGestureRecognizer Tapped="OnIngredientTapped" />
+                                </Grid.GestureRecognizers>
+                                <CheckBox IsChecked="{Binding IsChecked, Mode=TwoWay}"
+                                          Color="{DynamicResource Lime}" VerticalOptions="Center" />
+                                <Label Grid.Column="1" Text="{Binding Text}" TextColor="{DynamicResource Ink}"
+                                       TextDecorations="{Binding TextDecoration}"
+                                       Opacity="{Binding IsChecked, Converter={StaticResource CheckedOpacityConverter}}"
                                        FontSize="16" LineHeight="1.2" VerticalOptions="Center" />
                             </Grid>
                         </DataTemplate>

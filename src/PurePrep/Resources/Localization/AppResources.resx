@@ -452,4 +452,85 @@ Add stock a ladle at a time, stirring.</value>
   <data name="RecipeLangHintAction" xml:space="preserve">
     <value>Set recipe language ›</value>
   </data>
+  <data name="PasteLink" xml:space="preserve">
+    <value>Paste link</value>
+  </data>
+  <data name="ErrSharedNoLink" xml:space="preserve">
+    <value>That share didn't include a recipe link.</value>
+  </data>
+  <data name="ErrClipboardNoLink" xml:space="preserve">
+    <value>No recipe link found on the clipboard.</value>
+  </data>
+  <data name="Close" xml:space="preserve">
+    <value>Close</value>
+  </data>
+  <data name="Dismiss" xml:space="preserve">
+    <value>Dismiss</value>
+  </data>
+  <data name="Edit" xml:space="preserve">
+    <value>Edit</value>
+  </data>
+  <data name="SmartCredits" xml:space="preserve">
+    <value>Smart Credits</value>
+  </data>
+  <data name="Privacy" xml:space="preserve">
+    <value>Privacy policy</value>
+  </data>
+  <data name="Appearance" xml:space="preserve">
+    <value>Appearance</value>
+  </data>
+  <data name="Units" xml:space="preserve">
+    <value>Units</value>
+  </data>
+  <data name="ShowIngredients" xml:space="preserve">
+    <value>Show ingredients</value>
+  </data>
+  <data name="StartTimer" xml:space="preserve">
+    <value>Start timer</value>
+  </data>
+  <data name="ShoppingList" xml:space="preserve">
+    <value>Shopping list</value>
+  </data>
+  <data name="AddToShoppingList" xml:space="preserve">
+    <value>Add to shopping list</value>
+  </data>
+  <data name="AddedToListFormat" xml:space="preserve">
+    <value>{0} added to your shopping list.</value>
+  </data>
+  <data name="ClearTicked" xml:space="preserve">
+    <value>Clear ticked</value>
+  </data>
+  <data name="ClearAll" xml:space="preserve">
+    <value>Clear all</value>
+  </data>
+  <data name="ShoppingEmptyTitle" xml:space="preserve">
+    <value>Nothing to buy yet</value>
+  </data>
+  <data name="ShoppingEmptyBody" xml:space="preserve">
+    <value>Open a recipe and add its ingredients to build your list.</value>
+  </data>
+  <data name="ShareRecipe" xml:space="preserve">
+    <value>Share</value>
+  </data>
+  <data name="ExportRecipes" xml:space="preserve">
+    <value>Export recipes</value>
+  </data>
+  <data name="ExportRecipesHint" xml:space="preserve">
+    <value>Save a backup you can restore later</value>
+  </data>
+  <data name="ImportRecipes" xml:space="preserve">
+    <value>Restore recipes</value>
+  </data>
+  <data name="ImportedFormat" xml:space="preserve">
+    <value>Restored {0} recipes.</value>
+  </data>
+  <data name="ImportFailed" xml:space="preserve">
+    <value>That file isn't a PurePrep backup.</value>
+  </data>
+  <data name="NoRecipesToExport" xml:space="preserve">
+    <value>There are no recipes to export yet.</value>
+  </data>
+  <data name="SectionBackup" xml:space="preserve">
+    <value>BACKUP</value>
+  </data>
 </root>

@@ -16,14 +16,17 @@ public sealed class FocusModeViewModel : INotifyPropertyChanged
     private bool _keepScreenAwake;
 
     private IReadOnlyList<StepTimer> _currentStepTimers = Array.Empty<StepTimer>();
-    private IDispatcherTimer? _countdown;
-    private StepTimer? _activeTimer;
-    private int _remainingSeconds;
+    private readonly CookTimerService? _timers;
 
-    public FocusModeViewModel(ParsedRecipe recipe, IDispatcher? dispatcher = null)
+    public FocusModeViewModel(ParsedRecipe recipe, IDispatcher? dispatcher = null, CookTimerService? timers = null)
     {
         Recipe = recipe;
         _dispatcher = dispatcher;
+        _timers = timers;
+
+        Ingredients = recipe.Ingredients
+            .Select(text => new CheckableIngredient(text))
+            .ToArray();
         _keepScreenAwake = CookingSettings.KeepScreenAwake;
         PreviousCommand = new Command(() => CurrentStepIndex--, () => !IsFirstStep);
         NextCommand = new Command(() => CurrentStepIndex++, () => !IsLastStep);
@@ -36,8 +39,8 @@ public sealed class FocusModeViewModel : INotifyPropertyChanged
                 CurrentStepIndex++;
         });
         ToggleIngredientsCommand = new Command(() => ShowIngredients = !ShowIngredients);
-        StartTimerCommand = new Command<StepTimer>(StartTimer);
-        CancelTimerCommand = new Command(CancelTimer);
+        StartTimerCommand = new Command<StepTimer>(timer => _ = StartTimerAsync(timer));
+        CancelTimerCommand = new Command(() => _ = CancelTimerAsync());
         UpdateCurrentStepTimers();
     }
 
@@ -46,7 +49,11 @@ public sealed class FocusModeViewModel : INotifyPropertyChanged
 
     public ParsedRecipe Recipe { get; }
     public IReadOnlyList<RecipeStep> Steps => Recipe.Steps;
-    public IReadOnlyList<string> Ingredients => Recipe.Ingredients;
+    /// <summary>
+    /// Ingredients with a tick-off state. Losing your place in a list while your hands are busy is
+    /// the single most common way cooking from a screen goes wrong.
+    /// </summary>
+    public IReadOnlyList<CheckableIngredient> Ingredients { get; }
     public bool HasIngredients => Ingredients.Count > 0;
     public int CurrentStepIndex
     {
@@ -124,18 +131,17 @@ public sealed class FocusModeViewModel : INotifyPropertyChanged
     public bool HasStepTimers => _currentStepTimers.Count > 0;
 
     /// <summary>True while a countdown is active.</summary>
-    public bool IsTimerRunning => _countdown is not null;
-    public string ActiveTimerLabel => _activeTimer?.Label ?? string.Empty;
+    public bool IsTimerRunning => _timers?.IsRunning ?? false;
+    public string ActiveTimerLabel => _timers?.Label ?? string.Empty;
+
     /// <summary>Remaining time as mm:ss (or h:mm:ss for long timers).</summary>
-    public string ActiveTimerDisplay
+    public string ActiveTimerDisplay => _timers?.Display ?? string.Empty;
+
+    private void OnTimerTick(object? sender, EventArgs e)
     {
-        get
-        {
-            var span = TimeSpan.FromSeconds(_remainingSeconds);
-            return span.TotalHours >= 1
-                ? $"{(int)span.TotalHours}:{span.Minutes:00}:{span.Seconds:00}"
-                : $"{span.Minutes:00}:{span.Seconds:00}";
-        }
+        OnPropertyChanged(nameof(IsTimerRunning));
+        OnPropertyChanged(nameof(ActiveTimerLabel));
+        OnPropertyChanged(nameof(ActiveTimerDisplay));
     }
 
     private void UpdateCurrentStepTimers()
@@ -145,42 +151,18 @@ public sealed class FocusModeViewModel : INotifyPropertyChanged
         OnPropertyChanged(nameof(HasStepTimers));
     }
 
-    private void StartTimer(StepTimer? timer)
+    private async Task StartTimerAsync(StepTimer? timer)
     {
-        if (timer is null || timer.TotalSeconds <= 0)
+        if (timer is null || _timers is null)
             return;
 
-        CancelTimer();
-        _activeTimer = timer;
-        _remainingSeconds = timer.TotalSeconds;
-
-        var dispatcher = _dispatcher ?? Microsoft.Maui.Controls.Application.Current?.Dispatcher;
-        if (dispatcher is null)
-            return;
-
-        _countdown = dispatcher.CreateTimer();
-        _countdown.Interval = TimeSpan.FromSeconds(1);
-        _countdown.Tick += OnTick;
-        _countdown.Start();
-
-        OnPropertyChanged(nameof(IsTimerRunning));
-        OnPropertyChanged(nameof(ActiveTimerLabel));
-        OnPropertyChanged(nameof(ActiveTimerDisplay));
+        await _timers.StartAsync(timer.Label, timer.TotalSeconds);
     }
 
-    private void OnTick(object? sender, EventArgs e)
+    private async Task CancelTimerAsync()
     {
-        _remainingSeconds--;
-        if (_remainingSeconds <= 0)
-        {
-            _remainingSeconds = 0;
-            OnPropertyChanged(nameof(ActiveTimerDisplay));
-            NotifyTimerFinished();
-            CancelTimer();
-            return;
-        }
-
-        OnPropertyChanged(nameof(ActiveTimerDisplay));
+        if (_timers is not null)
+            await _timers.StopAsync();
     }
 
     private static void Haptic()
@@ -195,34 +177,31 @@ public sealed class FocusModeViewModel : INotifyPropertyChanged
         }
     }
 
-    private static void NotifyTimerFinished()
+    /// <summary>
+    /// Subscribes to the shared timer and re-reads its deadline. Paired with <see cref="Detach"/>
+    /// on every appear/disappear cycle — subscribing only once in the constructor left the display
+    /// frozen if this page was ever shown a second time.
+    /// </summary>
+    public void Attach()
     {
-        try
-        {
-            Vibration.Default.Vibrate(TimeSpan.FromMilliseconds(800));
-        }
-        catch
-        {
-            // Vibration is best-effort; ignore unsupported devices.
-        }
+        if (_timers is null)
+            return;
+
+        _timers.Tick -= OnTimerTick;
+        _timers.Tick += OnTimerTick;
+        _timers.Resume();
+        OnTimerTick(this, EventArgs.Empty);
     }
 
-    /// <summary>Stops any running countdown (call when leaving Focus mode).</summary>
-    public void StopTimers() => CancelTimer();
-
-    private void CancelTimer()
+    /// <summary>
+    /// Stops listening to the shared timer. Note it does NOT stop the countdown: a timer
+    /// deliberately keeps running when you leave Focus Mode, which is the whole point of moving it
+    /// out of this page.
+    /// </summary>
+    public void Detach()
     {
-        if (_countdown is not null)
-        {
-            _countdown.Stop();
-            _countdown.Tick -= OnTick;
-            _countdown = null;
-        }
-
-        _activeTimer = null;
-        OnPropertyChanged(nameof(IsTimerRunning));
-        OnPropertyChanged(nameof(ActiveTimerLabel));
-        OnPropertyChanged(nameof(ActiveTimerDisplay));
+        if (_timers is not null)
+            _timers.Tick -= OnTimerTick;
     }
 
     public event PropertyChangedEventHandler? PropertyChanged;

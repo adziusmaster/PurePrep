@@ -1,6 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:local="clr-namespace:PurePrep"
              xmlns:loc="clr-namespace:PurePrep.Localization"
              x:Class="PurePrep.RecipeDetailPage"
              x:Name="PageRoot"
@@ -11,34 +12,58 @@
     <Grid RowDefinitions="Auto,*,Auto">
 
         <!-- Top bar -->
-        <Grid Padding="20,12,20,0" ColumnDefinitions="Auto,*,Auto,Auto,Auto" ColumnSpacing="10"
+        <Grid Padding="20,12,20,0" ColumnDefinitions="Auto,*,Auto,Auto,Auto,Auto,Auto" ColumnSpacing="8"
               MaximumWidthRequest="760" HorizontalOptions="Center">
-            <Border WidthRequest="42" HeightRequest="42" BackgroundColor="{DynamicResource Surface}"
-                    Stroke="{DynamicResource Line}" StrokeThickness="1" StrokeShape="RoundRectangle 13">
+            <Border WidthRequest="48" HeightRequest="48" BackgroundColor="{DynamicResource Surface}"
+                    Stroke="{DynamicResource Line}" StrokeThickness="1" StrokeShape="RoundRectangle 14"
+                    local:TapFeedback.IsEnabled="True" AutomationProperties.IsInAccessibleTree="True" AutomationProperties.Name="{loc:Translate Back}">
                 <Border.GestureRecognizers>
                     <TapGestureRecognizer Tapped="OnBackTapped" />
                 </Border.GestureRecognizers>
                 <Label Text="&#8249;" TextColor="{DynamicResource Ink}" FontSize="26"
                        HorizontalOptions="Center" VerticalOptions="Center" />
             </Border>
-            <Border Grid.Column="2" WidthRequest="42" HeightRequest="42" BackgroundColor="{DynamicResource Surface}"
-                    Stroke="{DynamicResource Line}" StrokeThickness="1" StrokeShape="RoundRectangle 13">
+            <Border Grid.Column="2" WidthRequest="48" HeightRequest="48" BackgroundColor="{DynamicResource Surface}"
+                    Stroke="{DynamicResource Line}" StrokeThickness="1" StrokeShape="RoundRectangle 14"
+                    local:TapFeedback.IsEnabled="True" AutomationProperties.IsInAccessibleTree="True" AutomationProperties.Name="{loc:Translate Translate}">
                 <Border.GestureRecognizers>
                     <TapGestureRecognizer Tapped="OnTranslateTapped" />
                 </Border.GestureRecognizers>
                 <Label Text="&#127760;" FontSize="18"
                        HorizontalOptions="Center" VerticalOptions="Center" />
             </Border>
-            <Border Grid.Column="3" WidthRequest="42" HeightRequest="42" BackgroundColor="{DynamicResource Surface}"
-                    Stroke="{DynamicResource Line}" StrokeThickness="1" StrokeShape="RoundRectangle 13">
+            <Border Grid.Column="3" WidthRequest="48" HeightRequest="48" BackgroundColor="{DynamicResource Surface}"
+                    Stroke="{DynamicResource Line}" StrokeThickness="1" StrokeShape="RoundRectangle 14"
+                    local:TapFeedback.IsEnabled="True" AutomationProperties.IsInAccessibleTree="True" AutomationProperties.Name="{loc:Translate Edit}">
                 <Border.GestureRecognizers>
                     <TapGestureRecognizer Tapped="OnEditTapped" />
                 </Border.GestureRecognizers>
                 <Label Text="&#9998;" TextColor="{DynamicResource Ink}" FontSize="17"
                        HorizontalOptions="Center" VerticalOptions="Center" />
             </Border>
-            <Border Grid.Column="4" WidthRequest="42" HeightRequest="42" BackgroundColor="{DynamicResource Surface}"
-                    Stroke="{DynamicResource Line}" StrokeThickness="1" StrokeShape="RoundRectangle 13">
+            <Border Grid.Column="4" WidthRequest="48" HeightRequest="48" BackgroundColor="{DynamicResource Surface}"
+                    Stroke="{DynamicResource Line}" StrokeThickness="1" StrokeShape="RoundRectangle 14"
+                    local:TapFeedback.IsEnabled="True" AutomationProperties.IsInAccessibleTree="True"
+                    AutomationProperties.Name="{loc:Translate AddToShoppingList}">
+                <Border.GestureRecognizers>
+                    <TapGestureRecognizer Tapped="OnAddToShoppingListTapped" />
+                </Border.GestureRecognizers>
+                <Label Text="&#128722;" FontSize="17"
+                       HorizontalOptions="Center" VerticalOptions="Center" />
+            </Border>
+            <Border Grid.Column="5" WidthRequest="48" HeightRequest="48" BackgroundColor="{DynamicResource Surface}"
+                    Stroke="{DynamicResource Line}" StrokeThickness="1" StrokeShape="RoundRectangle 14"
+                    local:TapFeedback.IsEnabled="True" AutomationProperties.IsInAccessibleTree="True"
+                    AutomationProperties.Name="{loc:Translate ShareRecipe}">
+                <Border.GestureRecognizers>
+                    <TapGestureRecognizer Tapped="OnShareTapped" />
+                </Border.GestureRecognizers>
+                <Label Text="&#8599;" TextColor="{DynamicResource Ink}" FontSize="19"
+                       HorizontalOptions="Center" VerticalOptions="Center" />
+            </Border>
+            <Border Grid.Column="6" WidthRequest="48" HeightRequest="48" BackgroundColor="{DynamicResource Surface}"
+                    Stroke="{DynamicResource Line}" StrokeThickness="1" StrokeShape="RoundRectangle 14"
+                    local:TapFeedback.IsEnabled="True" AutomationProperties.IsInAccessibleTree="True" AutomationProperties.Name="{loc:Translate Delete}">
                 <Border.GestureRecognizers>
                     <TapGestureRecognizer Tapped="OnDeleteTapped" />
                 </Border.GestureRecognizers>

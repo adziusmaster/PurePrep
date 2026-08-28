@@ -8,11 +8,20 @@ using Microsoft.Extensions.DependencyInjection;
 namespace PurePrep;
 
 [Activity(Theme = "@style/Maui.SplashTheme", MainLauncher = true, LaunchMode = LaunchMode.SingleTop, ConfigurationChanges = ConfigChanges.ScreenSize | ConfigChanges.Orientation | ConfigChanges.UiMode | ConfigChanges.ScreenLayout | ConfigChanges.SmallestScreenSize | ConfigChanges.Density)]
+// Lets PurePrep appear in the Android share sheet. Sharing a recipe link from a browser, a chat
+// app or a social app is how people actually encounter recipes; without this the only way in is to
+// copy the link, leave the app you were in, open PurePrep and paste.
+[IntentFilter(new[] { Android.Content.Intent.ActionSend },
+    Categories = new[] { Android.Content.Intent.CategoryDefault },
+    DataMimeType = "text/plain")]
 public class MainActivity : MauiAppCompatActivity
 {
     protected override void OnCreate(Bundle? savedInstanceState)
     {
         base.OnCreate(savedInstanceState);
+
+        // base.OnCreate builds the MAUI app, so services are available from here on.
+        HandleShareIntent(Intent);
 
         if (Window is null)
             return;
@@ -33,6 +42,32 @@ public class MainActivity : MauiAppCompatActivity
         var content = Window.DecorView.FindViewById(Android.Resource.Id.Content);
         if (content is not null)
             ViewCompat.SetOnApplyWindowInsetsListener(content, new SystemBarsInsetsListener());
+    }
+
+    // LaunchMode is SingleTop, so a share arriving while PurePrep is already open is delivered
+    // here rather than creating a second activity.
+    protected override void OnNewIntent(Android.Content.Intent? intent)
+    {
+        base.OnNewIntent(intent);
+        HandleShareIntent(intent);
+    }
+
+    private static void HandleShareIntent(Android.Content.Intent? intent)
+    {
+        if (intent?.Action != Android.Content.Intent.ActionSend)
+            return;
+
+        var relay = IPlatformApplication.Current?.Services.GetService<PurePrep.Services.SharedUrlRelay>();
+        if (relay is null)
+            return;
+
+        var shared = intent.GetStringExtra(Android.Content.Intent.ExtraText);
+        var url = PurePrep.Domain.SharedText.ExtractUrl(shared);
+
+        if (url is null)
+            relay.PublishEmpty();
+        else
+            relay.Publish(url);
     }
 
     private sealed class SystemBarsInsetsListener : Java.Lang.Object, IOnApplyWindowInsetsListener

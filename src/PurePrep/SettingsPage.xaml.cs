@@ -129,6 +129,14 @@ public partial class SettingsPage : ContentPage
             return true;
         }
 
+        // Behave like a normal back: return to the previous page (home) rather than fall through to
+        // the platform default, which was quitting the app from a pushed page on some devices.
+        if (Navigation.NavigationStack.Count > 1)
+        {
+            _ = Navigation.PopAsync();
+            return true;
+        }
+
         return base.OnBackButtonPressed();
     }
 

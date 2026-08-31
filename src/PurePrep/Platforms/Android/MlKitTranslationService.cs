@@ -102,9 +102,16 @@ public sealed class MlKitTranslationService : ITranslationService
             .Concat(recipe.Ingredients)
             .Concat(recipe.Steps.Select(s => s.Instruction)));
 
-        var source = LanguageHeuristics.Detect(combined) ?? "en";
-        if (string.Equals(source, targetCode, StringComparison.OrdinalIgnoreCase))
+        // Only skip translation when we CONFIDENTLY detect the recipe is already in the target
+        // language. A null detection means "unknown source" (e.g. an import in a language our
+        // heuristics don't cover) — previously we defaulted that to "en" and wrongly short-circuited
+        // when the user's target was English, leaving the recipe untranslated. Fall back to "en" as
+        // the ML Kit source only for the actual translation attempt.
+        var detected = LanguageHeuristics.Detect(combined);
+        if (detected is not null && string.Equals(detected, targetCode, StringComparison.OrdinalIgnoreCase))
             return recipe; // already in the requested language
+
+        var source = detected ?? "en";
 
         var options = new TranslatorOptions.Builder()
             .SetSourceLanguage(RequireMlKitCode(source))

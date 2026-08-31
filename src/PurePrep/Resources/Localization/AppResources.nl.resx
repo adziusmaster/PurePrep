@@ -323,6 +323,15 @@ Voeg de bouillon pollepel voor pollepel toe, al roerend.</value>
   <data name="Ok" xml:space="preserve">
     <value>OK</value>
   </data>
+  <data name="UnitsHint" xml:space="preserve">
+    <value>Ingrediënten niet in jouw eenheden?</value>
+  </data>
+  <data name="UnitsHintAction" xml:space="preserve">
+    <value>Wijzig in Instellingen</value>
+  </data>
+  <data name="PressBackAgainToExit" xml:space="preserve">
+    <value>Druk nogmaals op terug om af te sluiten</value>
+  </data>
   <data name="Download" xml:space="preserve">
     <value>Downloaden</value>
   </data>

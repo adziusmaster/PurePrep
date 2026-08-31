@@ -3,6 +3,7 @@ using PurePrep.Application;
 using PurePrep.Domain;
 using PurePrep.Localization;
 using PurePrep.Presentation;
+using PurePrep.Services;
 
 namespace PurePrep;
 
@@ -37,6 +38,18 @@ public partial class RecipeDetailPage : ContentPage
     }
 
     private async void OnBackTapped(object? sender, EventArgs e) => await Navigation.PopAsync();
+
+    private async void OnUnitsHintTapped(object? sender, EventArgs e)
+    {
+        // Same wiring as the home screen's settings button, so the units hint lands users directly
+        // on the screen where metric/US can be toggled.
+        var services = this.Handler?.MauiContext?.Services;
+        var theme = services?.GetService(typeof(ThemeService)) as ThemeService;
+        var credits = services?.GetService(typeof(ISmartCreditsClient)) as ISmartCreditsClient;
+        var billing = services?.GetService(typeof(IBillingService)) as IBillingService;
+        if (theme is not null)
+            await Navigation.PushAsync(new SettingsPage(theme, credits, billing));
+    }
 
     private async void OnEditTapped(object? sender, EventArgs e) =>
         await Navigation.PushAsync(new ManualAddPage(_library, _recipe));

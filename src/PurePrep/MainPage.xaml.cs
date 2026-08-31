@@ -2,12 +2,19 @@ namespace PurePrep;
 
 using System.ComponentModel;
 using PurePrep.Domain;
+using PurePrep.Localization;
 using PurePrep.Presentation;
 using PurePrep.Services;
 
 public partial class MainPage : ContentPage
 {
 	private bool _hasLoaded;
+
+	// Home is the navigation root, so the hardware back would otherwise quit on the first press —
+	// which testers hit by accident. Follow the Android convention: one press hints, a second within
+	// this window actually exits.
+	private static readonly TimeSpan ExitWindow = TimeSpan.FromSeconds(2);
+	private DateTime _lastBackPress = DateTime.MinValue;
 
 	private readonly SharedUrlRelay? _sharedUrls;
 
@@ -78,7 +85,25 @@ public partial class MainPage : ContentPage
 			return true;
 		}
 
-		return base.OnBackButtonPressed();
+		// Double-press-to-exit: the first press only shows a hint, so an accidental back on the
+		// home screen no longer closes the app outright.
+		var now = DateTime.UtcNow;
+		if (now - _lastBackPress <= ExitWindow)
+			return base.OnBackButtonPressed(); // second press in the window: let the platform exit
+
+		_lastBackPress = now;
+		ShowExitHint();
+		return true;
+	}
+
+	private void ShowExitHint()
+	{
+#if ANDROID
+		Android.Widget.Toast.MakeText(
+			Android.App.Application.Context,
+			AppResources.Get("PressBackAgainToExit"),
+			Android.Widget.ToastLength.Short)?.Show();
+#endif
 	}
 
 	private async void OnFocusRequested(object? sender, ParsedRecipe recipe)

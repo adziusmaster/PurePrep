@@ -323,6 +323,15 @@ Add stock a ladle at a time, stirring.</value>
   <data name="Ok" xml:space="preserve">
     <value>OK</value>
   </data>
+  <data name="UnitsHint" xml:space="preserve">
+    <value>Ingredients not in your units?</value>
+  </data>
+  <data name="UnitsHintAction" xml:space="preserve">
+    <value>Change in Settings</value>
+  </data>
+  <data name="PressBackAgainToExit" xml:space="preserve">
+    <value>Press back again to exit</value>
+  </data>
   <data name="Download" xml:space="preserve">
     <value>Download</value>
   </data>

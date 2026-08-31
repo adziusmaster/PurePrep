@@ -55,6 +55,28 @@ public sealed class GeminiClient(HttpClient http, IOptions<GeminiOptions> option
         ["nl"] = "Dutch",
     };
 
+    /// <summary>
+    /// Builds the system prompt, appending a translation directive when a supported target language
+    /// is requested. Exposed as a pure method so the language handling can be unit-tested without a
+    /// live Gemini call. The directive is deliberately emphatic that translation applies to the
+    /// STRUCTURED RECIPE DATA too: that section is authoritative for structure/boundaries only, and
+    /// testers saw the model otherwise echo the source language verbatim.
+    /// </summary>
+    public static string BuildSystemPrompt(string? targetLanguage)
+    {
+        var code = targetLanguage?.Trim().Split('-')[0];
+        if (string.IsNullOrEmpty(code) || !LanguageNames.TryGetValue(code, out var languageName))
+            return SystemPrompt;
+
+        return SystemPrompt +
+            $" OUTPUT LANGUAGE: write the Title, Ingredients, and Steps entirely in {languageName}. " +
+            $"This overrides everything else: even where the STRUCTURED RECIPE DATA is treated as " +
+            $"authoritative for structure, its text must still be translated. If the source recipe is " +
+            $"in any other language, translate every ingredient and step faithfully into natural, fluent " +
+            $"{languageName}; the final output must not contain words left in the source language. " +
+            "Preserve all quantities, units, numbers, and cooking terminology exactly and keep them unchanged.";
+    }
+
     public async Task<AiRecipe> ExtractAsync(string pageText, string? targetLanguage = null, CancellationToken ct = default)
     {
         if (string.IsNullOrWhiteSpace(_options.ApiKey))
@@ -63,15 +85,7 @@ public sealed class GeminiClient(HttpClient http, IOptions<GeminiOptions> option
         if (pageText.Length > _options.MaxInputChars)
             pageText = pageText[.._options.MaxInputChars];
 
-        var systemPrompt = SystemPrompt;
-        var code = targetLanguage?.Trim().Split('-')[0];
-        if (!string.IsNullOrEmpty(code) && LanguageNames.TryGetValue(code, out var languageName))
-        {
-            systemPrompt +=
-                $" Write the Title, Ingredients, and Steps in {languageName}. If the source recipe is in a " +
-                $"different language, translate it faithfully into natural, fluent {languageName}, preserving all " +
-                "quantities, units, and cooking terminology exactly. Keep numbers and units unchanged.";
-        }
+        var systemPrompt = BuildSystemPrompt(targetLanguage);
 
         var request = new
         {

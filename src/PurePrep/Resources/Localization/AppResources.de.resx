@@ -323,6 +323,15 @@ Brühe kellenweise unter Rühren zugeben.</value>
   <data name="Ok" xml:space="preserve">
     <value>OK</value>
   </data>
+  <data name="UnitsHint" xml:space="preserve">
+    <value>Zutaten nicht in deinen Einheiten?</value>
+  </data>
+  <data name="UnitsHintAction" xml:space="preserve">
+    <value>In Einstellungen ändern</value>
+  </data>
+  <data name="PressBackAgainToExit" xml:space="preserve">
+    <value>Zum Beenden erneut „Zurück“ drücken</value>
+  </data>
   <data name="Download" xml:space="preserve">
     <value>Herunterladen</value>
   </data>

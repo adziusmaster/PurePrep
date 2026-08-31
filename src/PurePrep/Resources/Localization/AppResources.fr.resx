@@ -323,6 +323,15 @@ Ajoutez le bouillon louche par louche en remuant.</value>
   <data name="Ok" xml:space="preserve">
     <value>OK</value>
   </data>
+  <data name="UnitsHint" xml:space="preserve">
+    <value>Ingrédients pas dans vos unités ?</value>
+  </data>
+  <data name="UnitsHintAction" xml:space="preserve">
+    <value>Modifier dans Réglages</value>
+  </data>
+  <data name="PressBackAgainToExit" xml:space="preserve">
+    <value>Appuyez à nouveau sur retour pour quitter</value>
+  </data>
   <data name="Download" xml:space="preserve">
     <value>Télécharger</value>
   </data>

@@ -22,7 +22,12 @@ public static partial class StepTimers
     private const string MinuteWords = @"minutes?|mins?|min|minuten?|minutos?|minuti|minuto|minut[ayę]?|minuut|minuten";
     private const string SecondWords = @"seconds?|secs?|sec|sekunden?|sek|secondes?|segundos?|secondi|secondo|sekund[ayę]?|seconden";
 
-    [GeneratedRegex(@"(?<num>\d+(?:[.,]\d+)?)\s*(?<unit>" + HourWords + @"|" + MinuteWords + @"|" + SecondWords + @")\b",
+    // Optional filler words that can sit between the number and the unit, e.g. Romanian
+    // "30 de minute", Italian "un quarto di ora", English "a couple of minutes". Without this the
+    // number and unit must be adjacent, so testers saw timers like "30 de minute" go undetected.
+    private const string FillerWords = @"de|di|of";
+
+    [GeneratedRegex(@"(?<num>\d+(?:[.,]\d+)?)\s*(?:(?:" + FillerWords + @")\s+)?(?<unit>" + HourWords + @"|" + MinuteWords + @"|" + SecondWords + @")\b",
         RegexOptions.IgnoreCase | RegexOptions.CultureInvariant)]
     private static partial Regex DurationPattern();
 

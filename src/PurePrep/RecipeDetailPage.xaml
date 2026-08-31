@@ -139,6 +139,22 @@
                     </Grid>
                     <Label Text="{Binding ServingsCaption}" TextColor="{DynamicResource Muted}" FontSize="12.5"
                            HorizontalOptions="End" Margin="0,-6,2,0" />
+                    <!-- Discoverability: testers didn't realise metric/US units are switchable. This
+                         subtle hint jumps straight to the Units setting. -->
+                    <Label TextColor="{DynamicResource Muted}" FontSize="12.5"
+                           HorizontalOptions="Start" Margin="2,-6,0,0">
+                        <Label.GestureRecognizers>
+                            <TapGestureRecognizer Tapped="OnUnitsHintTapped" />
+                        </Label.GestureRecognizers>
+                        <Label.FormattedText>
+                            <FormattedString>
+                                <Span Text="{loc:Translate UnitsHint}" />
+                                <Span Text="  " />
+                                <Span Text="{loc:Translate UnitsHintAction}" TextColor="{DynamicResource Lime}"
+                                      TextDecorations="Underline" />
+                            </FormattedString>
+                        </Label.FormattedText>
+                    </Label>
                     <Border BackgroundColor="{DynamicResource Surface}" Stroke="{DynamicResource Line}"
                             StrokeThickness="1" Padding="16,6" StrokeShape="RoundRectangle 18">
                         <VerticalStackLayout BindableLayout.ItemsSource="{Binding ScaledIngredients}">

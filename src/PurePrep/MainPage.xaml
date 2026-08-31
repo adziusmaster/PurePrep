@@ -36,17 +36,6 @@
                         <Border WidthRequest="48" HeightRequest="48" BackgroundColor="{DynamicResource Surface}"
                                 Stroke="{DynamicResource Line}" StrokeThickness="1"
                                 StrokeShape="RoundRectangle 24" VerticalOptions="Center"
-                                local:TapFeedback.IsEnabled="True" AutomationProperties.IsInAccessibleTree="True"
-                                AutomationProperties.Name="{loc:Translate ShoppingList}">
-                            <Border.GestureRecognizers>
-                                <TapGestureRecognizer Tapped="OnShoppingListTapped" />
-                            </Border.GestureRecognizers>
-                            <Label Text="&#128722;" FontSize="18"
-                                   HorizontalOptions="Center" VerticalOptions="Center" />
-                        </Border>
-                        <Border WidthRequest="48" HeightRequest="48" BackgroundColor="{DynamicResource Surface}"
-                                Stroke="{DynamicResource Line}" StrokeThickness="1"
-                                StrokeShape="RoundRectangle 24" VerticalOptions="Center"
                                 local:TapFeedback.IsEnabled="True" AutomationProperties.IsInAccessibleTree="True" AutomationProperties.Name="{loc:Translate Settings}">
                             <Border.GestureRecognizers>
                                 <TapGestureRecognizer Tapped="OnSettingsTapped" />

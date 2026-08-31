@@ -12,7 +12,7 @@
     <Grid RowDefinitions="Auto,*,Auto">
 
         <!-- Top bar -->
-        <Grid Padding="20,12,20,0" ColumnDefinitions="Auto,*,Auto,Auto,Auto,Auto,Auto" ColumnSpacing="8"
+        <Grid Padding="20,12,20,0" ColumnDefinitions="Auto,*,Auto,Auto,Auto" ColumnSpacing="8"
               MaximumWidthRequest="760" HorizontalOptions="Center">
             <Border WidthRequest="48" HeightRequest="48" BackgroundColor="{DynamicResource Surface}"
                     Stroke="{DynamicResource Line}" StrokeThickness="1" StrokeShape="RoundRectangle 14"
@@ -42,26 +42,6 @@
                        HorizontalOptions="Center" VerticalOptions="Center" />
             </Border>
             <Border Grid.Column="4" WidthRequest="48" HeightRequest="48" BackgroundColor="{DynamicResource Surface}"
-                    Stroke="{DynamicResource Line}" StrokeThickness="1" StrokeShape="RoundRectangle 14"
-                    local:TapFeedback.IsEnabled="True" AutomationProperties.IsInAccessibleTree="True"
-                    AutomationProperties.Name="{loc:Translate AddToShoppingList}">
-                <Border.GestureRecognizers>
-                    <TapGestureRecognizer Tapped="OnAddToShoppingListTapped" />
-                </Border.GestureRecognizers>
-                <Label Text="&#128722;" FontSize="17"
-                       HorizontalOptions="Center" VerticalOptions="Center" />
-            </Border>
-            <Border Grid.Column="5" WidthRequest="48" HeightRequest="48" BackgroundColor="{DynamicResource Surface}"
-                    Stroke="{DynamicResource Line}" StrokeThickness="1" StrokeShape="RoundRectangle 14"
-                    local:TapFeedback.IsEnabled="True" AutomationProperties.IsInAccessibleTree="True"
-                    AutomationProperties.Name="{loc:Translate ShareRecipe}">
-                <Border.GestureRecognizers>
-                    <TapGestureRecognizer Tapped="OnShareTapped" />
-                </Border.GestureRecognizers>
-                <Label Text="&#8599;" TextColor="{DynamicResource Ink}" FontSize="19"
-                       HorizontalOptions="Center" VerticalOptions="Center" />
-            </Border>
-            <Border Grid.Column="6" WidthRequest="48" HeightRequest="48" BackgroundColor="{DynamicResource Surface}"
                     Stroke="{DynamicResource Line}" StrokeThickness="1" StrokeShape="RoundRectangle 14"
                     local:TapFeedback.IsEnabled="True" AutomationProperties.IsInAccessibleTree="True" AutomationProperties.Name="{loc:Translate Delete}">
                 <Border.GestureRecognizers>

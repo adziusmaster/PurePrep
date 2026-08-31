@@ -497,30 +497,6 @@ Aggiungi il brodo un mestolo alla volta, mescolando.</value>
   <data name="StartTimer" xml:space="preserve">
     <value>Avvia timer</value>
   </data>
-  <data name="ShoppingList" xml:space="preserve">
-    <value>Lista della spesa</value>
-  </data>
-  <data name="AddToShoppingList" xml:space="preserve">
-    <value>Aggiungi alla lista</value>
-  </data>
-  <data name="AddedToListFormat" xml:space="preserve">
-    <value>{0} aggiunti alla tua lista.</value>
-  </data>
-  <data name="ClearTicked" xml:space="preserve">
-    <value>Rimuovi spuntati</value>
-  </data>
-  <data name="ClearAll" xml:space="preserve">
-    <value>Cancella tutto</value>
-  </data>
-  <data name="ShoppingEmptyTitle" xml:space="preserve">
-    <value>Niente da comprare</value>
-  </data>
-  <data name="ShoppingEmptyBody" xml:space="preserve">
-    <value>Apri una ricetta e aggiungi i suoi ingredienti.</value>
-  </data>
-  <data name="ShareRecipe" xml:space="preserve">
-    <value>Condividi</value>
-  </data>
   <data name="ExportRecipes" xml:space="preserve">
     <value>Esporta ricette</value>
   </data>

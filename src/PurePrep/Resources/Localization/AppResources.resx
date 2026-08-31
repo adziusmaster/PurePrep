@@ -497,30 +497,6 @@ Add stock a ladle at a time, stirring.</value>
   <data name="StartTimer" xml:space="preserve">
     <value>Start timer</value>
   </data>
-  <data name="ShoppingList" xml:space="preserve">
-    <value>Shopping list</value>
-  </data>
-  <data name="AddToShoppingList" xml:space="preserve">
-    <value>Add to shopping list</value>
-  </data>
-  <data name="AddedToListFormat" xml:space="preserve">
-    <value>{0} added to your shopping list.</value>
-  </data>
-  <data name="ClearTicked" xml:space="preserve">
-    <value>Clear ticked</value>
-  </data>
-  <data name="ClearAll" xml:space="preserve">
-    <value>Clear all</value>
-  </data>
-  <data name="ShoppingEmptyTitle" xml:space="preserve">
-    <value>Nothing to buy yet</value>
-  </data>
-  <data name="ShoppingEmptyBody" xml:space="preserve">
-    <value>Open a recipe and add its ingredients to build your list.</value>
-  </data>
-  <data name="ShareRecipe" xml:space="preserve">
-    <value>Share</value>
-  </data>
   <data name="ExportRecipes" xml:space="preserve">
     <value>Export recipes</value>
   </data>

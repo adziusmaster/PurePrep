@@ -2,19 +2,12 @@ namespace PurePrep;
 
 using System.ComponentModel;
 using PurePrep.Domain;
-using PurePrep.Localization;
 using PurePrep.Presentation;
 using PurePrep.Services;
 
-public partial class MainPage : ContentPage
+public partial class MainPage : ContentPage, IHardwareBackHandler
 {
 	private bool _hasLoaded;
-
-	// Home is the navigation root, so the hardware back would otherwise quit on the first press —
-	// which testers hit by accident. Follow the Android convention: one press hints, a second within
-	// this window actually exits.
-	private static readonly TimeSpan ExitWindow = TimeSpan.FromSeconds(2);
-	private DateTime _lastBackPress = DateTime.MinValue;
 
 	private readonly SharedUrlRelay? _sharedUrls;
 
@@ -74,10 +67,10 @@ public partial class MainPage : ContentPage
 		}
 	}
 
-	protected override bool OnBackButtonPressed()
+	// The paywall sheet is an in-page overlay, so the hardware back button should close it rather
+	// than pop/exit. MainActivity drives the back policy and calls this first.
+	public bool OnHardwareBack()
 	{
-		// When the paywall sheet is open, the hardware back button should close it rather than
-		// exit the app (this page is the navigation root, so the default would quit PurePrep).
 		var vm = (RecipeLibraryViewModel)BindingContext;
 		if (vm.IsUpgradePromptVisible)
 		{
@@ -85,25 +78,7 @@ public partial class MainPage : ContentPage
 			return true;
 		}
 
-		// Double-press-to-exit: the first press only shows a hint, so an accidental back on the
-		// home screen no longer closes the app outright.
-		var now = DateTime.UtcNow;
-		if (now - _lastBackPress <= ExitWindow)
-			return base.OnBackButtonPressed(); // second press in the window: let the platform exit
-
-		_lastBackPress = now;
-		ShowExitHint();
-		return true;
-	}
-
-	private void ShowExitHint()
-	{
-#if ANDROID
-		Android.Widget.Toast.MakeText(
-			Android.App.Application.Context,
-			AppResources.Get("PressBackAgainToExit"),
-			Android.Widget.ToastLength.Short)?.Show();
-#endif
+		return false;
 	}
 
 	private async void OnFocusRequested(object? sender, ParsedRecipe recipe)
@@ -123,9 +98,6 @@ public partial class MainPage : ContentPage
 	{
 		await Navigation.PushAsync(new ManualAddPage((RecipeLibraryViewModel)BindingContext));
 	}
-
-	private async void OnShoppingListTapped(object? sender, EventArgs e) =>
-		await Navigation.PushAsync(new ShoppingListPage());
 
 	private async void OnSettingsTapped(object? sender, EventArgs e)
 	{

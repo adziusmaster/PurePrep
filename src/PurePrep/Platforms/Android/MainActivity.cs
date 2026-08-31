@@ -2,6 +2,7 @@ using Android.App;
 using Android.Content.PM;
 using Android.OS;
 using Android.Views;
+using AndroidX.Activity;
 using AndroidX.Core.View;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -22,6 +23,12 @@ public class MainActivity : MauiAppCompatActivity
 
         // base.OnCreate builds the MAUI app, so services are available from here on.
         HandleShareIntent(Intent);
+
+        // Own the hardware/gesture back button ourselves. At targetSdk 35+ Android routes back
+        // through the predictive-back OnBackInvokedCallback, which bypasses MAUI's per-page
+        // OnBackButtonPressed — that is why back was closing the app from every screen. This
+        // dispatcher callback works with both classic and predictive back.
+        OnBackPressedDispatcher.AddCallback(this, new BackPolicyCallback(this));
 
         if (Window is null)
             return;
@@ -80,6 +87,66 @@ public class MainActivity : MauiAppCompatActivity
             var bars = insets.GetInsets(WindowInsetsCompat.Type.SystemBars() | WindowInsetsCompat.Type.DisplayCutout());
             v.SetPadding(bars.Left, bars.Top, bars.Right, bars.Bottom);
             return WindowInsetsCompat.Consumed;
+        }
+    }
+
+    // Central hardware-back policy. Mirrors what users expect on Android: dismiss an open overlay,
+    // otherwise navigate back through the MAUI stack, and only on the home screen require a second
+    // press (within the window) to actually leave the app.
+    private sealed class BackPolicyCallback : OnBackPressedCallback
+    {
+        private static readonly TimeSpan ExitWindow = TimeSpan.FromSeconds(2);
+        private readonly MainActivity _activity;
+        private DateTime _lastBackPress = DateTime.MinValue;
+
+        public BackPolicyCallback(MainActivity activity) : base(true) => _activity = activity;
+
+        public override void HandleOnBackPressed()
+        {
+            var page = Microsoft.Maui.Controls.Application.Current?.Windows is { Count: > 0 } windows
+                ? windows[0].Page
+                : null;
+
+            if (page is null)
+            {
+                _activity.Finish();
+                return;
+            }
+
+            var nav = page.Navigation;
+
+            // 1. A modal page is on top — close it.
+            if (nav.ModalStack.Count > 0)
+            {
+                _ = nav.PopModalAsync();
+                return;
+            }
+
+            // 2. The visible page has an in-page overlay (buy sheet / upgrade prompt) — let it close.
+            var current = (page as Microsoft.Maui.Controls.NavigationPage)?.CurrentPage ?? page;
+            if (current is IHardwareBackHandler handler && handler.OnHardwareBack())
+                return;
+
+            // 3. A page is pushed on the stack — go back to the previous one.
+            if (nav.NavigationStack.Count > 1)
+            {
+                _ = nav.PopAsync();
+                return;
+            }
+
+            // 4. We're at the home screen — press back again within the window to exit.
+            var now = DateTime.UtcNow;
+            if (now - _lastBackPress <= ExitWindow)
+            {
+                _activity.Finish();
+                return;
+            }
+
+            _lastBackPress = now;
+            Android.Widget.Toast.MakeText(
+                _activity,
+                PurePrep.Localization.AppResources.Get("PressBackAgainToExit"),
+                Android.Widget.ToastLength.Short)?.Show();
         }
     }
 }

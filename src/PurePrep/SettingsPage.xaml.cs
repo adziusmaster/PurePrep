@@ -7,7 +7,7 @@ using MauiApp = Microsoft.Maui.Controls.Application;
 
 namespace PurePrep;
 
-public partial class SettingsPage : ContentPage
+public partial class SettingsPage : ContentPage, IHardwareBackHandler
 {
     private const string PrivacyUrl = "https://pureprep.lechdigital.nl/privacy";
     private readonly ThemeService _theme;
@@ -120,8 +120,8 @@ public partial class SettingsPage : ContentPage
     }
 
     // The buy sheet is an in-page overlay, so the hardware back button should close it rather than
-    // pop the page.
-    protected override bool OnBackButtonPressed()
+    // pop the page. Back navigation itself is handled centrally in MainActivity.
+    public bool OnHardwareBack()
     {
         if (BuySheet.IsVisible)
         {
@@ -129,15 +129,7 @@ public partial class SettingsPage : ContentPage
             return true;
         }
 
-        // Behave like a normal back: return to the previous page (home) rather than fall through to
-        // the platform default, which was quitting the app from a pushed page on some devices.
-        if (Navigation.NavigationStack.Count > 1)
-        {
-            _ = Navigation.PopAsync();
-            return true;
-        }
-
-        return base.OnBackButtonPressed();
+        return false;
     }
 
     private void BuildLanguagePicker()

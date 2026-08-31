@@ -497,30 +497,6 @@ Voeg de bouillon pollepel voor pollepel toe, al roerend.</value>
   <data name="StartTimer" xml:space="preserve">
     <value>Timer starten</value>
   </data>
-  <data name="ShoppingList" xml:space="preserve">
-    <value>Boodschappenlijst</value>
-  </data>
-  <data name="AddToShoppingList" xml:space="preserve">
-    <value>Aan lijst toevoegen</value>
-  </data>
-  <data name="AddedToListFormat" xml:space="preserve">
-    <value>{0} toegevoegd aan je lijst.</value>
-  </data>
-  <data name="ClearTicked" xml:space="preserve">
-    <value>Afgevinkte wissen</value>
-  </data>
-  <data name="ClearAll" xml:space="preserve">
-    <value>Alles wissen</value>
-  </data>
-  <data name="ShoppingEmptyTitle" xml:space="preserve">
-    <value>Nog niets te kopen</value>
-  </data>
-  <data name="ShoppingEmptyBody" xml:space="preserve">
-    <value>Open een recept en voeg de ingrediënten toe.</value>
-  </data>
-  <data name="ShareRecipe" xml:space="preserve">
-    <value>Delen</value>
-  </data>
   <data name="ExportRecipes" xml:space="preserve">
     <value>Recepten exporteren</value>
   </data>

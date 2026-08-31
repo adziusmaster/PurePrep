@@ -497,30 +497,6 @@ Dodawaj bulion po chochli, mieszając.</value>
   <data name="StartTimer" xml:space="preserve">
     <value>Uruchom minutnik</value>
   </data>
-  <data name="ShoppingList" xml:space="preserve">
-    <value>Lista zakupów</value>
-  </data>
-  <data name="AddToShoppingList" xml:space="preserve">
-    <value>Dodaj do listy</value>
-  </data>
-  <data name="AddedToListFormat" xml:space="preserve">
-    <value>Dodano {0} do listy.</value>
-  </data>
-  <data name="ClearTicked" xml:space="preserve">
-    <value>Usuń zaznaczone</value>
-  </data>
-  <data name="ClearAll" xml:space="preserve">
-    <value>Wyczyść wszystko</value>
-  </data>
-  <data name="ShoppingEmptyTitle" xml:space="preserve">
-    <value>Nic do kupienia</value>
-  </data>
-  <data name="ShoppingEmptyBody" xml:space="preserve">
-    <value>Otwórz przepis i dodaj jego składniki.</value>
-  </data>
-  <data name="ShareRecipe" xml:space="preserve">
-    <value>Udostępnij</value>
-  </data>
   <data name="ExportRecipes" xml:space="preserve">
     <value>Eksportuj przepisy</value>
   </data>

@@ -497,30 +497,6 @@ Añade el caldo cucharón a cucharón, removiendo.</value>
   <data name="StartTimer" xml:space="preserve">
     <value>Iniciar temporizador</value>
   </data>
-  <data name="ShoppingList" xml:space="preserve">
-    <value>Lista de la compra</value>
-  </data>
-  <data name="AddToShoppingList" xml:space="preserve">
-    <value>Añadir a la lista</value>
-  </data>
-  <data name="AddedToListFormat" xml:space="preserve">
-    <value>{0} añadidos a tu lista.</value>
-  </data>
-  <data name="ClearTicked" xml:space="preserve">
-    <value>Borrar marcados</value>
-  </data>
-  <data name="ClearAll" xml:space="preserve">
-    <value>Borrar todo</value>
-  </data>
-  <data name="ShoppingEmptyTitle" xml:space="preserve">
-    <value>Nada que comprar aún</value>
-  </data>
-  <data name="ShoppingEmptyBody" xml:space="preserve">
-    <value>Abre una receta y añade sus ingredientes.</value>
-  </data>
-  <data name="ShareRecipe" xml:space="preserve">
-    <value>Compartir</value>
-  </data>
   <data name="ExportRecipes" xml:space="preserve">
     <value>Exportar recetas</value>
   </data>

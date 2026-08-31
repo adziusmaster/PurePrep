@@ -497,30 +497,6 @@ Ajoutez le bouillon louche par louche en remuant.</value>
   <data name="StartTimer" xml:space="preserve">
     <value>Démarrer le minuteur</value>
   </data>
-  <data name="ShoppingList" xml:space="preserve">
-    <value>Liste de courses</value>
-  </data>
-  <data name="AddToShoppingList" xml:space="preserve">
-    <value>Ajouter à la liste</value>
-  </data>
-  <data name="AddedToListFormat" xml:space="preserve">
-    <value>{0} ajoutés à votre liste.</value>
-  </data>
-  <data name="ClearTicked" xml:space="preserve">
-    <value>Effacer les cochés</value>
-  </data>
-  <data name="ClearAll" xml:space="preserve">
-    <value>Tout effacer</value>
-  </data>
-  <data name="ShoppingEmptyTitle" xml:space="preserve">
-    <value>Rien à acheter</value>
-  </data>
-  <data name="ShoppingEmptyBody" xml:space="preserve">
-    <value>Ouvrez une recette et ajoutez ses ingrédients.</value>
-  </data>
-  <data name="ShareRecipe" xml:space="preserve">
-    <value>Partager</value>
-  </data>
   <data name="ExportRecipes" xml:space="preserve">
     <value>Exporter les recettes</value>
   </data>

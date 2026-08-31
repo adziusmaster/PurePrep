@@ -56,9 +56,6 @@ public static class MauiProgram
 #endif
 		builder.Services.AddSingleton<CookTimerService>();
 
-		// Shopping list, persisted as a small JSON file alongside the recipe database.
-		builder.Services.AddSingleton<ShoppingListStore>();
-
 		// Language newly imported recipes are produced in (defaults to the app UI language).
 		builder.Services.AddSingleton<IRecipeLanguageProvider, RecipeLanguageSettings>();
 

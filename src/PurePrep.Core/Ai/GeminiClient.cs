@@ -93,6 +93,9 @@ public sealed class GeminiClient(HttpClient http, IOptions<GeminiOptions> option
             contents = new[] { new { role = "user", parts = new[] { new { text = pageText } } } },
             generationConfig = new
             {
+                // Deterministic extraction: re-importing the same page should yield the same recipe.
+                // Testers saw the step count wobble between imports; temperature 0 removes that variance.
+                temperature = 0.0,
                 responseMimeType = "application/json",
                 responseSchema = new
                 {
@@ -180,6 +183,8 @@ public sealed class GeminiClient(HttpClient http, IOptions<GeminiOptions> option
             contents = new[] { new { role = "user", parts = new[] { new { text = inputJson } } } },
             generationConfig = new
             {
+                // Faithful, stable translation — no creative variance.
+                temperature = 0.0,
                 responseMimeType = "application/json",
                 responseSchema = new
                 {

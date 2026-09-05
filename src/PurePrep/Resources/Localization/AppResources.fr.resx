@@ -542,4 +542,31 @@ Ajoutez le bouillon louche par louche en remuant.</value>
   <data name="TranslateInsufficientCredits" xml:space="preserve">
     <value>Vous n'avez pas assez de crédits intelligents pour traduire cette recette.</value>
   </data>
+  <data name="DuplicateTitleFormat" xml:space="preserve">
+    <value>« {0} » est déjà dans votre bibliothèque</value>
+  </data>
+  <data name="DuplicateReplace" xml:space="preserve">
+    <value>Remplacer</value>
+  </data>
+  <data name="DuplicateKeepBoth" xml:space="preserve">
+    <value>Garder les deux</value>
+  </data>
+  <data name="SourceOpen" xml:space="preserve">
+    <value>Ouvrir le lien</value>
+  </data>
+  <data name="SourceCopy" xml:space="preserve">
+    <value>Copier le lien</value>
+  </data>
+  <data name="ExportSaveToDevice" xml:space="preserve">
+    <value>Enregistrer sur l’appareil</value>
+  </data>
+  <data name="ExportShare" xml:space="preserve">
+    <value>Partager…</value>
+  </data>
+  <data name="ExportSaveFailed" xml:space="preserve">
+    <value>Impossible d’enregistrer la sauvegarde. Essayez de la partager.</value>
+  </data>
+  <data name="ExportSavedFormat" xml:space="preserve">
+    <value>Enregistré dans {0} sous {1}.</value>
+  </data>
 </root>

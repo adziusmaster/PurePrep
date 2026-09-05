@@ -542,4 +542,31 @@ Dodawaj bulion po chochli, mieszając.</value>
   <data name="TranslateInsufficientCredits" xml:space="preserve">
     <value>Nie masz wystarczającej liczby Smart Kredytów, aby przetłumaczyć ten przepis.</value>
   </data>
+  <data name="DuplicateTitleFormat" xml:space="preserve">
+    <value>„{0}” jest już w Twojej bibliotece</value>
+  </data>
+  <data name="DuplicateReplace" xml:space="preserve">
+    <value>Zastąp</value>
+  </data>
+  <data name="DuplicateKeepBoth" xml:space="preserve">
+    <value>Zachowaj obie</value>
+  </data>
+  <data name="SourceOpen" xml:space="preserve">
+    <value>Otwórz link</value>
+  </data>
+  <data name="SourceCopy" xml:space="preserve">
+    <value>Kopiuj link</value>
+  </data>
+  <data name="ExportSaveToDevice" xml:space="preserve">
+    <value>Zapisz na urządzeniu</value>
+  </data>
+  <data name="ExportShare" xml:space="preserve">
+    <value>Udostępnij…</value>
+  </data>
+  <data name="ExportSaveFailed" xml:space="preserve">
+    <value>Nie udało się zapisać kopii. Spróbuj ją udostępnić.</value>
+  </data>
+  <data name="ExportSavedFormat" xml:space="preserve">
+    <value>Zapisano w {0} jako {1}.</value>
+  </data>
 </root>

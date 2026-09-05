@@ -169,6 +169,13 @@ public sealed class RecipeLibraryViewModel : INotifyPropertyChanged
     public event EventHandler<ParsedRecipe>? DetailRequested;
     public event EventHandler? AddManuallyRequested;
     public event EventHandler? SettingsRequested;
+
+    /// <summary>
+    /// Asked (by the page) when an import URL matches a recipe already in the library, so the user can
+    /// choose Replace / Keep both / Cancel <b>before</b> any Smart Credit is spent. When unset the
+    /// import defaults to "Keep both" (never blocks, never silently overwrites).
+    /// </summary>
+    public Func<ParsedRecipe, Task<DuplicateImportAction>>? ResolveDuplicateImportAsync { get; set; }
     public event PropertyChangedEventHandler? PropertyChanged;
 
     /// <summary>Loads saved recipes and the current credit balance. Called when the page appears.</summary>
@@ -250,12 +257,38 @@ public sealed class RecipeLibraryViewModel : INotifyPropertyChanged
             return;
         }
 
+        // Duplicate guard: if the same page was already imported, ask before spending a Smart Credit.
+        // This runs BEFORE ParseAsync (which is what the backend charges for), so "Cancel" is free.
+        ParsedRecipe? replaceTarget = null;
+        var existing = FindBySourceUrl(source);
+        if (existing is not null)
+        {
+            var action = ResolveDuplicateImportAsync is null
+                ? DuplicateImportAction.KeepBoth
+                : await ResolveDuplicateImportAsync(existing);
+
+            if (action == DuplicateImportAction.Cancel)
+                return;
+
+            if (action == DuplicateImportAction.Replace)
+                replaceTarget = existing;
+        }
+
         IsImporting = true;
         try
         {
             var recipe = await _parser.ParseAsync(source);
-            await _repository.SaveAsync(recipe);
-            AddNewRecipe(recipe);
+            if (replaceTarget is not null)
+            {
+                recipe = CopyWithIdentity(recipe, replaceTarget.Id, replaceTarget.SavedAt);
+                await _repository.UpdateAsync(recipe);
+                ReplaceRecipe(replaceTarget, recipe);
+            }
+            else
+            {
+                await _repository.SaveAsync(recipe);
+                AddNewRecipe(recipe);
+            }
             UrlInput = string.Empty;
             IsUpgradePromptVisible = false;
             await RefreshCreditsAsync();
@@ -438,6 +471,44 @@ public sealed class RecipeLibraryViewModel : INotifyPropertyChanged
     /// </summary>
     public ParsedRecipe? FindById(Guid id) => _all.FirstOrDefault(r => r.Id == id);
 
+    /// <summary>
+    /// Finds an already-imported recipe whose source page matches <paramref name="source"/>, ignoring
+    /// trivial differences (scheme, case, trailing slash, fragment, common tracking query params) so a
+    /// re-paste of the same link is recognised as a duplicate rather than silently re-charged.
+    /// </summary>
+    private ParsedRecipe? FindBySourceUrl(Uri source)
+    {
+        var key = NormalizeUrl(source);
+        return _all.FirstOrDefault(r =>
+            !string.IsNullOrWhiteSpace(r.SourceUrl) &&
+            Uri.TryCreate(r.SourceUrl, UriKind.Absolute, out var existing) &&
+            string.Equals(NormalizeUrl(existing), key, StringComparison.Ordinal));
+    }
+
+    /// <summary>Canonical form used to compare two recipe source links for duplicate detection.</summary>
+    private static string NormalizeUrl(Uri uri)
+    {
+        var host = uri.Host.StartsWith("www.", StringComparison.OrdinalIgnoreCase) ? uri.Host[4..] : uri.Host;
+        var path = uri.AbsolutePath.TrimEnd('/');
+        return $"{host.ToLowerInvariant()}{path.ToLowerInvariant()}";
+    }
+
+    /// <summary>Returns a copy of a freshly parsed recipe stamped with an existing recipe's identity
+    /// (id + original save time) so a "Replace" import overwrites the old one in place.</summary>
+    private static ParsedRecipe CopyWithIdentity(ParsedRecipe recipe, Guid id, DateTimeOffset savedAt) => new()
+    {
+        Id = id,
+        Title = recipe.Title,
+        SourceUrl = recipe.SourceUrl,
+        Ingredients = recipe.Ingredients,
+        Steps = recipe.Steps,
+        SourceSystem = recipe.SourceSystem,
+        SavedAt = savedAt,
+        OriginalLanguage = recipe.OriginalLanguage,
+        DisplayLanguage = recipe.DisplayLanguage,
+        Translations = recipe.Translations,
+    };
+
     /// <summary>Removes a saved recipe from storage and the library list.</summary>
     public async Task DeleteRecipeAsync(ParsedRecipe recipe)
     {
@@ -461,3 +532,15 @@ public sealed class RecipeLibraryViewModel : INotifyPropertyChanged
 
 /// <summary>A Smart Credit pack shown in the paywall picker, with a display label ("10 credits · €0.99").</summary>
 public sealed record CreditPackOption(string ProductId, int Credits, string DisplayPrice, string Label);
+/// <summary>What to do when an imported URL already exists in the library.</summary>
+public enum DuplicateImportAction
+{
+    /// <summary>Overwrite the existing recipe in place (spends one Smart Credit for the re-import).</summary>
+    Replace,
+
+    /// <summary>Import as a separate second copy (spends one Smart Credit).</summary>
+    KeepBoth,
+
+    /// <summary>Do nothing — no credit is spent.</summary>
+    Cancel,
+}

@@ -67,10 +67,13 @@
                                TextColor="{DynamicResource Muted}" FontSize="13.5" />
                     </HorizontalStackLayout>
                     <HorizontalStackLayout Spacing="6" IsVisible="{Binding HasSource}" Margin="0,2,0,0">
+                        <HorizontalStackLayout.GestureRecognizers>
+                            <TapGestureRecognizer Tapped="OnSourceTapped" />
+                        </HorizontalStackLayout.GestureRecognizers>
                         <Label Text="&#128279;" FontSize="12" TextColor="{DynamicResource Faint}"
                                VerticalOptions="Center" />
-                        <Label Text="{Binding SourceHost}" TextColor="{DynamicResource Faint}"
-                               FontSize="12.5" VerticalOptions="Center" />
+                        <Label Text="{Binding SourceHost}" TextColor="{DynamicResource Primary}"
+                               FontSize="12.5" VerticalOptions="Center" TextDecorations="Underline" />
                     </HorizontalStackLayout>
                     <!-- Translation badge: shown only when a cached translation is on screen. Tapping
                          "Show original" is always free and instant (original text is kept pristine). -->

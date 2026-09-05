@@ -141,6 +141,39 @@ public partial class RecipeDetailPage : ContentPage
         await ApplyRecipeAsync(original, original.WithDisplayLanguage(null));
     }
 
+    private async void OnSourceTapped(object? sender, EventArgs e)
+    {
+        var url = _viewModel.SourceUrl;
+        if (string.IsNullOrWhiteSpace(url))
+            return;
+
+        var open = AppResources.Get("SourceOpen");
+        var copy = AppResources.Get("SourceCopy");
+        var choice = await DisplayActionSheet(
+            _viewModel.SourceHost,
+            AppResources.Get("Cancel"),
+            null,
+            open,
+            copy);
+
+        if (choice == open)
+        {
+            try
+            {
+                await Launcher.OpenAsync(url);
+            }
+            catch
+            {
+                // No browser / malformed link: fall back to copying so the link is never lost.
+                await Clipboard.SetTextAsync(url);
+            }
+        }
+        else if (choice == copy)
+        {
+            await Clipboard.SetTextAsync(url);
+        }
+    }
+
     // Persists the new translation state and refreshes the view. Switching languages is free at this
     // layer; the credit (if any) was already charged by the backend translate call.
     private async Task ApplyRecipeAsync(ParsedRecipe current, ParsedRecipe updated)

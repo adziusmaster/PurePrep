@@ -45,6 +45,13 @@ public static class MauiProgram
 #endif
 		builder.Services.AddSingleton<ThemeService>();
 
+		// Direct "save to device" backup (public Downloads) alongside the share sheet.
+#if ANDROID
+		builder.Services.AddSingleton<ILocalBackupSaver, PurePrep.Platforms.Android.MediaStoreBackupSaver>();
+#else
+		builder.Services.AddSingleton<ILocalBackupSaver, UnsupportedLocalBackupSaver>();
+#endif
+
 		// Carries links shared into the app from the Android share sheet across to the library page.
 		builder.Services.AddSingleton<SharedUrlRelay>();
 

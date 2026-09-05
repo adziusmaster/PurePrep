@@ -2,6 +2,7 @@ namespace PurePrep;
 
 using System.ComponentModel;
 using PurePrep.Domain;
+using PurePrep.Localization;
 using PurePrep.Presentation;
 using PurePrep.Services;
 
@@ -24,8 +25,22 @@ public partial class MainPage : ContentPage, IHardwareBackHandler
 		viewModel.DetailRequested += OnDetailRequested;
 		viewModel.AddManuallyRequested += OnAddManuallyRequested;
 		viewModel.SettingsRequested += OnSettingsTapped;
+		viewModel.ResolveDuplicateImportAsync = OnResolveDuplicateImportAsync;
 		viewModel.PropertyChanged += OnViewModelPropertyChanged;
 		BindingContext = viewModel;
+		SizeChanged += OnPageSizeChanged;
+	}
+
+	// MAUI-Android keeps a stale measured width on a centred, max-width container after an
+	// orientation change, so rotating to landscape and back could leave the list mis-sized (and
+	// sometimes unscrollable). Re-stamping an explicit width on every size change forces a clean
+	// re-measure: full width when narrower than the cap, the centred cap when wider.
+	private void OnPageSizeChanged(object? sender, EventArgs e)
+	{
+		const double maxWidth = 760;
+		if (Width <= 0)
+			return;
+		ContentRoot.WidthRequest = Math.Min(Width, maxWidth);
 	}
 
 	private void OnViewModelPropertyChanged(object? sender, PropertyChangedEventArgs e)
@@ -47,6 +62,26 @@ public partial class MainPage : ContentPage, IHardwareBackHandler
 	private async void OnPasteTapped(object? sender, EventArgs e) =>
 		await ((RecipeLibraryViewModel)BindingContext).PasteFromClipboardAsync();
 
+	private async Task<DuplicateImportAction> OnResolveDuplicateImportAsync(Domain.ParsedRecipe existing)
+	{
+		var replace = AppResources.Get("DuplicateReplace");
+		var keepBoth = AppResources.Get("DuplicateKeepBoth");
+		var cancel = AppResources.Get("Cancel");
+
+		var choice = await DisplayActionSheet(
+			string.Format(AppResources.Get("DuplicateTitleFormat"), existing.Title),
+			cancel,
+			null,
+			replace,
+			keepBoth);
+
+		if (choice == replace)
+			return DuplicateImportAction.Replace;
+		if (choice == keepBoth)
+			return DuplicateImportAction.KeepBoth;
+		return DuplicateImportAction.Cancel;
+	}
+
 	protected override async void OnAppearing()
 	{
 		base.OnAppearing();
@@ -62,8 +97,10 @@ public partial class MainPage : ContentPage, IHardwareBackHandler
 		}
 		else
 		{
-			// Returning from another page (e.g. after redeeming a code): refresh the credit chip.
-			await vm.RefreshCreditsAsync();
+			// Returning from another page: reload the library so changes made elsewhere are reflected
+			// on Home — most importantly a backup restore in Settings, which repopulates SQLite behind
+			// our back. LoadAsync also refreshes the credit chip, so it covers the redeem-code case too.
+			await vm.LoadAsync();
 		}
 	}
 

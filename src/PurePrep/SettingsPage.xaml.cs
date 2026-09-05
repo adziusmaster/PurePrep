@@ -257,11 +257,42 @@ public partial class SettingsPage : ContentPage, IHardwareBackHandler
             return;
         }
 
-        // Written to the cache directory and handed straight to the share sheet: the user chooses
-        // where it lands (Drive, email, Files), so the app needs no storage permission.
-        var path = Path.Combine(FileSystem.CacheDirectory,
-            $"pureprep-recipes-{DateTime.Now:yyyy-MM-dd}.json");
-        await File.WriteAllTextAsync(path, RecipeBackup.Export(recipes));
+        // Written to the cache directory first (no storage permission needed there).
+        var fileName = $"pureprep-recipes-{DateTime.Now:yyyy-MM-dd}.json";
+        var json = RecipeBackup.Export(recipes);
+        var path = Path.Combine(FileSystem.CacheDirectory, fileName);
+        await File.WriteAllTextAsync(path, json);
+
+        // Let the user pick a plain local save (straight to Downloads) or the share sheet. Testers
+        // wanted a "just save it on my phone" option that doesn't route through Drive/email/chat.
+        var saver = IPlatformApplication.Current?.Services.GetService<ILocalBackupSaver>();
+        string action;
+        if (saver?.IsSupported == true)
+        {
+            var saveToDevice = AppResources.Get("ExportSaveToDevice");
+            var share = AppResources.Get("ExportShare");
+            action = await DisplayActionSheet(
+                AppResources.Get("ExportRecipes"),
+                AppResources.Get("Cancel"),
+                null,
+                saveToDevice,
+                share);
+
+            if (action == saveToDevice)
+            {
+                var location = await saver.SaveAsync(fileName, json);
+                await DisplayAlert(
+                    AppResources.Get("ExportRecipes"),
+                    location is null
+                        ? AppResources.Get("ExportSaveFailed")
+                        : string.Format(AppResources.Get("ExportSavedFormat"), location, fileName),
+                    AppResources.Get("Ok"));
+                return;
+            }
+
+            if (action != share)
+                return;
+        }
 
         await Share.Default.RequestAsync(new ShareFileRequest
         {

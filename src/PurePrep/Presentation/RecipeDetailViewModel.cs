@@ -79,6 +79,9 @@ public sealed class RecipeDetailViewModel : INotifyPropertyChanged
     public string SourceHost => TryGetHost(_recipe.SourceUrl);
     public bool HasSource => !string.IsNullOrEmpty(SourceHost);
 
+    /// <summary>Full origin link, used by the detail page to open or copy the source.</summary>
+    public string? SourceUrl => _recipe.SourceUrl;
+
     private static string TryGetHost(string? url)
     {
         if (string.IsNullOrWhiteSpace(url))

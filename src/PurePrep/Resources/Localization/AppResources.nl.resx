@@ -542,4 +542,31 @@ Voeg de bouillon pollepel voor pollepel toe, al roerend.</value>
   <data name="TranslateInsufficientCredits" xml:space="preserve">
     <value>Je hebt niet genoeg Smart-credits om dit recept te vertalen.</value>
   </data>
+  <data name="DuplicateTitleFormat" xml:space="preserve">
+    <value>“{0}” staat al in je bibliotheek</value>
+  </data>
+  <data name="DuplicateReplace" xml:space="preserve">
+    <value>Vervangen</value>
+  </data>
+  <data name="DuplicateKeepBoth" xml:space="preserve">
+    <value>Beide bewaren</value>
+  </data>
+  <data name="SourceOpen" xml:space="preserve">
+    <value>Link openen</value>
+  </data>
+  <data name="SourceCopy" xml:space="preserve">
+    <value>Link kopiëren</value>
+  </data>
+  <data name="ExportSaveToDevice" xml:space="preserve">
+    <value>Op apparaat opslaan</value>
+  </data>
+  <data name="ExportShare" xml:space="preserve">
+    <value>Delen…</value>
+  </data>
+  <data name="ExportSaveFailed" xml:space="preserve">
+    <value>Back-up kon niet worden opgeslagen. Probeer het te delen.</value>
+  </data>
+  <data name="ExportSavedFormat" xml:space="preserve">
+    <value>Opgeslagen in {0} als {1}.</value>
+  </data>
 </root>

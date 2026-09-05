@@ -542,4 +542,31 @@ Add stock a ladle at a time, stirring.</value>
   <data name="TranslateInsufficientCredits" xml:space="preserve">
     <value>You don't have enough Smart Credits to translate this recipe.</value>
   </data>
+  <data name="DuplicateTitleFormat" xml:space="preserve">
+    <value>“{0}” is already in your library</value>
+  </data>
+  <data name="DuplicateReplace" xml:space="preserve">
+    <value>Replace it</value>
+  </data>
+  <data name="DuplicateKeepBoth" xml:space="preserve">
+    <value>Keep both</value>
+  </data>
+  <data name="SourceOpen" xml:space="preserve">
+    <value>Open link</value>
+  </data>
+  <data name="SourceCopy" xml:space="preserve">
+    <value>Copy link</value>
+  </data>
+  <data name="ExportSaveToDevice" xml:space="preserve">
+    <value>Save to device</value>
+  </data>
+  <data name="ExportShare" xml:space="preserve">
+    <value>Share…</value>
+  </data>
+  <data name="ExportSaveFailed" xml:space="preserve">
+    <value>Couldn’t save the backup. Try sharing it instead.</value>
+  </data>
+  <data name="ExportSavedFormat" xml:space="preserve">
+    <value>Saved to {0} as {1}.</value>
+  </data>
 </root>

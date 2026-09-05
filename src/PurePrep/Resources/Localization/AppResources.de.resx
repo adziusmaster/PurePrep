@@ -542,4 +542,31 @@ Brühe kellenweise unter Rühren zugeben.</value>
   <data name="TranslateInsufficientCredits" xml:space="preserve">
     <value>Du hast nicht genügend Smart-Credits, um dieses Rezept zu übersetzen.</value>
   </data>
+  <data name="DuplicateTitleFormat" xml:space="preserve">
+    <value>„{0}“ ist bereits in deiner Bibliothek</value>
+  </data>
+  <data name="DuplicateReplace" xml:space="preserve">
+    <value>Ersetzen</value>
+  </data>
+  <data name="DuplicateKeepBoth" xml:space="preserve">
+    <value>Beide behalten</value>
+  </data>
+  <data name="SourceOpen" xml:space="preserve">
+    <value>Link öffnen</value>
+  </data>
+  <data name="SourceCopy" xml:space="preserve">
+    <value>Link kopieren</value>
+  </data>
+  <data name="ExportSaveToDevice" xml:space="preserve">
+    <value>Auf Gerät speichern</value>
+  </data>
+  <data name="ExportShare" xml:space="preserve">
+    <value>Teilen…</value>
+  </data>
+  <data name="ExportSaveFailed" xml:space="preserve">
+    <value>Sicherung konnte nicht gespeichert werden. Versuche es stattdessen mit Teilen.</value>
+  </data>
+  <data name="ExportSavedFormat" xml:space="preserve">
+    <value>In {0} als {1} gespeichert.</value>
+  </data>
 </root>

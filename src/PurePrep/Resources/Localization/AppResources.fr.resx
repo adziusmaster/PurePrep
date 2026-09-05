@@ -366,25 +366,10 @@ Ajoutez le bouillon louche par louche en remuant.</value>
     <value>Traduire en…</value>
   </data>
   <data name="TranslateUnsupported" xml:space="preserve">
-    <value>La traduction sur l'appareil n'est pas disponible sur cet appareil.</value>
+    <value>La traduction n'est pas disponible pour le moment.</value>
   </data>
   <data name="TranslateWorking" xml:space="preserve">
     <value>Traduction…</value>
-  </data>
-  <data name="TranslateDownloadPromptFormat" xml:space="preserve">
-    <value>Le pack de langue {0} nécessite un téléchargement unique (~30 Mo). Le télécharger via le Wi-Fi maintenant ?</value>
-  </data>
-  <data name="TranslateAlreadyFormat" xml:space="preserve">
-    <value>Cette recette semble déjà être en {0}.</value>
-  </data>
-  <data name="TranslateFailedFormat" xml:space="preserve">
-    <value>Impossible de traduire la recette : {0}</value>
-  </data>
-  <data name="SectionLanguagePacks" xml:space="preserve">
-    <value>Packs de langue</value>
-  </data>
-  <data name="LanguagePacksDesc" xml:space="preserve">
-    <value>Téléchargez des packs hors ligne pour traduire des recettes gratuitement.</value>
   </data>
   <data name="LanguagePacksIntro" xml:space="preserve">
     <value>Les traductions s'exécutent entièrement sur votre appareil — aucune connexion nécessaire une fois le pack installé. Chaque pack est un téléchargement unique d'environ 30 Mo.</value>
@@ -541,5 +526,20 @@ Ajoutez le bouillon louche par louche en remuant.</value>
   </data>
   <data name="SectionBackup" xml:space="preserve">
     <value>SAUVEGARDE</value>
+  </data>
+  <data name="TranslateConfirm" xml:space="preserve">
+    <value>Traduire</value>
+  </data>
+  <data name="ShowOriginal" xml:space="preserve">
+    <value>Afficher l'original</value>
+  </data>
+  <data name="TranslatedBadgeFormat" xml:space="preserve">
+    <value>Traduit en {0}</value>
+  </data>
+  <data name="TranslateCostFormat" xml:space="preserve">
+    <value>Traduire cette recette en {0} ? Cela utilise 1 crédit intelligent. La traduction est enregistrée : la revoir — ou revenir à l'original — est toujours gratuit.</value>
+  </data>
+  <data name="TranslateInsufficientCredits" xml:space="preserve">
+    <value>Vous n'avez pas assez de crédits intelligents pour traduire cette recette.</value>
   </data>
 </root>

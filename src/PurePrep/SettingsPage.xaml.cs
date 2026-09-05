@@ -319,9 +319,6 @@ public partial class SettingsPage : ContentPage, IHardwareBackHandler
         }
     }
 
-    private async void OnLanguagePacksTapped(object? sender, EventArgs e) =>
-        await Navigation.PushAsync(new LanguagePacksPage());
-
     private void OnSystemTapped(object? sender, EventArgs e) => SelectTheme(AppThemeChoice.System);
     private void OnLightTapped(object? sender, EventArgs e) => SelectTheme(AppThemeChoice.Light);
     private void OnDarkTapped(object? sender, EventArgs e) => SelectTheme(AppThemeChoice.Dark);

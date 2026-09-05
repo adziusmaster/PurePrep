@@ -366,25 +366,10 @@ Brühe kellenweise unter Rühren zugeben.</value>
     <value>Übersetzen in…</value>
   </data>
   <data name="TranslateUnsupported" xml:space="preserve">
-    <value>Die Geräteübersetzung ist auf diesem Gerät nicht verfügbar.</value>
+    <value>Übersetzung ist derzeit nicht verfügbar.</value>
   </data>
   <data name="TranslateWorking" xml:space="preserve">
     <value>Übersetzen…</value>
-  </data>
-  <data name="TranslateDownloadPromptFormat" xml:space="preserve">
-    <value>Das Sprachpaket „{0}“ muss einmalig heruntergeladen werden (~30 MB). Jetzt über WLAN herunterladen?</value>
-  </data>
-  <data name="TranslateAlreadyFormat" xml:space="preserve">
-    <value>Dieses Rezept ist anscheinend bereits auf {0}.</value>
-  </data>
-  <data name="TranslateFailedFormat" xml:space="preserve">
-    <value>Rezept konnte nicht übersetzt werden: {0}</value>
-  </data>
-  <data name="SectionLanguagePacks" xml:space="preserve">
-    <value>Sprachpakete</value>
-  </data>
-  <data name="LanguagePacksDesc" xml:space="preserve">
-    <value>Lade Offline-Pakete herunter, um Rezepte kostenlos zu übersetzen.</value>
   </data>
   <data name="LanguagePacksIntro" xml:space="preserve">
     <value>Übersetzungen laufen vollständig auf deinem Gerät – nach der Installation ist kein Internet nötig. Jedes Paket ist ein einmaliger Download von etwa 30 MB.</value>
@@ -541,5 +526,20 @@ Brühe kellenweise unter Rühren zugeben.</value>
   </data>
   <data name="SectionBackup" xml:space="preserve">
     <value>SICHERUNG</value>
+  </data>
+  <data name="TranslateConfirm" xml:space="preserve">
+    <value>Übersetzen</value>
+  </data>
+  <data name="ShowOriginal" xml:space="preserve">
+    <value>Original anzeigen</value>
+  </data>
+  <data name="TranslatedBadgeFormat" xml:space="preserve">
+    <value>Übersetzt in {0}</value>
+  </data>
+  <data name="TranslateCostFormat" xml:space="preserve">
+    <value>Dieses Rezept in {0} übersetzen? Das kostet 1 Smart-Credit. Die Übersetzung wird gespeichert, sodass erneutes Ansehen – und der Wechsel zurück zum Original – immer kostenlos ist.</value>
+  </data>
+  <data name="TranslateInsufficientCredits" xml:space="preserve">
+    <value>Du hast nicht genügend Smart-Credits, um dieses Rezept zu übersetzen.</value>
   </data>
 </root>

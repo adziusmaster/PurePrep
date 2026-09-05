@@ -168,22 +168,6 @@
                     </Border>
                     <Label Text="{loc:Translate LanguageDesc}"
                            TextColor="{DynamicResource Faint}" FontSize="12.5" />
-                    <Border BackgroundColor="{DynamicResource Surface}" Stroke="{DynamicResource Line}"
-                            StrokeThickness="1" Padding="16,14" StrokeShape="RoundRectangle 18" local:TapFeedback.IsEnabled="True">
-                        <Border.GestureRecognizers>
-                            <TapGestureRecognizer Tapped="OnLanguagePacksTapped" />
-                        </Border.GestureRecognizers>
-                        <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
-                            <VerticalStackLayout Spacing="3">
-                                <Label Text="{loc:Translate SectionLanguagePacks}" TextColor="{DynamicResource Ink}"
-                                       FontSize="16" FontAttributes="Bold" />
-                                <Label Text="{loc:Translate LanguagePacksDesc}"
-                                       TextColor="{DynamicResource Muted}" FontSize="13" />
-                            </VerticalStackLayout>
-                            <Label Grid.Column="1" Text="&#8250;" TextColor="{DynamicResource Muted}"
-                                   FontSize="22" VerticalOptions="Center" />
-                        </Grid>
-                    </Border>
                 </VerticalStackLayout>
 
                 <!-- Cooking -->

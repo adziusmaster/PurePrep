@@ -23,4 +23,12 @@ public sealed record AiRecipe(string Title, string[] Ingredients, string[] Steps
 public interface IGeminiClient
 {
     Task<AiRecipe> ExtractAsync(string pageText, string? targetLanguage = null, CancellationToken ct = default);
+
+    /// <summary>
+    /// Translates an already-structured recipe into <paramref name="targetLanguage"/> faithfully,
+    /// preserving the exact ingredient/step count and every quantity, unit, and number. Unlike
+    /// <see cref="ExtractAsync"/> there is no page fetch or extraction — the given content is trusted
+    /// structure and only its wording changes.
+    /// </summary>
+    Task<AiRecipe> TranslateAsync(AiRecipe recipe, string targetLanguage, CancellationToken ct = default);
 }

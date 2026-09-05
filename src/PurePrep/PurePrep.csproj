@@ -102,9 +102,8 @@
 		<PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="10.0.0" />
 	</ItemGroup>
 
-	<!-- On-device (offline) translation via Google ML Kit. Android-only native binding. -->
+	<!-- Android-only native bindings. -->
 	<ItemGroup Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">
-		<PackageReference Include="Xamarin.Google.MLKit.Translate" Version="117.0.3.8" />
 		<PackageReference Include="Xamarin.Android.Google.BillingClient" Version="8.3.0.2" />
 	</ItemGroup>
 

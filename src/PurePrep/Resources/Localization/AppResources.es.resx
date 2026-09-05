@@ -366,25 +366,10 @@ Añade el caldo cucharón a cucharón, removiendo.</value>
     <value>Traducir a…</value>
   </data>
   <data name="TranslateUnsupported" xml:space="preserve">
-    <value>La traducción en el dispositivo no está disponible en este dispositivo.</value>
+    <value>La traducción no está disponible en este momento.</value>
   </data>
   <data name="TranslateWorking" xml:space="preserve">
     <value>Traduciendo…</value>
-  </data>
-  <data name="TranslateDownloadPromptFormat" xml:space="preserve">
-    <value>El paquete de idioma {0} necesita una descarga única (~30 MB). ¿Descargarlo por Wi-Fi ahora?</value>
-  </data>
-  <data name="TranslateAlreadyFormat" xml:space="preserve">
-    <value>Esta receta ya parece estar en {0}.</value>
-  </data>
-  <data name="TranslateFailedFormat" xml:space="preserve">
-    <value>No se pudo traducir la receta: {0}</value>
-  </data>
-  <data name="SectionLanguagePacks" xml:space="preserve">
-    <value>Paquetes de idioma</value>
-  </data>
-  <data name="LanguagePacksDesc" xml:space="preserve">
-    <value>Descarga paquetes sin conexión para traducir recetas gratis.</value>
   </data>
   <data name="LanguagePacksIntro" xml:space="preserve">
     <value>Las traducciones se ejecutan totalmente en tu dispositivo: no se necesita internet una vez instalado el paquete. Cada paquete es una descarga única de unos 30 MB.</value>
@@ -541,5 +526,20 @@ Añade el caldo cucharón a cucharón, removiendo.</value>
   </data>
   <data name="SectionBackup" xml:space="preserve">
     <value>COPIA</value>
+  </data>
+  <data name="TranslateConfirm" xml:space="preserve">
+    <value>Traducir</value>
+  </data>
+  <data name="ShowOriginal" xml:space="preserve">
+    <value>Ver original</value>
+  </data>
+  <data name="TranslatedBadgeFormat" xml:space="preserve">
+    <value>Traducido al {0}</value>
+  </data>
+  <data name="TranslateCostFormat" xml:space="preserve">
+    <value>¿Traducir esta receta al {0}? Esto usa 1 crédito inteligente. La traducción se guarda, así que volver a verla —o volver al original— siempre es gratis.</value>
+  </data>
+  <data name="TranslateInsufficientCredits" xml:space="preserve">
+    <value>No tienes suficientes créditos inteligentes para traducir esta receta.</value>
   </data>
 </root>

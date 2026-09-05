@@ -366,25 +366,10 @@ Dodawaj bulion po chochli, mieszając.</value>
     <value>Przetłumacz na…</value>
   </data>
   <data name="TranslateUnsupported" xml:space="preserve">
-    <value>Tłumaczenie na urządzeniu nie jest dostępne na tym urządzeniu.</value>
+    <value>Tłumaczenie jest obecnie niedostępne.</value>
   </data>
   <data name="TranslateWorking" xml:space="preserve">
     <value>Tłumaczenie…</value>
-  </data>
-  <data name="TranslateDownloadPromptFormat" xml:space="preserve">
-    <value>Pakiet języka {0} wymaga jednorazowego pobrania (~30 MB). Pobrać teraz przez Wi-Fi?</value>
-  </data>
-  <data name="TranslateAlreadyFormat" xml:space="preserve">
-    <value>Ten przepis wygląda na już w języku {0}.</value>
-  </data>
-  <data name="TranslateFailedFormat" xml:space="preserve">
-    <value>Nie udało się przetłumaczyć przepisu: {0}</value>
-  </data>
-  <data name="SectionLanguagePacks" xml:space="preserve">
-    <value>Pakiety językowe</value>
-  </data>
-  <data name="LanguagePacksDesc" xml:space="preserve">
-    <value>Pobierz pakiety offline, aby tłumaczyć przepisy za darmo.</value>
   </data>
   <data name="LanguagePacksIntro" xml:space="preserve">
     <value>Tłumaczenia działają w całości na Twoim urządzeniu — po zainstalowaniu pakietu internet nie jest potrzebny. Każdy pakiet to jednorazowe pobranie około 30 MB.</value>
@@ -541,5 +526,20 @@ Dodawaj bulion po chochli, mieszając.</value>
   </data>
   <data name="SectionBackup" xml:space="preserve">
     <value>KOPIA</value>
+  </data>
+  <data name="TranslateConfirm" xml:space="preserve">
+    <value>Przetłumacz</value>
+  </data>
+  <data name="ShowOriginal" xml:space="preserve">
+    <value>Pokaż oryginał</value>
+  </data>
+  <data name="TranslatedBadgeFormat" xml:space="preserve">
+    <value>Przetłumaczono na {0}</value>
+  </data>
+  <data name="TranslateCostFormat" xml:space="preserve">
+    <value>Przetłumaczyć ten przepis na {0}? To kosztuje 1 Smart Kredyt. Tłumaczenie zostaje zapisane, więc ponowne wyświetlenie — i powrót do oryginału — jest zawsze darmowe.</value>
+  </data>
+  <data name="TranslateInsufficientCredits" xml:space="preserve">
+    <value>Nie masz wystarczającej liczby Smart Kredytów, aby przetłumaczyć ten przepis.</value>
   </data>
 </root>

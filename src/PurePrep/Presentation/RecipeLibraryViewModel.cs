@@ -342,6 +342,18 @@ public sealed class RecipeLibraryViewModel : INotifyPropertyChanged
         return updated;
     }
 
+    /// <summary>
+    /// Persists a recipe whose translation state (cached translations / displayed language) changed.
+    /// Unlike <see cref="UpdateManualAsync"/> this keeps the whole recipe intact — no field rebuild —
+    /// so the original text and translation cache are preserved. Switching or caching a translation is
+    /// free at this layer; the Smart Credit is charged by the backend translate call, not here.
+    /// </summary>
+    public async Task UpdateRecipeAsync(ParsedRecipe original, ParsedRecipe updated)
+    {
+        await _repository.UpdateAsync(updated);
+        ReplaceRecipe(original, updated);
+    }
+
     private static ParsedRecipe BuildRecipe(Guid id, string title, IEnumerable<string> ingredients,
         IEnumerable<string> steps, DateTimeOffset savedAt, string? sourceUrl,
         MeasurementSystem sourceSystem = MeasurementSystem.Metric) => new()

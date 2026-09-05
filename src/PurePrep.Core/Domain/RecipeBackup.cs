@@ -38,7 +38,9 @@ public static class RecipeBackup
                 r.SourceSystem.ToString(),
                 r.SavedAt,
                 r.Ingredients.ToArray(),
-                r.Steps.OrderBy(s => s.Order).Select(s => s.Instruction).ToArray())).ToArray());
+                r.Steps.OrderBy(s => s.Order).Select(s => s.Instruction).ToArray(),
+                r.OriginalLanguage,
+                r.Translations.Count > 0 ? new Dictionary<string, RecipeTranslation>(r.Translations) : null)).ToArray());
 
         return JsonSerializer.Serialize(document, Options);
     }
@@ -82,6 +84,12 @@ public static class RecipeBackup
             .Where(x => !string.IsNullOrWhiteSpace(x))
             .Select((text, index) => new RecipeStep { Order = index + 1, Instruction = text })
             .ToArray(),
+        // Restore any paid translations so a backup keeps their value; always show the original after
+        // a restore (DisplayLanguage is deliberately not carried over).
+        OriginalLanguage = string.IsNullOrWhiteSpace(r.OriginalLanguage) ? null : r.OriginalLanguage,
+        Translations = r.Translations is { Count: > 0 }
+            ? new Dictionary<string, RecipeTranslation>(r.Translations, StringComparer.OrdinalIgnoreCase)
+            : new Dictionary<string, RecipeTranslation>(StringComparer.OrdinalIgnoreCase),
     };
 
     /// <summary>
@@ -138,5 +146,7 @@ public static class RecipeBackup
         string? SourceSystem,
         DateTimeOffset SavedAt,
         string[]? Ingredients,
-        string[]? Steps);
+        string[]? Steps,
+        string? OriginalLanguage = null,
+        IReadOnlyDictionary<string, RecipeTranslation>? Translations = null);
 }

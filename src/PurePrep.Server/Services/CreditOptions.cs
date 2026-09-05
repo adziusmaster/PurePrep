@@ -21,6 +21,13 @@ public sealed class CreditOptions
     /// <summary>Credits charged per AI parse. Kept configurable for future tuning.</summary>
     public int CostPerParse { get; set; } = 1;
 
+    /// <summary>
+    /// Credits charged per AI recipe translation into a new language. Each translation is cached on
+    /// the device forever, so a language is only ever paid for once. Configurable (and promo-able to
+    /// 0) for future tuning.
+    /// </summary>
+    public int CostPerTranslation { get; set; } = 1;
+
     /// <summary>Free AI Smart Credits seeded to every new device on first contact.</summary>
     public int FreeCredits { get; set; } = 10;
 

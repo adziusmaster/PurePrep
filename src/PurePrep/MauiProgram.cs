@@ -59,12 +59,13 @@ public static class MauiProgram
 		// Language newly imported recipes are produced in (defaults to the app UI language).
 		builder.Services.AddSingleton<IRecipeLanguageProvider, RecipeLanguageSettings>();
 
-		// On-device offline translation (free). Real ML Kit impl on Android; no-op elsewhere.
-#if ANDROID
-		builder.Services.AddSingleton<ITranslationService, PurePrep.Platforms.Android.MlKitTranslationService>();
-#else
-		builder.Services.AddSingleton<ITranslationService, UnsupportedTranslationService>();
-#endif
+		// AI recipe translation (backend Gemini). Replaces the retired on-device ML Kit packs: results
+		// are cached per language on the device, so each language is paid for once and then free/offline.
+		builder.Services.AddHttpClient<IRecipeTranslator, AiProxyRecipeTranslator>(client =>
+		{
+			client.BaseAddress = new Uri(BackendBaseUrl);
+			client.Timeout = TimeSpan.FromSeconds(30);
+		});
 
 		// Link import is powered by the backend AI Smart Parser and is gated by server-side credits.
 		builder.Services.AddHttpClient<IRecipeParser, AiProxyRecipeParser>(client =>

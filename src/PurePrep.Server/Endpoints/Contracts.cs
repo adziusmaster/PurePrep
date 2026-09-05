@@ -12,6 +12,16 @@ public sealed record RecipeResponse(
 
 public sealed record ParseResponse(RecipeResponse Recipe, int RemainingCredits);
 
+// --- AI translate ---
+public sealed record TranslateRequest(
+    Guid DeviceId,
+    string Language,
+    string Title,
+    IReadOnlyList<string>? Ingredients,
+    IReadOnlyList<string>? Steps);
+
+public sealed record TranslateResponse(RecipeResponse Recipe, int RemainingCredits);
+
 /// <summary>Error envelope for a failed import: a stable machine code plus a default English message.</summary>
 public sealed record ImportError(string Code, string Error);
 

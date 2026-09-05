@@ -366,25 +366,10 @@ Add stock a ladle at a time, stirring.</value>
     <value>Translate to…</value>
   </data>
   <data name="TranslateUnsupported" xml:space="preserve">
-    <value>On-device translation isn't available on this device.</value>
+    <value>Translation isn't available right now.</value>
   </data>
   <data name="TranslateWorking" xml:space="preserve">
     <value>Translating…</value>
-  </data>
-  <data name="TranslateDownloadPromptFormat" xml:space="preserve">
-    <value>The {0} language pack needs a one-time download (~30 MB). Download it over Wi-Fi now?</value>
-  </data>
-  <data name="TranslateAlreadyFormat" xml:space="preserve">
-    <value>This recipe already appears to be in {0}.</value>
-  </data>
-  <data name="TranslateFailedFormat" xml:space="preserve">
-    <value>Couldn't translate the recipe: {0}</value>
-  </data>
-  <data name="SectionLanguagePacks" xml:space="preserve">
-    <value>Language packs</value>
-  </data>
-  <data name="LanguagePacksDesc" xml:space="preserve">
-    <value>Download offline packs to translate recipes for free.</value>
   </data>
   <data name="LanguagePacksIntro" xml:space="preserve">
     <value>Translations run fully on your device — no internet needed once a pack is installed. Each pack is a one-time download of about 30 MB.</value>
@@ -541,5 +526,20 @@ Add stock a ladle at a time, stirring.</value>
   </data>
   <data name="SectionBackup" xml:space="preserve">
     <value>BACKUP</value>
+  </data>
+  <data name="TranslateConfirm" xml:space="preserve">
+    <value>Translate</value>
+  </data>
+  <data name="ShowOriginal" xml:space="preserve">
+    <value>Show original</value>
+  </data>
+  <data name="TranslatedBadgeFormat" xml:space="preserve">
+    <value>Translated to {0}</value>
+  </data>
+  <data name="TranslateCostFormat" xml:space="preserve">
+    <value>Translate this recipe to {0}? This uses 1 Smart Credit. The translation is saved, so viewing it again — or switching back to the original — is always free.</value>
+  </data>
+  <data name="TranslateInsufficientCredits" xml:space="preserve">
+    <value>You don't have enough Smart Credits to translate this recipe.</value>
   </data>
 </root>

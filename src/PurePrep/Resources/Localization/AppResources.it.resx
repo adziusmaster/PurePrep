@@ -366,25 +366,10 @@ Aggiungi il brodo un mestolo alla volta, mescolando.</value>
     <value>Traduci in…</value>
   </data>
   <data name="TranslateUnsupported" xml:space="preserve">
-    <value>La traduzione sul dispositivo non è disponibile su questo dispositivo.</value>
+    <value>La traduzione non è disponibile al momento.</value>
   </data>
   <data name="TranslateWorking" xml:space="preserve">
     <value>Traduzione…</value>
-  </data>
-  <data name="TranslateDownloadPromptFormat" xml:space="preserve">
-    <value>Il pacchetto lingua {0} richiede un download una tantum (~30 MB). Scaricarlo ora tramite Wi-Fi?</value>
-  </data>
-  <data name="TranslateAlreadyFormat" xml:space="preserve">
-    <value>Questa ricetta sembra essere già in {0}.</value>
-  </data>
-  <data name="TranslateFailedFormat" xml:space="preserve">
-    <value>Impossibile tradurre la ricetta: {0}</value>
-  </data>
-  <data name="SectionLanguagePacks" xml:space="preserve">
-    <value>Pacchetti lingua</value>
-  </data>
-  <data name="LanguagePacksDesc" xml:space="preserve">
-    <value>Scarica pacchetti offline per tradurre le ricette gratuitamente.</value>
   </data>
   <data name="LanguagePacksIntro" xml:space="preserve">
     <value>Le traduzioni vengono eseguite interamente sul tuo dispositivo: nessuna connessione necessaria una volta installato il pacchetto. Ogni pacchetto è un download una tantum di circa 30 MB.</value>
@@ -541,5 +526,20 @@ Aggiungi il brodo un mestolo alla volta, mescolando.</value>
   </data>
   <data name="SectionBackup" xml:space="preserve">
     <value>BACKUP</value>
+  </data>
+  <data name="TranslateConfirm" xml:space="preserve">
+    <value>Traduci</value>
+  </data>
+  <data name="ShowOriginal" xml:space="preserve">
+    <value>Mostra originale</value>
+  </data>
+  <data name="TranslatedBadgeFormat" xml:space="preserve">
+    <value>Tradotto in {0}</value>
+  </data>
+  <data name="TranslateCostFormat" xml:space="preserve">
+    <value>Tradurre questa ricetta in {0}? Questo usa 1 credito Smart. La traduzione viene salvata, quindi rivederla — o tornare all'originale — è sempre gratis.</value>
+  </data>
+  <data name="TranslateInsufficientCredits" xml:space="preserve">
+    <value>Non hai abbastanza crediti Smart per tradurre questa ricetta.</value>
   </data>
 </root>

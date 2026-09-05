@@ -17,4 +17,10 @@ public sealed class RecipeRecord
     public required string StepsJson { get; set; }
     public string SourceSystem { get; set; } = nameof(MeasurementSystem.Metric);
     public DateTimeOffset SavedAt { get; set; }
+
+    // Translation state. The columns above always hold the ORIGINAL text; these hold the detected
+    // original language, the language currently displayed, and a JSON cache of paid translations.
+    public string? OriginalLanguage { get; set; }
+    public string? DisplayLanguage { get; set; }
+    public string TranslationsJson { get; set; } = "{}";
 }

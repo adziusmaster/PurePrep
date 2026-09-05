@@ -16,6 +16,7 @@ namespace PurePrep.Presentation;
 public sealed class RecipeDetailViewModel : INotifyPropertyChanged
 {
     private ParsedRecipe _recipe;
+    private ParsedRecipe _active;
     private ParsedRecipe _display;
     private int? _baseServings;
     private double _factor = 1.0;
@@ -23,8 +24,9 @@ public sealed class RecipeDetailViewModel : INotifyPropertyChanged
     public RecipeDetailViewModel(ParsedRecipe recipe)
     {
         _recipe = recipe;
-        _display = RecipeUnits.ForDisplay(recipe);
-        _baseServings = ServingsDetector.Detect(recipe.Title, recipe.Ingredients, recipe.Steps.Select(s => s.Instruction));
+        _active = recipe.Displayed();
+        _display = RecipeUnits.ForDisplay(_active);
+        _baseServings = ServingsDetector.Detect(_active.Title, _active.Ingredients, _active.Steps.Select(s => s.Instruction));
 
         ScaleOptions = new ObservableCollection<ScaleOption>
         {
@@ -50,10 +52,25 @@ public sealed class RecipeDetailViewModel : INotifyPropertyChanged
     /// </summary>
     public ParsedRecipe CookRecipe => RecipeScaling.ScaleRecipe(_display, _factor);
 
-    public string Title => _recipe.Title;
-    public int StepCount => _recipe.StepCount;
-    public int IngredientCount => _recipe.IngredientCount;
-    public bool HasIngredients => _recipe.HasIngredients;
+    public string Title => _active.Title;
+    public int StepCount => _active.StepCount;
+    public int IngredientCount => _active.IngredientCount;
+    public bool HasIngredients => _active.HasIngredients;
+
+    /// <summary>True when a cached translation (not the original) is currently displayed.</summary>
+    public bool IsTranslated => !string.IsNullOrEmpty(_recipe.DisplayLanguage)
+        && _recipe.HasTranslation(_recipe.DisplayLanguage);
+
+    /// <summary>Native name of the language on screen, e.g. "Deutsch" — for the "translated" badge.</summary>
+    public string TranslatedLanguageName => IsTranslated
+        ? LocalizationService.Supported.FirstOrDefault(l => l.Code == _recipe.DisplayLanguage)?.NativeName
+            ?? _recipe.DisplayLanguage!
+        : string.Empty;
+
+    /// <summary>Badge caption shown when a translation is displayed ("Translated to Deutsch").</summary>
+    public string TranslatedBadge => IsTranslated
+        ? AppResources.Format("TranslatedBadgeFormat", TranslatedLanguageName)
+        : string.Empty;
 
     /// <summary>Unit-converted method steps (not scaled).</summary>
     public ObservableCollection<RecipeStep> DisplaySteps { get; } = new();
@@ -114,8 +131,9 @@ public sealed class RecipeDetailViewModel : INotifyPropertyChanged
     public void SetRecipe(ParsedRecipe recipe)
     {
         _recipe = recipe;
-        _display = RecipeUnits.ForDisplay(recipe);
-        _baseServings = ServingsDetector.Detect(recipe.Title, recipe.Ingredients, recipe.Steps.Select(s => s.Instruction));
+        _active = recipe.Displayed();
+        _display = RecipeUnits.ForDisplay(_active);
+        _baseServings = ServingsDetector.Detect(_active.Title, _active.Ingredients, _active.Steps.Select(s => s.Instruction));
         RebuildDisplay();
         OnPropertyChanged(nameof(Title));
         OnPropertyChanged(nameof(StepCount));
@@ -125,6 +143,9 @@ public sealed class RecipeDetailViewModel : INotifyPropertyChanged
         OnPropertyChanged(nameof(SourceHost));
         OnPropertyChanged(nameof(HasSource));
         OnPropertyChanged(nameof(ServingsCaption));
+        OnPropertyChanged(nameof(IsTranslated));
+        OnPropertyChanged(nameof(TranslatedLanguageName));
+        OnPropertyChanged(nameof(TranslatedBadge));
     }
 
     private void RebuildDisplay()

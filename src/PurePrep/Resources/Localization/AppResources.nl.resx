@@ -366,25 +366,10 @@ Voeg de bouillon pollepel voor pollepel toe, al roerend.</value>
     <value>Vertalen naar…</value>
   </data>
   <data name="TranslateUnsupported" xml:space="preserve">
-    <value>Vertaling op het apparaat is niet beschikbaar op dit apparaat.</value>
+    <value>Vertalen is momenteel niet beschikbaar.</value>
   </data>
   <data name="TranslateWorking" xml:space="preserve">
     <value>Vertalen…</value>
-  </data>
-  <data name="TranslateDownloadPromptFormat" xml:space="preserve">
-    <value>Het taalpakket {0} vereist een eenmalige download (~30 MB). Nu downloaden via wifi?</value>
-  </data>
-  <data name="TranslateAlreadyFormat" xml:space="preserve">
-    <value>Dit recept lijkt al in het {0} te zijn.</value>
-  </data>
-  <data name="TranslateFailedFormat" xml:space="preserve">
-    <value>Kan het recept niet vertalen: {0}</value>
-  </data>
-  <data name="SectionLanguagePacks" xml:space="preserve">
-    <value>Taalpakketten</value>
-  </data>
-  <data name="LanguagePacksDesc" xml:space="preserve">
-    <value>Download offline pakketten om recepten gratis te vertalen.</value>
   </data>
   <data name="LanguagePacksIntro" xml:space="preserve">
     <value>Vertalingen draaien volledig op je apparaat — geen internet nodig zodra een pakket is geïnstalleerd. Elk pakket is een eenmalige download van ongeveer 30 MB.</value>
@@ -541,5 +526,20 @@ Voeg de bouillon pollepel voor pollepel toe, al roerend.</value>
   </data>
   <data name="SectionBackup" xml:space="preserve">
     <value>BACK-UP</value>
+  </data>
+  <data name="TranslateConfirm" xml:space="preserve">
+    <value>Vertalen</value>
+  </data>
+  <data name="ShowOriginal" xml:space="preserve">
+    <value>Origineel tonen</value>
+  </data>
+  <data name="TranslatedBadgeFormat" xml:space="preserve">
+    <value>Vertaald naar {0}</value>
+  </data>
+  <data name="TranslateCostFormat" xml:space="preserve">
+    <value>Dit recept naar {0} vertalen? Dit kost 1 Smart-credit. De vertaling wordt bewaard, dus opnieuw bekijken — of terugschakelen naar het origineel — is altijd gratis.</value>
+  </data>
+  <data name="TranslateInsufficientCredits" xml:space="preserve">
+    <value>Je hebt niet genoeg Smart-credits om dit recept te vertalen.</value>
   </data>
 </root>

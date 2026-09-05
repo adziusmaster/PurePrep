@@ -133,6 +133,7 @@ app.MapGet("/privacy", () => Results.File(
 app.UseRateLimiter();
 
 app.MapPost("/api/ai/parse", ParseEndpoint.Parse).RequireRateLimiting(RateLimitPolicies.Parse);
+app.MapPost("/api/ai/translate", TranslateEndpoint.Translate).RequireRateLimiting(RateLimitPolicies.Parse);
 app.MapPost("/api/billing/redeem", BillingEndpoint.Redeem).RequireRateLimiting(RateLimitPolicies.Billing);
 
 // Read-only balance. Kept for app builds already in the field; new clients call /ensure.

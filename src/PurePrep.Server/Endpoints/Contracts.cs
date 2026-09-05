@@ -12,6 +12,9 @@ public sealed record RecipeResponse(
 
 public sealed record ParseResponse(RecipeResponse Recipe, int RemainingCredits);
 
+/// <summary>Error envelope for a failed import: a stable machine code plus a default English message.</summary>
+public sealed record ImportError(string Code, string Error);
+
 // --- Billing ---
 public sealed record RedeemRequest(Guid DeviceId, string ProductId, string PurchaseToken);
 public sealed record RedeemResponse(int CreditsGranted, int Balance);

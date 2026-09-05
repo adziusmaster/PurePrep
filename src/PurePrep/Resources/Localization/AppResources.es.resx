@@ -287,6 +287,30 @@ Añade el caldo cucharón a cucharón, removiendo.</value>
   <data name="ErrCouldNotImportFormat" xml:space="preserve">
     <value>No se pudo importar la receta: {0}</value>
   </data>
+  <data name="ImportErrInvalidUrl" xml:space="preserve">
+    <value>Esto no parece un enlace de receta. Pega la dirección de una página de receta pública.</value>
+  </data>
+  <data name="ImportErrSiteBlocked" xml:space="preserve">
+    <value>Ese sitio no nos dejó leer la página. Ábrela en tu navegador y pega la receta, o usa otro enlace.</value>
+  </data>
+  <data name="ImportErrNotFound" xml:space="preserve">
+    <value>No pudimos encontrar esa página. Comprueba el enlace e inténtalo de nuevo.</value>
+  </data>
+  <data name="ImportErrNoRecipe" xml:space="preserve">
+    <value>No encontramos ninguna receta en esa página. Prueba con un enlace directo a la receta.</value>
+  </data>
+  <data name="ImportErrTemporary" xml:space="preserve">
+    <value>El sitio estaba lento o no disponible. Inténtalo de nuevo en un momento.</value>
+  </data>
+  <data name="ImportErrService" xml:space="preserve">
+    <value>Algo salió mal por nuestra parte al leer la receta. Se ha devuelto tu crédito.</value>
+  </data>
+  <data name="ImportErrCancelled" xml:space="preserve">
+    <value>Importación cancelada.</value>
+  </data>
+  <data name="ImportErrGeneric" xml:space="preserve">
+    <value>No pudimos importar esa receta. Comprueba tu conexión e inténtalo de nuevo.</value>
+  </data>
   <data name="ErrPacksPlayStore" xml:space="preserve">
     <value>Los paquetes de créditos Smart están disponibles en la versión de Play Store.</value>
   </data>

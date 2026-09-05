@@ -287,6 +287,30 @@ Dodawaj bulion po chochli, mieszając.</value>
   <data name="ErrCouldNotImportFormat" xml:space="preserve">
     <value>Nie udało się zaimportować przepisu: {0}</value>
   </data>
+  <data name="ImportErrInvalidUrl" xml:space="preserve">
+    <value>To nie wygląda na link do przepisu. Wklej adres publicznej strony z przepisem.</value>
+  </data>
+  <data name="ImportErrSiteBlocked" xml:space="preserve">
+    <value>Ta strona nie pozwoliła nam odczytać jej zawartości. Otwórz ją w przeglądarce i wklej przepis albo użyj innego linku.</value>
+  </data>
+  <data name="ImportErrNotFound" xml:space="preserve">
+    <value>Nie udało się znaleźć tej strony. Sprawdź link i spróbuj ponownie.</value>
+  </data>
+  <data name="ImportErrNoRecipe" xml:space="preserve">
+    <value>Nie znaleźliśmy przepisu na tej stronie. Spróbuj bezpośredniego linku do przepisu.</value>
+  </data>
+  <data name="ImportErrTemporary" xml:space="preserve">
+    <value>Strona działała wolno lub była niedostępna. Spróbuj ponownie za chwilę.</value>
+  </data>
+  <data name="ImportErrService" xml:space="preserve">
+    <value>Coś poszło nie tak po naszej stronie podczas odczytu przepisu. Twój kredyt został zwrócony.</value>
+  </data>
+  <data name="ImportErrCancelled" xml:space="preserve">
+    <value>Import anulowany.</value>
+  </data>
+  <data name="ImportErrGeneric" xml:space="preserve">
+    <value>Nie udało się zaimportować tego przepisu. Sprawdź połączenie i spróbuj ponownie.</value>
+  </data>
   <data name="ErrPacksPlayStore" xml:space="preserve">
     <value>Pakiety Smart Credits są dostępne w wersji ze Sklepu Play.</value>
   </data>

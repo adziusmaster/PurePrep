@@ -287,6 +287,30 @@ Aggiungi il brodo un mestolo alla volta, mescolando.</value>
   <data name="ErrCouldNotImportFormat" xml:space="preserve">
     <value>Impossibile importare la ricetta: {0}</value>
   </data>
+  <data name="ImportErrInvalidUrl" xml:space="preserve">
+    <value>Questo non sembra un link a una ricetta. Incolla l’indirizzo di una pagina di ricetta pubblica.</value>
+  </data>
+  <data name="ImportErrSiteBlocked" xml:space="preserve">
+    <value>Quel sito non ci ha lasciato leggere la pagina. Aprila nel browser e incolla la ricetta, oppure usa un altro link.</value>
+  </data>
+  <data name="ImportErrNotFound" xml:space="preserve">
+    <value>Non abbiamo trovato quella pagina. Controlla il link e riprova.</value>
+  </data>
+  <data name="ImportErrNoRecipe" xml:space="preserve">
+    <value>Non abbiamo trovato nessuna ricetta in quella pagina. Prova un link diretto alla ricetta.</value>
+  </data>
+  <data name="ImportErrTemporary" xml:space="preserve">
+    <value>Il sito era lento o non disponibile. Riprova tra un momento.</value>
+  </data>
+  <data name="ImportErrService" xml:space="preserve">
+    <value>Qualcosa è andato storto da parte nostra nella lettura della ricetta. Il tuo credito è stato rimborsato.</value>
+  </data>
+  <data name="ImportErrCancelled" xml:space="preserve">
+    <value>Importazione annullata.</value>
+  </data>
+  <data name="ImportErrGeneric" xml:space="preserve">
+    <value>Non siamo riusciti a importare quella ricetta. Controlla la connessione e riprova.</value>
+  </data>
   <data name="ErrPacksPlayStore" xml:space="preserve">
     <value>I pacchetti di crediti Smart sono disponibili nella versione Play Store.</value>
   </data>

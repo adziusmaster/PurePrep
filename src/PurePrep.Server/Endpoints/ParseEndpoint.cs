@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using PurePrep.Ai;
+using PurePrep.Application;
 using PurePrep.Server.Data;
 using PurePrep.Server.Services;
 using PurePrep.Units;
@@ -26,16 +27,16 @@ public static class ParseEndpoint
         var log = loggerFactory.CreateLogger("ParseEndpoint");
 
         if (request.DeviceId == Guid.Empty)
-            return Results.BadRequest(new { error = "A valid deviceId is required." });
+            return Fail(StatusCodes.Status400BadRequest, ImportErrorCode.InvalidRequest, "A valid deviceId is required.");
         if (!Uri.TryCreate(request.Url, UriKind.Absolute, out var url))
-            return Results.BadRequest(new { error = "A valid absolute URL is required." });
+            return Fail(StatusCodes.Status400BadRequest, ImportErrorCode.InvalidUrl, "A valid absolute URL is required.");
 
         // Seed the free allowance the first time this device is seen, subject to the origin cap.
         await CreditsEndpoint.EnsureSeededAsync(request.DeviceId, http, credits, freeCredits, ipHasher, ct);
 
         var cost = creditOptions.Value.CostPerParse;
         if (!await credits.TrySpendAsync(request.DeviceId, cost, ct))
-            return Results.Json(new { error = "Insufficient credits." }, statusCode: StatusCodes.Status402PaymentRequired);
+            return Fail(StatusCodes.Status402PaymentRequired, ImportErrorCode.InsufficientCredits, "Insufficient credits.");
 
         var deviceHash = ipHasher.Hash(request.DeviceId.ToString()) ?? string.Empty;
 
@@ -50,6 +51,11 @@ public static class ParseEndpoint
             var input = RecipeExtractionInput.Build(structured, PageText.Extract(html), geminiOptions.Value.MaxInputChars);
 
             var ai = await gemini.ExtractAsync(input, request.Language, ct);
+
+            // A page that loaded but yielded nothing usable is a distinct outcome from a fetch or
+            // service failure: refund and tell the user the page simply had no recipe.
+            if (!ai.Ingredients.Any() && !ai.Steps.Any())
+                throw new NoRecipeExtractedException($"No recipe extracted from '{url.Host}'.");
 
             var system = UnitConverter.Detect(ai.Ingredients.Concat(ai.Steps));
             var recipe = new RecipeResponse(
@@ -67,39 +73,44 @@ public static class ParseEndpoint
             await credits.RefundAsync(request.DeviceId, cost, CancellationToken.None);
             await LogAsync(dbFactory, deviceHash, url.Host, success: false, CancellationToken.None);
 
-            // Distinguish the failure modes instead of blaming every one on the recipe page.
-            // Previously an expired Gemini key and an unparseable blog post looked identical.
+            // Every failure maps to a stable code + a friendly message. The client localizes the code,
+            // so the user never sees a raw "502 Bad Gateway" and each failure mode reads distinctly.
             return ex switch
             {
-                UrlNotAllowedException => Results.BadRequest(
-                    new { error = "That address can't be imported. Paste a public recipe page link." }),
+                UrlNotAllowedException => Fail(StatusCodes.Status400BadRequest, ImportErrorCode.InvalidUrl,
+                    "That address can't be imported. Paste a public recipe page link."),
 
-                OperationCanceledException => Results.Json(
-                    new { error = "The import was cancelled." }, statusCode: StatusCodes.Status499ClientClosedRequest),
+                PageNotFoundException => Fail(StatusCodes.Status400BadRequest, ImportErrorCode.NotFound,
+                    "That page could not be found. Check the link and try again."),
 
-                HttpRequestException http404 when http404.StatusCode == System.Net.HttpStatusCode.NotFound =>
-                    Results.BadRequest(new { error = "That page could not be found. Check the link and try again." }),
+                SiteBlockedException => Fail(StatusCodes.Status502BadGateway, ImportErrorCode.SiteBlocked,
+                    "That site wouldn't let us read the page. Try opening it in your browser and pasting the recipe, or use a different link."),
 
-                HttpRequestException httpEx when IsUpstreamRecipeSite(httpEx) => Results.Json(
-                    new { error = "That site would not let us read the page. Try a different link." },
-                    statusCode: StatusCodes.Status502BadGateway),
+                NoRecipeExtractedException => Fail(StatusCodes.Status502BadGateway, ImportErrorCode.NoRecipe,
+                    "We couldn't find a recipe on that page. Try a direct link to the recipe itself."),
+
+                OperationCanceledException when ct.IsCancellationRequested => Fail(
+                    StatusCodes.Status499ClientClosedRequest, ImportErrorCode.Cancelled, "The import was cancelled."),
+
+                UpstreamFetchException or OperationCanceledException or HttpRequestException => Fail(
+                    StatusCodes.Status502BadGateway, ImportErrorCode.Temporary,
+                    "The site was slow or unavailable. Please try again in a moment."),
 
                 _ => LogAndFail(log, ex),
             };
         }
     }
 
-    private static bool IsUpstreamRecipeSite(HttpRequestException ex) =>
-        ex.StatusCode is not null;
+    private static IResult Fail(int statusCode, string code, string message) =>
+        Results.Json(new ImportError(code, message), statusCode: statusCode);
 
     private static IResult LogAndFail(ILogger log, Exception ex)
     {
         // The extraction service itself failed (bad API key, quota, malformed response). The user
         // gets a neutral message; the detail belongs in the log, where it is actionable.
         log.LogError(ex, "Recipe extraction failed.");
-        return Results.Json(
-            new { error = "We couldn't read a recipe from that page. Your credit has been returned." },
-            statusCode: StatusCodes.Status502BadGateway);
+        return Fail(StatusCodes.Status502BadGateway, ImportErrorCode.ServiceError,
+            "We couldn't read a recipe from that page. Your credit has been returned.");
     }
 
     private static async Task LogAsync(

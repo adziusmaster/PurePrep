@@ -287,6 +287,30 @@ Add stock a ladle at a time, stirring.</value>
   <data name="ErrCouldNotImportFormat" xml:space="preserve">
     <value>Could not import recipe: {0}</value>
   </data>
+  <data name="ImportErrInvalidUrl" xml:space="preserve">
+    <value>That doesn't look like a recipe link. Paste a public recipe page address.</value>
+  </data>
+  <data name="ImportErrSiteBlocked" xml:space="preserve">
+    <value>That site wouldn't let us read the page. Try opening it in your browser and pasting the recipe, or use a different link.</value>
+  </data>
+  <data name="ImportErrNotFound" xml:space="preserve">
+    <value>We couldn't find that page. Check the link and try again.</value>
+  </data>
+  <data name="ImportErrNoRecipe" xml:space="preserve">
+    <value>We couldn't find a recipe on that page. Try a direct link to the recipe itself.</value>
+  </data>
+  <data name="ImportErrTemporary" xml:space="preserve">
+    <value>The site was slow or unavailable. Please try again in a moment.</value>
+  </data>
+  <data name="ImportErrService" xml:space="preserve">
+    <value>Something went wrong on our side reading that recipe. Your credit has been returned.</value>
+  </data>
+  <data name="ImportErrCancelled" xml:space="preserve">
+    <value>Import cancelled.</value>
+  </data>
+  <data name="ImportErrGeneric" xml:space="preserve">
+    <value>We couldn't import that recipe. Check your connection and try again.</value>
+  </data>
   <data name="ErrPacksPlayStore" xml:space="preserve">
     <value>Smart Credit packs are available in the Play Store build.</value>
   </data>

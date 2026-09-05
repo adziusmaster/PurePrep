@@ -265,9 +265,16 @@ public sealed class RecipeLibraryViewModel : INotifyPropertyChanged
             CreditBalance = 0;
             IsUpgradePromptVisible = true;
         }
-        catch (Exception ex)
+        catch (RecipeImportException ex)
         {
-            ErrorMessage = AppResources.Format("ErrCouldNotImportFormat", ex.Message);
+            // Backend returned a handled failure with a stable code — show its localized message.
+            ErrorMessage = ImportErrorText.ForCode(ex.Code);
+        }
+        catch (Exception)
+        {
+            // Anything unclassified (no connection, unexpected transport error) gets a neutral,
+            // localized message rather than a raw exception string.
+            ErrorMessage = ImportErrorText.ForCode(ImportErrorCode.Unknown);
         }
         finally
         {

@@ -40,14 +40,22 @@ builder.Services.AddScoped<IFreeCreditPolicy>(sp => new SqliteFreeCreditPolicy(
 // ---- Outbound page fetch (SSRF-guarded) -----------------------------------------------------
 // AllowAutoRedirect is off on purpose: GuardedPageFetcher walks the redirect chain itself and
 // re-checks every hop, because automatic following is the standard way past an SSRF allow-list.
+// The User-Agent is NOT set here: the fetcher chooses it per request (honest bot first, browser
+// only as a transparent fallback). AutomaticDecompression lets us accept gzip/br like a browser.
+builder.Services.Configure<PageFetchOptions>(builder.Configuration.GetSection(PageFetchOptions.SectionName));
+builder.Services.AddSingleton<IFetchHostMemory>(sp =>
+    new InMemoryFetchHostMemory(
+        sp.GetRequiredService<Microsoft.Extensions.Options.IOptions<PageFetchOptions>>().Value.BlockedHostTtl));
 builder.Services.AddHttpClient<IPageFetcher, GuardedPageFetcher>(client =>
 {
     client.Timeout = TimeSpan.FromSeconds(15);
     client.MaxResponseContentBufferSize = 5 * 1024 * 1024; // 5 MB cap
-    client.DefaultRequestHeaders.UserAgent.ParseAdd("Mozilla/5.0 (compatible; PurePrepBot/1.0)");
-    client.DefaultRequestHeaders.Accept.ParseAdd("text/html,application/xhtml+xml");
 })
-.ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler { AllowAutoRedirect = false });
+.ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler
+{
+    AllowAutoRedirect = false,
+    AutomaticDecompression = System.Net.DecompressionMethods.All,
+});
 
 // ---- Gemini ---------------------------------------------------------------------------------
 var geminiKey = builder.Configuration[$"{GeminiOptions.SectionName}:ApiKey"];

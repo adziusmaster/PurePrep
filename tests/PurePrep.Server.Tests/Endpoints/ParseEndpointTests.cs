@@ -4,6 +4,7 @@ using FluentAssertions;
 using NSubstitute;
 using NSubstitute.ClearExtensions;
 using PurePrep.Ai;
+using PurePrep.Application;
 using PurePrep.Server.Tests.TestSupport;
 
 namespace PurePrep.Server.Tests.Endpoints;
@@ -16,6 +17,8 @@ public sealed class ParseEndpointTests : IClassFixture<PurePrepAppFactory>
 {
     private readonly PurePrepAppFactory _factory;
 
+    private static int _originCounter;
+
     public ParseEndpointTests(PurePrepAppFactory factory)
     {
         _factory = factory;
@@ -23,6 +26,10 @@ public sealed class ParseEndpointTests : IClassFixture<PurePrepAppFactory>
         // would otherwise leak between them — one test's throwing model breaks the next.
         _factory.Gemini.ClearSubstitute();
         _factory.PageFetcher.ClearSubstitute();
+        // Give each test its own origin so the per-IP free-credit cap (5/day) never couples tests:
+        // every device is a fresh origin that seeds with a full free balance.
+        var n = System.Threading.Interlocked.Increment(ref _originCounter);
+        _factory.ClientAddress = System.Net.IPAddress.Parse($"198.51.100.{n}");
     }
 
     private const string PageWithJsonLd = """
@@ -124,9 +131,57 @@ public sealed class ParseEndpointTests : IClassFixture<PurePrepAppFactory>
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.BadGateway);
+        (await ReadCodeAsync(response)).Should().Be(ImportErrorCode.ServiceError);
         var after = (await client.GetFromJsonAsync<BalanceDto>($"/api/credits/{device}"))!.Balance;
         after.Should().Be(before);
     }
 
+    [Fact]
+    public async Task Parse_WhenTheSiteWallsUs_ShouldReturnSiteBlockedCodeAndRefund()
+    {
+        // Arrange
+        var client = _factory.CreateClient();
+        var device = Guid.NewGuid();
+        var before = (await client.GetFromJsonAsync<BalanceDto>($"/api/credits/{device}"))!.Balance;
+        _factory.PageFetcher.FetchAsync(Arg.Any<Uri>(), Arg.Any<CancellationToken>())
+            .Returns<Task<string>>(_ => throw new SiteBlockedException("blocked"));
+
+        // Act
+        var response = await ParseAsync(client, device);
+
+        // Assert — a friendly code, never a raw transport status, and the credit comes back.
+        response.StatusCode.Should().Be(HttpStatusCode.BadGateway);
+        (await ReadCodeAsync(response)).Should().Be(ImportErrorCode.SiteBlocked);
+        var after = (await client.GetFromJsonAsync<BalanceDto>($"/api/credits/{device}"))!.Balance;
+        after.Should().Be(before);
+    }
+
+    [Fact]
+    public async Task Parse_WhenThePageHasNoRecipe_ShouldReturnNoRecipeCodeAndRefund()
+    {
+        // Arrange — the page loaded but the model found nothing usable.
+        var client = _factory.CreateClient();
+        var device = Guid.NewGuid();
+        var before = (await client.GetFromJsonAsync<BalanceDto>($"/api/credits/{device}"))!.Balance;
+        _factory.PageFetcher.FetchAsync(Arg.Any<Uri>(), Arg.Any<CancellationToken>())
+            .Returns(Task.FromResult("<html><body>Just a blog post.</body></html>"));
+        _factory.Gemini.ExtractAsync(Arg.Any<string>(), Arg.Any<string?>(), Arg.Any<CancellationToken>())
+            .Returns(Task.FromResult(new AiRecipe("", Array.Empty<string>(), Array.Empty<string>())));
+
+        // Act
+        var response = await ParseAsync(client, device);
+
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.BadGateway);
+        (await ReadCodeAsync(response)).Should().Be(ImportErrorCode.NoRecipe);
+        var after = (await client.GetFromJsonAsync<BalanceDto>($"/api/credits/{device}"))!.Balance;
+        after.Should().Be(before);
+    }
+
+    private static async Task<string?> ReadCodeAsync(HttpResponseMessage response) =>
+        (await response.Content.ReadFromJsonAsync<ImportErrorDto>())?.Code;
+
     private sealed record BalanceDto(int Balance);
+
+    private sealed record ImportErrorDto(string Code, string Error);
 }

@@ -287,6 +287,30 @@ Voeg de bouillon pollepel voor pollepel toe, al roerend.</value>
   <data name="ErrCouldNotImportFormat" xml:space="preserve">
     <value>Kan recept niet importeren: {0}</value>
   </data>
+  <data name="ImportErrInvalidUrl" xml:space="preserve">
+    <value>Dit lijkt geen receptlink. Plak het adres van een openbare receptpagina.</value>
+  </data>
+  <data name="ImportErrSiteBlocked" xml:space="preserve">
+    <value>Die site liet ons de pagina niet lezen. Open hem in je browser en plak het recept, of gebruik een andere link.</value>
+  </data>
+  <data name="ImportErrNotFound" xml:space="preserve">
+    <value>We konden die pagina niet vinden. Controleer de link en probeer het opnieuw.</value>
+  </data>
+  <data name="ImportErrNoRecipe" xml:space="preserve">
+    <value>We konden geen recept op die pagina vinden. Probeer een directe link naar het recept.</value>
+  </data>
+  <data name="ImportErrTemporary" xml:space="preserve">
+    <value>De site was traag of niet bereikbaar. Probeer het zo meteen opnieuw.</value>
+  </data>
+  <data name="ImportErrService" xml:space="preserve">
+    <value>Er ging iets mis aan onze kant bij het lezen van het recept. Je tegoed is teruggestort.</value>
+  </data>
+  <data name="ImportErrCancelled" xml:space="preserve">
+    <value>Import geannuleerd.</value>
+  </data>
+  <data name="ImportErrGeneric" xml:space="preserve">
+    <value>We konden dat recept niet importeren. Controleer je verbinding en probeer het opnieuw.</value>
+  </data>
   <data name="ErrPacksPlayStore" xml:space="preserve">
     <value>Smart-creditpakketten zijn beschikbaar in de Play Store-versie.</value>
   </data>

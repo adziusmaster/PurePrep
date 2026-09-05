@@ -26,7 +26,14 @@ public sealed class AiProxyRecipeParser(HttpClient http, IDeviceIdentity identit
         if (response.StatusCode == HttpStatusCode.PaymentRequired)
             throw new InsufficientCreditsException();
 
-        response.EnsureSuccessStatusCode();
+        if (!response.IsSuccessStatusCode)
+        {
+            // The backend hands back a machine-readable code plus a default message. Surface the code
+            // so the UI can localize it — never let the raw "502 Bad Gateway" transport string leak
+            // to the user (which is exactly what EnsureSuccessStatusCode used to do).
+            var error = await TryReadErrorAsync(response, cancellationToken);
+            throw new RecipeImportException(error?.Code ?? ImportErrorCode.Unknown, error?.Error);
+        }
 
         var payload = await response.Content.ReadFromJsonAsync<ParsePayload>(cancellationToken)
             ?? throw new InvalidOperationException("The parser service returned an empty response.");
@@ -58,4 +65,19 @@ public sealed class AiProxyRecipeParser(HttpClient http, IDeviceIdentity identit
         string SourceSystem,
         IReadOnlyList<string>? Ingredients,
         IReadOnlyList<string>? Steps);
+
+    private sealed record ImportErrorPayload(string? Code, string? Error);
+
+    /// <summary>Reads the error envelope defensively — a proxy or gateway may return non-JSON.</summary>
+    private static async Task<ImportErrorPayload?> TryReadErrorAsync(HttpResponseMessage response, CancellationToken ct)
+    {
+        try
+        {
+            return await response.Content.ReadFromJsonAsync<ImportErrorPayload>(ct);
+        }
+        catch
+        {
+            return null;
+        }
+    }
 }

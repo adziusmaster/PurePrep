@@ -96,4 +96,104 @@ public sealed class GuardedPageFetcherTests
         await act.Should().ThrowAsync<UrlNotAllowedException>();
         handler.RequestedUris.Should().BeEmpty();
     }
+
+    [Fact]
+    public async Task FetchAsync_WhenHonestBotIsWalled_ShouldRetryAsTransparentBrowser()
+    {
+        // Arrange — the site 403s our bot, then serves the page to the browser fallback.
+        var handler = new StubHttpMessageHandler()
+            .Respond(HttpStatusCode.Forbidden)
+            .Respond(HttpStatusCode.OK, "<html>recipe</html>");
+        var options = new PageFetchOptions { ContactEmail = "dev@pureprep.app" };
+        var fetcher = new GuardedPageFetcher(
+            new HttpClient(handler), GuardAllowing("recipes.example.com"), options, new InMemoryFetchHostMemory());
+
+        // Act
+        var body = await fetcher.FetchAsync(Public);
+
+        // Assert
+        body.Should().Be("<html>recipe</html>");
+        handler.SentRequests.Should().HaveCount(2);
+        handler.SentRequests[0].UserAgent.Should().Contain("PurePrepBot");
+        handler.SentRequests[0].From.Should().BeNull("the honest attempt does not disguise itself");
+
+        var fallback = handler.SentRequests[1];
+        fallback.UserAgent.Should().Contain("Mozilla").And.NotContain("PurePrepBot");
+        fallback.From.Should().Be("dev@pureprep.app");
+        fallback.Purpose.Should().NotBeNullOrWhiteSpace().And.Contain("recipe import");
+        fallback.Info.Should().Be("https://pureprep.app/bot");
+    }
+
+    [Fact]
+    public async Task FetchAsync_WhenBrowserFallbackIsAlsoWalled_ShouldThrowSiteBlocked()
+    {
+        // Arrange
+        var handler = new StubHttpMessageHandler()
+            .Respond(HttpStatusCode.Forbidden)
+            .Respond(HttpStatusCode.Forbidden);
+        var fetcher = new GuardedPageFetcher(
+            new HttpClient(handler), GuardAllowing("recipes.example.com"), new PageFetchOptions(), new InMemoryFetchHostMemory());
+
+        // Act
+        var act = async () => await fetcher.FetchAsync(Public);
+
+        // Assert
+        await act.Should().ThrowAsync<SiteBlockedException>();
+        handler.SentRequests.Should().HaveCount(2, "one honest attempt, one browser fallback");
+    }
+
+    [Fact]
+    public async Task FetchAsync_WhenPageIsNotFound_ShouldThrowWithoutBrowserRetry()
+    {
+        // Arrange — a 404 is a real "no such page"; masquerading as a browser will not conjure one.
+        var handler = new StubHttpMessageHandler().Respond(HttpStatusCode.NotFound);
+        var fetcher = new GuardedPageFetcher(
+            new HttpClient(handler), GuardAllowing("recipes.example.com"), new PageFetchOptions(), new InMemoryFetchHostMemory());
+
+        // Act
+        var act = async () => await fetcher.FetchAsync(Public);
+
+        // Assert
+        await act.Should().ThrowAsync<PageNotFoundException>();
+        handler.SentRequests.Should().ContainSingle("404 must not trigger the browser fallback");
+    }
+
+    [Fact]
+    public async Task FetchAsync_WhenHostAlreadyKnownToBlockBot_ShouldStartWithBrowser()
+    {
+        // Arrange — a prior import taught us this host walls the bot, so we skip the wasted first hop.
+        var memory = new InMemoryFetchHostMemory();
+        memory.MarkBlocked("recipes.example.com");
+        var handler = new StubHttpMessageHandler().Respond(HttpStatusCode.OK, "<html>ok</html>");
+        var fetcher = new GuardedPageFetcher(
+            new HttpClient(handler), GuardAllowing("recipes.example.com"), new PageFetchOptions(), memory);
+
+        // Act
+        var body = await fetcher.FetchAsync(Public);
+
+        // Assert
+        body.Should().Be("<html>ok</html>");
+        handler.SentRequests.Should().ContainSingle();
+        handler.SentRequests[0].UserAgent.Should().Contain("Mozilla");
+    }
+
+    [Fact]
+    public async Task FetchAsync_WhenUpstreamIsTransientlyBad_ShouldRetrySameIdentityAndSucceed()
+    {
+        // Arrange — a one-off 502 clears on retry, all under the honest bot identity.
+        var handler = new StubHttpMessageHandler()
+            .Respond(HttpStatusCode.BadGateway)
+            .Respond(HttpStatusCode.OK, "<html>recovered</html>");
+        var options = new PageFetchOptions { MaxTransientRetries = 2 };
+        var fetcher = new GuardedPageFetcher(
+            new HttpClient(handler), GuardAllowing("recipes.example.com"), options, new InMemoryFetchHostMemory());
+
+        // Act
+        var body = await fetcher.FetchAsync(Public);
+
+        // Assert
+        body.Should().Be("<html>recovered</html>");
+        handler.SentRequests.Should().HaveCount(2);
+        handler.SentRequests.Should().OnlyContain(r => r.UserAgent!.Contains("PurePrepBot"));
+    }
 }

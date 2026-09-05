@@ -59,21 +59,22 @@ public sealed class PurePrepAppFactory : WebApplicationFactory<Program>
 
             // TestServer has no transport, so Connection.RemoteIpAddress is null — which the free
             // credit policy correctly treats as "origin unknown, grant nothing". Kestrel always has
-            // one, so give the test host an address to make it behave like production.
-            services.AddSingleton<IStartupFilter>(new ClientAddressStartupFilter(ClientAddress));
+            // one, so give the test host an address to make it behave like production. The address is
+            // resolved per request (not captured at build time) so a test can vary its origin.
+            services.AddSingleton<IStartupFilter>(new ClientAddressStartupFilter(() => ClientAddress));
         });
     }
 
     /// <summary>The address the hosted app sees for every request. Tests may vary it per instance.</summary>
     public System.Net.IPAddress ClientAddress { get; set; } = System.Net.IPAddress.Parse("203.0.113.10");
 
-    private sealed class ClientAddressStartupFilter(System.Net.IPAddress address) : IStartupFilter
+    private sealed class ClientAddressStartupFilter(Func<System.Net.IPAddress> address) : IStartupFilter
     {
         public Action<IApplicationBuilder> Configure(Action<IApplicationBuilder> next) => app =>
         {
             app.Use(async (context, nextMiddleware) =>
             {
-                context.Connection.RemoteIpAddress ??= address;
+                context.Connection.RemoteIpAddress ??= address();
                 await nextMiddleware();
             });
             next(app);

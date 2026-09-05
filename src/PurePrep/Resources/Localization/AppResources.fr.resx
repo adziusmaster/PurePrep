@@ -287,6 +287,30 @@ Ajoutez le bouillon louche par louche en remuant.</value>
   <data name="ErrCouldNotImportFormat" xml:space="preserve">
     <value>Impossible d’importer la recette : {0}</value>
   </data>
+  <data name="ImportErrInvalidUrl" xml:space="preserve">
+    <value>Cela ne ressemble pas à un lien de recette. Collez l’adresse d’une page de recette publique.</value>
+  </data>
+  <data name="ImportErrSiteBlocked" xml:space="preserve">
+    <value>Ce site ne nous a pas laissés lire la page. Ouvrez-la dans votre navigateur et collez la recette, ou utilisez un autre lien.</value>
+  </data>
+  <data name="ImportErrNotFound" xml:space="preserve">
+    <value>Nous n’avons pas trouvé cette page. Vérifiez le lien et réessayez.</value>
+  </data>
+  <data name="ImportErrNoRecipe" xml:space="preserve">
+    <value>Nous n’avons trouvé aucune recette sur cette page. Essayez un lien direct vers la recette.</value>
+  </data>
+  <data name="ImportErrTemporary" xml:space="preserve">
+    <value>Le site était lent ou indisponible. Veuillez réessayer dans un instant.</value>
+  </data>
+  <data name="ImportErrService" xml:space="preserve">
+    <value>Un problème est survenu de notre côté lors de la lecture de la recette. Votre crédit a été remboursé.</value>
+  </data>
+  <data name="ImportErrCancelled" xml:space="preserve">
+    <value>Importation annulée.</value>
+  </data>
+  <data name="ImportErrGeneric" xml:space="preserve">
+    <value>Nous n’avons pas pu importer cette recette. Vérifiez votre connexion et réessayez.</value>
+  </data>
   <data name="ErrPacksPlayStore" xml:space="preserve">
     <value>Les packs de crédits Smart sont disponibles dans la version Play Store.</value>
   </data>

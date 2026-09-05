@@ -287,6 +287,30 @@ Brühe kellenweise unter Rühren zugeben.</value>
   <data name="ErrCouldNotImportFormat" xml:space="preserve">
     <value>Rezept konnte nicht importiert werden: {0}</value>
   </data>
+  <data name="ImportErrInvalidUrl" xml:space="preserve">
+    <value>Das sieht nicht nach einem Rezept-Link aus. Füge die Adresse einer öffentlichen Rezeptseite ein.</value>
+  </data>
+  <data name="ImportErrSiteBlocked" xml:space="preserve">
+    <value>Diese Website hat uns die Seite nicht lesen lassen. Öffne sie im Browser und füge das Rezept ein oder verwende einen anderen Link.</value>
+  </data>
+  <data name="ImportErrNotFound" xml:space="preserve">
+    <value>Wir konnten diese Seite nicht finden. Prüfe den Link und versuche es erneut.</value>
+  </data>
+  <data name="ImportErrNoRecipe" xml:space="preserve">
+    <value>Auf dieser Seite konnten wir kein Rezept finden. Versuche einen direkten Link zum Rezept.</value>
+  </data>
+  <data name="ImportErrTemporary" xml:space="preserve">
+    <value>Die Website war langsam oder nicht erreichbar. Bitte versuche es gleich noch einmal.</value>
+  </data>
+  <data name="ImportErrService" xml:space="preserve">
+    <value>Beim Lesen des Rezepts ist auf unserer Seite etwas schiefgelaufen. Dein Guthaben wurde zurückerstattet.</value>
+  </data>
+  <data name="ImportErrCancelled" xml:space="preserve">
+    <value>Import abgebrochen.</value>
+  </data>
+  <data name="ImportErrGeneric" xml:space="preserve">
+    <value>Wir konnten dieses Rezept nicht importieren. Prüfe deine Verbindung und versuche es erneut.</value>
+  </data>
   <data name="ErrPacksPlayStore" xml:space="preserve">
     <value>Smart-Credit-Pakete sind in der Play-Store-Version verfügbar.</value>
   </data>

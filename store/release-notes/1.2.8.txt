@@ -1,0 +1,63 @@
+<en-GB>
+What's new in 1.2.8
+• Translation, reinvented. Translate any recipe into 7 languages with much better quality. Your original is always kept — switch back any time for free — and each language is saved, so you only ever pay once.
+• More reliable imports. Recipes that used to fail now come through from many more sites.
+• Clearer messages. Friendly, plain-language notices replace confusing technical errors.
+Thanks for testing PurePrep — keep the feedback coming!
+</en-GB>
+
+<en-US>
+What's new in 1.2.8
+• Translation, reinvented. Translate any recipe into 7 languages with much better quality. Your original is always kept — switch back anytime for free — and each language is saved, so you only ever pay once.
+• More reliable imports. Recipes that used to fail now come through from many more sites.
+• Clearer messages. Friendly, plain-language notices replace confusing technical errors.
+Thanks for testing PurePrep — keep the feedback coming!
+</en-US>
+
+<de-DE>
+Neu in 1.2.8
+• Übersetzung, neu gedacht. Übersetze jedes Rezept in 7 Sprachen – in deutlich besserer Qualität. Das Original bleibt immer erhalten – jederzeit kostenlos zurückwechseln – und jede Sprache wird gespeichert, du zahlst also nur einmal.
+• Zuverlässigerer Import. Rezepte, die früher fehlschlugen, gelingen jetzt von viel mehr Seiten.
+• Klarere Hinweise. Freundliche, verständliche Meldungen statt technischer Fehler.
+Danke fürs Testen von PurePrep – schick uns weiter dein Feedback!
+</de-DE>
+
+<es-ES>
+Novedades en 1.2.8
+• Traducción reinventada. Traduce cualquier receta a 7 idiomas con mucha mejor calidad. El original se conserva siempre —vuelve a él gratis cuando quieras— y cada idioma se guarda, así que solo pagas una vez.
+• Importación más fiable. Recetas que antes fallaban ahora se importan desde muchos más sitios.
+• Mensajes más claros. Avisos sencillos y amables en lugar de errores técnicos.
+¡Gracias por probar PurePrep! Sigue enviándonos tus comentarios.
+</es-ES>
+
+<fr-FR>
+Nouveautés de la version 1.2.8
+• La traduction réinventée. Traduisez n'importe quelle recette en 7 langues avec une bien meilleure qualité. L'original est toujours conservé — revenez-y gratuitement à tout moment — et chaque langue est enregistrée : vous ne payez qu'une fois.
+• Imports plus fiables. Des recettes qui échouaient s'importent désormais depuis bien plus de sites.
+• Messages plus clairs. Des notices simples remplacent les erreurs techniques.
+Merci de tester PurePrep — continuez à nous faire vos retours !
+</fr-FR>
+
+<it-IT>
+Novità della 1.2.8
+• Traduzione reinventata. Traduci qualsiasi ricetta in 7 lingue con una qualità molto migliore. L'originale viene sempre mantenuto — torna a esso gratis quando vuoi — e ogni lingua viene salvata, così paghi una sola volta.
+• Importazioni più affidabili. Ricette che prima fallivano ora arrivano da molti più siti.
+• Messaggi più chiari. Avvisi semplici e amichevoli al posto degli errori tecnici.
+Grazie per aver provato PurePrep — continua a inviarci il tuo feedback!
+</it-IT>
+
+<nl-NL>
+Nieuw in 1.2.8
+• Vertalen, opnieuw bedacht. Vertaal elk recept naar 7 talen met veel betere kwaliteit. Het origineel blijft altijd bewaard — schakel gratis terug wanneer je wilt — en elke taal wordt opgeslagen, dus je betaalt maar één keer.
+• Betrouwbaarder importeren. Recepten die eerder mislukten, komen nu van veel meer sites binnen.
+• Duidelijkere meldingen. Vriendelijke, begrijpelijke berichten in plaats van technische fouten.
+Bedankt voor het testen van PurePrep — blijf je feedback sturen!
+</nl-NL>
+
+<pl-PL>
+Co nowego w 1.2.8
+• Tłumaczenie na nowo. Przetłumacz dowolny przepis na 7 języków w znacznie lepszej jakości. Oryginał jest zawsze zachowany — wróć do niego za darmo w każdej chwili — a każdy język jest zapisywany, więc płacisz tylko raz.
+• Bardziej niezawodny import. Przepisy, które wcześniej się nie wczytywały, teraz działają na wielu więcej stronach.
+• Czytelniejsze komunikaty. Przyjazne, zrozumiałe informacje zamiast błędów technicznych.
+Dziękujemy za testowanie PurePrep — czekamy na Twoje opinie!
+</pl-PL>

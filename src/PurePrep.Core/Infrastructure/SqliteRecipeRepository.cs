@@ -79,6 +79,10 @@ public sealed class SqliteRecipeRepository(IDbContextFactory<PurePrepDbContext> 
 
         // Additive translation columns. Existing rows get NULL languages and an empty cache, so their
         // current text is treated as the pristine original — no data loss, no reprocessing needed.
+        // NOTE: the default is an empty string, NOT '{}'. ExecuteSqlRaw runs the SQL through
+        // string.Format, which reads a literal "{}" as a malformed placeholder and throws
+        // FormatException (crashing on the first upgraded-DB launch). An empty string is treated as
+        // an empty map by DeserializeTranslations, so it's equivalent and brace-free.
         if (!columns.Contains("OriginalLanguage"))
             await db.Database.ExecuteSqlRawAsync(
                 "ALTER TABLE Recipes ADD COLUMN OriginalLanguage TEXT NULL", cancellationToken);
@@ -87,7 +91,7 @@ public sealed class SqliteRecipeRepository(IDbContextFactory<PurePrepDbContext> 
                 "ALTER TABLE Recipes ADD COLUMN DisplayLanguage TEXT NULL", cancellationToken);
         if (!columns.Contains("TranslationsJson"))
             await db.Database.ExecuteSqlRawAsync(
-                "ALTER TABLE Recipes ADD COLUMN TranslationsJson TEXT NOT NULL DEFAULT '{}'", cancellationToken);
+                "ALTER TABLE Recipes ADD COLUMN TranslationsJson TEXT NOT NULL DEFAULT ''", cancellationToken);
     }
 
     private static string SerializeTranslations(IReadOnlyDictionary<string, RecipeTranslation> translations) =>

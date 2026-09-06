@@ -1,5 +1,7 @@
 using System.Net;
 using FluentAssertions;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 using NSubstitute;
 using PurePrep.Ai;
 using PurePrep.Core.Tests.TestSupport;
@@ -195,5 +197,39 @@ public sealed class GuardedPageFetcherTests
         body.Should().Be("<html>recovered</html>");
         handler.SentRequests.Should().HaveCount(2);
         handler.SentRequests.Should().OnlyContain(r => r.UserAgent!.Contains("PurePrepBot"));
+    }
+
+    // Registered as a typed HttpClient, GuardedPageFetcher is created by the DI container's
+    // ActivatorUtilities, which requires exactly one applicable constructor. When a second public
+    // constructor was added, resolution began throwing "Multiple constructors accepting all given
+    // argument types" on every request — a 500 on every import that no other test caught, because
+    // the unit tests call a constructor directly and the server tests swap in a fake fetcher.
+    [Fact]
+    public void TypedClientActivation_ShouldResolveASingleConstructor()
+    {
+        // Arrange — mirror exactly what AddHttpClient<IPageFetcher, GuardedPageFetcher>() does:
+        // build a factory that supplies the HttpClient and resolves the rest from the provider.
+        var provider = new StubServiceProvider(
+            (typeof(IUrlGuard), GuardAllowing("recipes.example.com")),
+            (typeof(IOptions<PageFetchOptions>), Options.Create(new PageFetchOptions())),
+            (typeof(IFetchHostMemory), new InMemoryFetchHostMemory()));
+
+        // Act
+        var act = () =>
+        {
+            var factory = ActivatorUtilities.CreateFactory(typeof(GuardedPageFetcher), [typeof(HttpClient)]);
+            return factory(provider, [new HttpClient()]);
+        };
+
+        // Assert
+        act.Should().NotThrow().Which.Should().BeOfType<GuardedPageFetcher>();
+    }
+
+    private sealed class StubServiceProvider(params (Type Type, object Instance)[] services) : IServiceProvider
+    {
+        private readonly Dictionary<Type, object> _services = services.ToDictionary(s => s.Type, s => s.Instance);
+
+        public object? GetService(Type serviceType) =>
+            _services.TryGetValue(serviceType, out var instance) ? instance : null;
     }
 }

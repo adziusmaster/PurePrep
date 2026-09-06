@@ -1,4 +1,5 @@
 using System.Net;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 
 namespace PurePrep.Ai;
@@ -42,6 +43,11 @@ public sealed class GuardedPageFetcher : IPageFetcher
     private readonly IFetchHostMemory _hostMemory;
     private readonly PageFetchOptions _options;
 
+    // Two public constructors are visible to the DI container because GuardedPageFetcher is
+    // registered as a typed HttpClient. Without this attribute the typed-client factory sees both
+    // as applicable (they share the HttpClient/IUrlGuard prefix) and throws at resolution time,
+    // 500-ing every import. This attribute names the one constructor DI must use.
+    [ActivatorUtilitiesConstructor]
     public GuardedPageFetcher(HttpClient http, IUrlGuard guard, IOptions<PageFetchOptions> options, IFetchHostMemory hostMemory)
         : this(http, guard, options.Value, hostMemory)
     {

@@ -74,6 +74,9 @@ public sealed class GeminiClient(HttpClient http, IOptions<GeminiOptions> option
             $"authoritative for structure, its text must still be translated. If the source recipe is " +
             $"in any other language, translate every ingredient and step faithfully into natural, fluent " +
             $"{languageName}; the final output must not contain words left in the source language. " +
+            $"The Title especially must be translated: render it as the natural dish name a native " +
+            $"{languageName} cook would use — never leave it in the source language or treat it as a " +
+            $"proper noun to keep, unless a word is a brand or place name with no {languageName} equivalent. " +
             "Preserve all quantities, units, numbers, and cooking terminology exactly and keep them unchanged.";
     }
 
@@ -140,6 +143,9 @@ public sealed class GeminiClient(HttpClient http, IOptions<GeminiOptions> option
         "You are a professional culinary translator. You are given a recipe as JSON with a title, an " +
         "ingredients array, and a steps array. Translate every string into the requested language " +
         "producing natural, fluent cooking language a native speaker would use. " +
+        "This includes the title: never leave the title in the source language — render it as the " +
+        "natural dish name a native speaker would use, keeping only brand or place names that have no " +
+        "local equivalent. " +
         "Preserve the structure EXACTLY: return the same number of ingredients and the same number of " +
         "steps, in the same order — never merge, split, add, or drop an entry. " +
         "Keep all quantities, units, numbers, temperatures, and times exactly as given; only translate " +

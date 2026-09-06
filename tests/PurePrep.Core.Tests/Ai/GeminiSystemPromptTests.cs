@@ -25,6 +25,15 @@ public sealed class GeminiSystemPromptTests
         prompt.Should().Contain($"write the Title, Ingredients, and Steps entirely in {languageName}");
         prompt.Should().Contain("must still be translated");
         prompt.Should().Contain("must not contain words left in the source language");
+        // Titles were the weak spot: the model would translate the body but keep a dish's proper name.
+        prompt.Should().Contain("The Title especially must be translated");
+    }
+
+    [Fact]
+    public void TranslatePrompt_ForcesTheTitleToBeTranslated()
+    {
+        GeminiClient.BuildTranslatePrompt("pl")
+            .Should().Contain("never leave the title in the source language");
     }
 
     [Fact]

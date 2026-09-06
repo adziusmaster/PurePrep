@@ -10,8 +10,8 @@ namespace PurePrep.Presentation;
 
 /// <summary>
 /// Wraps a saved recipe for the detail screen. Applies the user's unit preference to a display
-/// copy of the recipe, then live serving-size scaling to the ingredient list via
-/// <see cref="RecipeScaling"/>. Steps are unit-converted but never scaled.
+/// copy of the recipe, then live serving-size scaling to both the ingredient list and the amounts
+/// embedded in the method steps via <see cref="RecipeScaling"/>.
 /// </summary>
 public sealed class RecipeDetailViewModel : INotifyPropertyChanged
 {
@@ -72,7 +72,7 @@ public sealed class RecipeDetailViewModel : INotifyPropertyChanged
         ? AppResources.Format("TranslatedBadgeFormat", TranslatedLanguageName)
         : string.Empty;
 
-    /// <summary>Unit-converted method steps (not scaled).</summary>
+    /// <summary>Unit-converted method steps, with amounts scaled to the chosen serving multiplier.</summary>
     public ObservableCollection<RecipeStep> DisplaySteps { get; } = new();
 
     /// <summary>Origin domain (e.g. "jamieoliver.com") when the recipe was imported from a link.</summary>
@@ -124,6 +124,7 @@ public sealed class RecipeDetailViewModel : INotifyPropertyChanged
                 return;
             _factor = value;
             RebuildIngredients();
+            RebuildSteps();
             OnPropertyChanged(nameof(ServingsCaption));
             foreach (var option in ScaleOptions)
                 option.RaiseSelectedChanged();
@@ -153,10 +154,18 @@ public sealed class RecipeDetailViewModel : INotifyPropertyChanged
 
     private void RebuildDisplay()
     {
-        DisplaySteps.Clear();
-        foreach (var step in _display.Steps)
-            DisplaySteps.Add(step);
+        RebuildSteps();
         RebuildIngredients();
+    }
+
+    private void RebuildSteps()
+    {
+        DisplaySteps.Clear();
+        var atOriginal = Math.Abs(_factor - 1.0) < 0.0001;
+        foreach (var step in _display.Steps)
+            DisplaySteps.Add(atOriginal
+                ? step
+                : new RecipeStep { Order = step.Order, Instruction = RecipeScaling.ScaleText(step.Instruction, _factor) });
     }
 
     private void RebuildIngredients()

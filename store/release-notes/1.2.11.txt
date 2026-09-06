@@ -1,0 +1,63 @@
+<en-GB>
+What's new in 1.2.11
+• Accurate scaling. Change the servings and every amount scales correctly — including amounts written after the ingredient and quantities mentioned in the steps.
+• Titles translated too. Imported recipes now get their title translated, not just the ingredients and steps.
+• More reliable imports. Fixed an issue that stopped some recipes from importing at all.
+Thanks for testing PurePrep — keep the feedback coming!
+</en-GB>
+
+<en-US>
+What's new in 1.2.11
+• Accurate scaling. Change the servings and every amount scales correctly — including amounts written after the ingredient and quantities mentioned in the steps.
+• Titles translated too. Imported recipes now get their title translated, not just the ingredients and steps.
+• More reliable imports. Fixed an issue that stopped some recipes from importing at all.
+Thanks for testing PurePrep — keep the feedback coming!
+</en-US>
+
+<de-DE>
+Neu in 1.2.11
+• Genaues Umrechnen. Ändere die Portionen und jede Menge wird korrekt umgerechnet – auch Mengen, die hinter der Zutat stehen, und Angaben in den Zubereitungsschritten.
+• Auch Titel werden übersetzt. Importierte Rezepte bekommen jetzt auch ihren Titel übersetzt, nicht nur Zutaten und Schritte.
+• Zuverlässigerer Import. Ein Fehler wurde behoben, der manche Rezepte gar nicht importieren ließ.
+Danke fürs Testen von PurePrep – schick uns weiter dein Feedback!
+</de-DE>
+
+<es-ES>
+Novedades en 1.2.11
+• Escalado preciso. Cambia las raciones y todas las cantidades se ajustan correctamente, incluidas las cantidades escritas después del ingrediente y las que aparecen en los pasos.
+• También se traducen los títulos. Las recetas importadas ahora traducen también su título, no solo los ingredientes y los pasos.
+• Importación más fiable. Corregido un problema que impedía importar algunas recetas por completo.
+¡Gracias por probar PurePrep! Sigue enviándonos tus comentarios.
+</es-ES>
+
+<fr-FR>
+Nouveautés de la 1.2.11
+• Conversion précise. Changez les portions et toutes les quantités s'ajustent correctement — y compris celles écrites après l'ingrédient et dans les étapes.
+• Les titres aussi traduits. Les recettes importées ont désormais leur titre traduit, pas seulement les ingrédients et les étapes.
+• Imports plus fiables. Correction d'un problème qui empêchait l'import de certaines recettes.
+Merci de tester PurePrep — envoyez-nous vos retours !
+</fr-FR>
+
+<it-IT>
+Novità della 1.2.11
+• Conversione precisa. Cambia le porzioni e ogni quantità viene ricalcolata correttamente, comprese le quantità scritte dopo l'ingrediente e quelle indicate nei passaggi.
+• Anche i titoli vengono tradotti. Le ricette importate ora traducono anche il titolo, non solo ingredienti e passaggi.
+• Importazioni più affidabili. Risolto un problema che impediva del tutto l'importazione di alcune ricette.
+Grazie per aver provato PurePrep — continua a inviarci il tuo feedback!
+</it-IT>
+
+<nl-NL>
+Nieuw in 1.2.11
+• Nauwkeurig omrekenen. Wijzig de porties en elke hoeveelheid wordt correct omgerekend — ook hoeveelheden achter het ingrediënt en in de stappen.
+• Ook titels worden vertaald. Geïmporteerde recepten krijgen nu ook hun titel vertaald, niet alleen de ingrediënten en stappen.
+• Betrouwbaarder importeren. Een probleem opgelost waardoor sommige recepten niet geïmporteerd konden worden.
+Bedankt voor het testen van PurePrep — blijf je feedback sturen!
+</nl-NL>
+
+<pl-PL>
+Co nowego w 1.2.11
+• Dokładne przeliczanie. Zmień liczbę porcji, a wszystkie ilości przeliczą się poprawnie — także te podane po nazwie składnika oraz ilości wymienione w krokach przygotowania.
+• Tłumaczone także tytuły. Zaimportowane przepisy mają teraz przetłumaczony również tytuł, nie tylko składniki i kroki.
+• Bardziej niezawodny import. Naprawiliśmy błąd, który całkowicie uniemożliwiał zaimportowanie niektórych przepisów.
+Dziękujemy za testowanie PurePrep — czekamy na Twoje opinie!
+</pl-PL>

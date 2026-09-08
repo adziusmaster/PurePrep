@@ -62,6 +62,56 @@ public partial class MainPage : ContentPage, IHardwareBackHandler
 	private async void OnPasteTapped(object? sender, EventArgs e) =>
 		await ((RecipeLibraryViewModel)BindingContext).PasteFromClipboardAsync();
 
+	private async void OnImportPhotoTapped(object? sender, EventArgs e)
+	{
+		var vm = (RecipeLibraryViewModel)BindingContext;
+
+		var take = AppResources.Get("ImportPhotoTake");
+		var choose = AppResources.Get("ImportPhotoChoose");
+		var cancel = AppResources.Get("Cancel");
+
+		// Offer camera only where it's actually supported, otherwise fall straight to the gallery.
+		string? action;
+		if (MediaPicker.Default.IsCaptureSupported)
+		{
+			action = await DisplayActionSheet(AppResources.Get("ImportPhotoTitle"), cancel, null, take, choose);
+		}
+		else
+		{
+			action = choose;
+		}
+
+		if (action == cancel || string.IsNullOrEmpty(action))
+			return;
+
+		try
+		{
+			var photo = action == take
+				? await MediaPicker.Default.CapturePhotoAsync()
+				: await MediaPicker.Default.PickPhotoAsync();
+			if (photo is null)
+				return;
+
+			using var stream = await photo.OpenReadAsync();
+			using var memory = new MemoryStream();
+			await stream.CopyToAsync(memory);
+
+			var mimeType = string.IsNullOrWhiteSpace(photo.ContentType) ? "image/jpeg" : photo.ContentType;
+			await vm.ImportFromImageAsync(memory.ToArray(), mimeType);
+		}
+		catch (FeatureNotSupportedException)
+		{
+			await DisplayAlert(AppResources.Get("ImportPhotoTitle"), AppResources.Get("ImportPhotoUnavailable"), AppResources.Get("Cancel"));
+		}
+		catch (PermissionException)
+		{
+			await DisplayAlert(AppResources.Get("ImportPhotoTitle"), AppResources.Get("ImportPhotoUnavailable"), AppResources.Get("Cancel"));
+		}
+	}
+
+	private async void OnImportTextTapped(object? sender, EventArgs e) =>
+		await Navigation.PushAsync(new PasteTextPage((RecipeLibraryViewModel)BindingContext));
+
 	private async Task<DuplicateImportAction> OnResolveDuplicateImportAsync(Domain.ParsedRecipe existing)
 	{
 		var replace = AppResources.Get("DuplicateReplace");

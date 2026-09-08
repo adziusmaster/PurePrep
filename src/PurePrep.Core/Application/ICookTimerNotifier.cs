@@ -19,11 +19,12 @@ public interface ICookTimerNotifier
     /// </summary>
     Task<bool> EnsurePermissionAsync(CancellationToken cancellationToken = default);
 
-    /// <summary>Schedules the alert for <paramref name="endsAt"/>, replacing any existing one.</summary>
-    Task ScheduleAsync(string label, DateTimeOffset endsAt, CancellationToken cancellationToken = default);
+    /// <summary>Schedules the alert for <paramref name="endsAt"/>, replacing any existing one for
+    /// the same <paramref name="id"/>. Concurrent timers each get their own alarm and notification.</summary>
+    Task ScheduleAsync(int id, string label, DateTimeOffset endsAt, CancellationToken cancellationToken = default);
 
-    /// <summary>Cancels a pending alert, and clears one already showing.</summary>
-    Task CancelAsync(CancellationToken cancellationToken = default);
+    /// <summary>Cancels the pending alert for <paramref name="id"/>, and clears one already showing.</summary>
+    Task CancelAsync(int id, CancellationToken cancellationToken = default);
 }
 
 /// <summary>Used where notifications are unavailable. The in-app countdown still functions.</summary>
@@ -31,6 +32,6 @@ public sealed class UnsupportedCookTimerNotifier : ICookTimerNotifier
 {
     public bool IsSupported => false;
     public Task<bool> EnsurePermissionAsync(CancellationToken cancellationToken = default) => Task.FromResult(false);
-    public Task ScheduleAsync(string label, DateTimeOffset endsAt, CancellationToken cancellationToken = default) => Task.CompletedTask;
-    public Task CancelAsync(CancellationToken cancellationToken = default) => Task.CompletedTask;
+    public Task ScheduleAsync(int id, string label, DateTimeOffset endsAt, CancellationToken cancellationToken = default) => Task.CompletedTask;
+    public Task CancelAsync(int id, CancellationToken cancellationToken = default) => Task.CompletedTask;
 }

@@ -181,6 +181,8 @@ public sealed class RecipeLibraryViewModel : INotifyPropertyChanged
     /// <summary>Loads saved recipes and the current credit balance. Called when the page appears.</summary>
     public async Task LoadAsync()
     {
+        await SeedSampleIfFirstRunAsync();
+
         var savedRecipes = await _repository.GetAllAsync();
         _all.Clear();
         _all.AddRange(savedRecipes);
@@ -189,6 +191,29 @@ public sealed class RecipeLibraryViewModel : INotifyPropertyChanged
 
         await RefreshCreditsAsync();
         await RefreshPricesAsync();
+    }
+
+    // Puts one recipe (a Polish pierogi classic, shown in English) into a brand-new library so the
+    // first thing a new user sees is a real recipe to cook, not an empty screen. Guarded by a flag
+    // rather than "is the library empty", so a user who deletes it does not get it forced back.
+    private async Task SeedSampleIfFirstRunAsync()
+    {
+        const string seededKey = "sample_recipe_seeded";
+        if (Preferences.Get(seededKey, false))
+            return;
+
+        Preferences.Set(seededKey, true);
+
+        try
+        {
+            var existing = await _repository.GetAllAsync();
+            if (existing.Count == 0)
+                await _repository.SaveAsync(SampleRecipe.Create());
+        }
+        catch
+        {
+            // Seeding is a nicety; never let it block the library from loading.
+        }
     }
 
     /// <summary>
@@ -320,6 +345,58 @@ public sealed class RecipeLibraryViewModel : INotifyPropertyChanged
         // Backward-compatible entry point (single button): buy the smallest pack.
         var first = CreditPacks.Count > 0 ? CreditPacks[0] : null;
         return PurchaseAsync(first);
+    }
+
+    /// <summary>
+    /// Imports a recipe from a photo/screenshot. Vision input is pricier, so the backend charges more
+    /// Smart Credits — the credit guard and refund-on-failure handling live server-side.
+    /// </summary>
+    public Task ImportFromImageAsync(byte[] image, string mimeType) =>
+        ImportNewAsync(() => _parser.ParseImageAsync(image, mimeType));
+
+    /// <summary>Imports a recipe from pasted free text (a note, a message, a PDF's contents).</summary>
+    public Task ImportFromTextAsync(string text) =>
+        ImportNewAsync(() => _parser.ParseTextAsync(text));
+
+    // Shared core for the "no URL" import sources (image, text): there's nothing to match against, so
+    // these always save as a new recipe. Credit guard + error mapping mirror ImportAsync exactly.
+    private async Task ImportNewAsync(Func<Task<ParsedRecipe>> parse)
+    {
+        ErrorMessage = null;
+        IsSharedUrlReady = false;
+
+        if (CreditBalance == 0)
+        {
+            IsUpgradePromptVisible = true;
+            return;
+        }
+
+        IsImporting = true;
+        try
+        {
+            var recipe = await parse();
+            await _repository.SaveAsync(recipe);
+            AddNewRecipe(recipe);
+            IsUpgradePromptVisible = false;
+            await RefreshCreditsAsync();
+        }
+        catch (InsufficientCreditsException)
+        {
+            CreditBalance = 0;
+            IsUpgradePromptVisible = true;
+        }
+        catch (RecipeImportException ex)
+        {
+            ErrorMessage = ImportErrorText.ForCode(ex.Code);
+        }
+        catch (Exception)
+        {
+            ErrorMessage = ImportErrorText.ForCode(ImportErrorCode.Unknown);
+        }
+        finally
+        {
+            IsImporting = false;
+        }
     }
 
     /// <summary>Buys the given Smart Credit pack, grants the credits server-side, then consumes the purchase.</summary>

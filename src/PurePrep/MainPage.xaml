@@ -97,6 +97,18 @@
                     </Grid>
                 </Border>
 
+                <!-- Import from beyond URLs: a photo of a page/screenshot, or pasted free text. -->
+                <Grid ColumnDefinitions="*,*" ColumnSpacing="9">
+                    <Button Grid.Column="0" Text="{loc:Translate ImportPhoto}" Clicked="OnImportPhotoTapped"
+                            IsEnabled="{Binding IsImporting, Converter={StaticResource InvertedBoolConverter}}"
+                            BackgroundColor="{DynamicResource BgElevated}" TextColor="{DynamicResource Ink}"
+                            FontAttributes="Bold" FontSize="14" Padding="0,11" CornerRadius="14" />
+                    <Button Grid.Column="1" Text="{loc:Translate ImportText}" Clicked="OnImportTextTapped"
+                            IsEnabled="{Binding IsImporting, Converter={StaticResource InvertedBoolConverter}}"
+                            BackgroundColor="{DynamicResource BgElevated}" TextColor="{DynamicResource Ink}"
+                            FontAttributes="Bold" FontSize="14" Padding="0,11" CornerRadius="14" />
+                </Grid>
+
                 <Label Text="{Binding ErrorMessage}" TextColor="{DynamicResource Danger}" FontSize="13"
                        Margin="4,0,0,0"
                        IsVisible="{Binding ErrorMessage, Converter={StaticResource StringNotNullOrEmptyConverter}}" />

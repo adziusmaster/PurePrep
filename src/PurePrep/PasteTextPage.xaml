@@ -1,0 +1,48 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:local="clr-namespace:PurePrep"
+             xmlns:loc="clr-namespace:PurePrep.Localization"
+             x:Class="PurePrep.PasteTextPage"
+             Shell.NavBarIsVisible="False"
+             NavigationPage.HasNavigationBar="False"
+             BackgroundColor="{DynamicResource Bg}">
+
+    <Grid MaximumWidthRequest="760" HorizontalOptions="Center"
+          RowDefinitions="Auto,*,Auto" Padding="20,12,20,16" RowSpacing="18">
+
+        <!-- Header -->
+        <Grid ColumnDefinitions="Auto,*" ColumnSpacing="10" VerticalOptions="Center">
+            <Border WidthRequest="48" HeightRequest="48" BackgroundColor="{DynamicResource Surface}"
+                    Stroke="{DynamicResource Line}" StrokeThickness="1" StrokeShape="RoundRectangle 14"
+                    local:TapFeedback.IsEnabled="True" AutomationProperties.IsInAccessibleTree="True" AutomationProperties.Name="{loc:Translate Cancel}">
+                <Border.GestureRecognizers>
+                    <TapGestureRecognizer Tapped="OnCancelTapped" />
+                </Border.GestureRecognizers>
+                <Label Text="&#8249;" TextColor="{DynamicResource Ink}" FontSize="26"
+                       HorizontalOptions="Center" VerticalOptions="Center" />
+            </Border>
+            <VerticalStackLayout Grid.Column="1" Spacing="1">
+                <Label Text="{loc:Translate ImportTextTitle}" TextColor="{DynamicResource Ink}" FontSize="20" FontAttributes="Bold" />
+                <Label Text="{loc:Translate ImportTextBody}" TextColor="{DynamicResource Muted}" FontSize="13" LineHeight="1.25" />
+            </VerticalStackLayout>
+        </Grid>
+
+        <!-- Text -->
+        <Border Grid.Row="1" BackgroundColor="{DynamicResource Surface}" Stroke="{DynamicResource Line}"
+                StrokeThickness="1" Padding="12,6" StrokeShape="RoundRectangle 15">
+            <ScrollView>
+                <Editor x:Name="TextEditor" AutoSize="TextChanges" MinimumHeightRequest="260"
+                        Placeholder="{loc:Translate ImportTextPlaceholder}"
+                        TextColor="{DynamicResource Ink}" PlaceholderColor="{DynamicResource Faint}" />
+            </ScrollView>
+        </Border>
+
+        <VerticalStackLayout Grid.Row="2" Spacing="10">
+            <Label x:Name="ErrorLabel" TextColor="{DynamicResource Danger}" FontSize="13" IsVisible="False" />
+            <Button x:Name="ImportButton" Text="{loc:Translate Import}" Clicked="OnImportClicked"
+                    BackgroundColor="{DynamicResource Lime}" TextColor="{DynamicResource LimeInk}"
+                    FontAttributes="Bold" FontSize="16" HeightRequest="54" CornerRadius="16" />
+        </VerticalStackLayout>
+    </Grid>
+</ContentPage>

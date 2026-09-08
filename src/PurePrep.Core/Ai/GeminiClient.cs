@@ -1,6 +1,7 @@
 using System.Net.Http.Json;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
 namespace PurePrep.Ai;
@@ -12,9 +13,30 @@ namespace PurePrep.Ai;
 /// dual-unit listings (e.g. "500g (1 lb)") to a single value; metric<->imperial conversion for the
 /// UI toggle remains deterministic in <c>UnitConverter</c>, not the model.
 /// </summary>
-public sealed class GeminiClient(HttpClient http, IOptions<GeminiOptions> options) : IGeminiClient
+public sealed class GeminiClient(HttpClient http, IOptions<GeminiOptions> options, ILogger<GeminiClient>? logger = null) : IGeminiClient
 {
     private readonly GeminiOptions _options = options.Value;
+    private readonly ILogger<GeminiClient>? _logger = logger;
+
+    // The JSON schema every extraction/translation response must match. Shared so the page, image,
+    // and translate calls stay in lock-step.
+    private static readonly object RecipeSchema = new
+    {
+        type = "OBJECT",
+        properties = new
+        {
+            title = new { type = "STRING" },
+            ingredients = new { type = "ARRAY", items = new { type = "STRING" } },
+            steps = new { type = "ARRAY", items = new { type = "STRING" } },
+        },
+        required = new[] { "title", "ingredients", "steps" },
+    };
+
+    // Prepended to an image so the model knows the picture IS the recipe source, not decoration.
+    private const string ImagePrompt =
+        "The attached image is a photo or screenshot of a recipe — for example a cookbook or magazine " +
+        "page, a handwritten recipe card, or a social-media post. Read every legible word from the " +
+        "image and extract the recipe from it, following all the rules above.";
 
     private const string SystemPrompt =
         "You are a meticulous recipe extractor. From raw web page text, extract the recipe's " +
@@ -104,24 +126,62 @@ public sealed class GeminiClient(HttpClient http, IOptions<GeminiOptions> option
                 temperature = 0.0,
                 seed = 7,
                 responseMimeType = "application/json",
-                responseSchema = new
-                {
-                    type = "OBJECT",
-                    properties = new
-                    {
-                        title = new { type = "STRING" },
-                        ingredients = new { type = "ARRAY", items = new { type = "STRING" } },
-                        steps = new { type = "ARRAY", items = new { type = "STRING" } },
-                    },
-                    required = new[] { "title", "ingredients", "steps" },
-                },
+                responseSchema = RecipeSchema,
             },
         };
 
         var url = $"v1beta/models/{_options.Model}:generateContent";
         var responseJson = await SendWithRetryAsync(url, request, ct);
+        return ReadRecipe(responseJson, "parse");
+    }
 
+    public async Task<AiRecipe> ExtractFromImageAsync(byte[] image, string mimeType, string? targetLanguage = null, CancellationToken ct = default)
+    {
+        if (string.IsNullOrWhiteSpace(_options.ApiKey))
+            throw new InvalidOperationException("Gemini API key is not configured.");
+        if (image is null || image.Length == 0)
+            throw new ArgumentException("Image content is empty.", nameof(image));
+
+        var systemPrompt = BuildSystemPrompt(targetLanguage);
+
+        var request = new
+        {
+            systemInstruction = new { parts = new[] { new { text = systemPrompt } } },
+            contents = new[]
+            {
+                new
+                {
+                    role = "user",
+                    // Mixed text + image parts, so the element type must be object.
+                    parts = new object[]
+                    {
+                        new { text = ImagePrompt },
+                        new { inlineData = new { mimeType, data = Convert.ToBase64String(image) } },
+                    },
+                },
+            },
+            generationConfig = new
+            {
+                // Same determinism guarantee as the page extractor.
+                temperature = 0.0,
+                seed = 7,
+                responseMimeType = "application/json",
+                responseSchema = RecipeSchema,
+            },
+        };
+
+        var url = $"v1beta/models/{_options.Model}:generateContent";
+        var responseJson = await SendWithRetryAsync(url, request, ct);
+        return ReadRecipe(responseJson, "parse-image");
+    }
+
+    // Reads the recipe JSON out of a Gemini response and records the token usage. Shared by the page
+    // and image extractors so both log their cost the same way.
+    private AiRecipe ReadRecipe(string responseJson, string operation)
+    {
         using var doc = JsonDocument.Parse(responseJson);
+        LogTokenUsage(doc.RootElement, operation);
+
         var json = doc.RootElement
             .GetProperty("candidates")[0]
             .GetProperty("content")
@@ -198,17 +258,7 @@ public sealed class GeminiClient(HttpClient http, IOptions<GeminiOptions> option
                 temperature = 0.0,
                 seed = 7,
                 responseMimeType = "application/json",
-                responseSchema = new
-                {
-                    type = "OBJECT",
-                    properties = new
-                    {
-                        title = new { type = "STRING" },
-                        ingredients = new { type = "ARRAY", items = new { type = "STRING" } },
-                        steps = new { type = "ARRAY", items = new { type = "STRING" } },
-                    },
-                    required = new[] { "title", "ingredients", "steps" },
-                },
+                responseSchema = RecipeSchema,
             },
         };
 
@@ -216,6 +266,7 @@ public sealed class GeminiClient(HttpClient http, IOptions<GeminiOptions> option
         var responseJson = await SendWithRetryAsync(url, request, ct);
 
         using var doc = JsonDocument.Parse(responseJson);
+        LogTokenUsage(doc.RootElement, "translate");
         var json = doc.RootElement
             .GetProperty("candidates")[0]
             .GetProperty("content")
@@ -230,6 +281,26 @@ public sealed class GeminiClient(HttpClient http, IOptions<GeminiOptions> option
             payload.Title?.Trim() ?? recipe.Title,
             (payload.Ingredients ?? []).Select(x => x?.Trim() ?? string.Empty).Where(x => x.Length > 0).ToArray(),
             (payload.Steps ?? []).Select(x => x?.Trim() ?? string.Empty).Where(x => x.Length > 0).ToArray());
+    }
+
+    // Records how many tokens a call actually consumed, so real per-request cost can be seen in the
+    // logs (image/vision requests cost noticeably more than plain text, which informs pricing).
+    private void LogTokenUsage(JsonElement root, string operation)
+    {
+        if (_logger is null || !root.TryGetProperty("usageMetadata", out var usage))
+            return;
+
+        static int Read(JsonElement usage, string name) =>
+            usage.TryGetProperty(name, out var v) && v.ValueKind == JsonValueKind.Number && v.TryGetInt32(out var n)
+                ? n
+                : 0;
+
+        _logger.LogInformation(
+            "Gemini {Operation} token usage: prompt={PromptTokens} output={OutputTokens} total={TotalTokens}",
+            operation,
+            Read(usage, "promptTokenCount"),
+            Read(usage, "candidatesTokenCount"),
+            Read(usage, "totalTokenCount"));
     }
 
     // Gemini occasionally returns 503 (overloaded) / 429 (rate limit). Retry a few times with backoff.
@@ -267,6 +338,12 @@ public sealed class FakeGeminiClient : IGeminiClient
     public Task<AiRecipe> ExtractAsync(string pageText, string? targetLanguage = null, CancellationToken ct = default) =>
         Task.FromResult(new AiRecipe(
             "AI Parsed Recipe (dev)",
+            ["200 g flour", "2 tbsp sugar", "1 cup milk"],
+            ["Preheat the oven to 180°C.", "Mix and bake for 25 minutes."]));
+
+    public Task<AiRecipe> ExtractFromImageAsync(byte[] image, string mimeType, string? targetLanguage = null, CancellationToken ct = default) =>
+        Task.FromResult(new AiRecipe(
+            "AI Parsed Recipe from Photo (dev)",
             ["200 g flour", "2 tbsp sugar", "1 cup milk"],
             ["Preheat the oven to 180°C.", "Mix and bake for 25 minutes."]));
 

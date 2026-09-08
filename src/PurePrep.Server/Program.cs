@@ -133,6 +133,8 @@ app.MapGet("/privacy", () => Results.File(
 app.UseRateLimiter();
 
 app.MapPost("/api/ai/parse", ParseEndpoint.Parse).RequireRateLimiting(RateLimitPolicies.Parse);
+app.MapPost("/api/ai/parse-image", ParseEndpoint.ParseImage).RequireRateLimiting(RateLimitPolicies.Parse);
+app.MapPost("/api/ai/parse-text", ParseEndpoint.ParseText).RequireRateLimiting(RateLimitPolicies.Parse);
 app.MapPost("/api/ai/translate", TranslateEndpoint.Translate).RequireRateLimiting(RateLimitPolicies.Parse);
 app.MapPost("/api/billing/redeem", BillingEndpoint.Redeem).RequireRateLimiting(RateLimitPolicies.Billing);
 

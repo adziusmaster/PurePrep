@@ -63,6 +63,13 @@ public static class MauiProgram
 #endif
 		builder.Services.AddSingleton<CookTimerService>();
 
+		// Hands-free voice step navigation in Focus Mode (Android on-device speech recognition).
+#if ANDROID
+		builder.Services.AddSingleton<PurePrep.Application.IVoiceCommandListener, PurePrep.Platforms.Android.VoiceCommandListener>();
+#else
+		builder.Services.AddSingleton<PurePrep.Application.IVoiceCommandListener, PurePrep.Application.UnsupportedVoiceCommandListener>();
+#endif
+
 		// Language newly imported recipes are produced in (defaults to the app UI language).
 		builder.Services.AddSingleton<IRecipeLanguageProvider, RecipeLanguageSettings>();
 

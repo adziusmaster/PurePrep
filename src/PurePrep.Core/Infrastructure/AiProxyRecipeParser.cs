@@ -18,10 +18,39 @@ public sealed class AiProxyRecipeParser(HttpClient http, IDeviceIdentity identit
         var deviceId = await identity.GetDeviceIdAsync(cancellationToken);
         var language = languageProvider?.GetRecipeLanguage();
 
-        using var response = await http.PostAsJsonAsync(
+        return await PostAndMapAsync(
             "api/ai/parse",
             new { deviceId, url = source.ToString(), language },
             cancellationToken);
+    }
+
+    public async Task<ParsedRecipe> ParseImageAsync(byte[] image, string mimeType, CancellationToken cancellationToken = default)
+    {
+        var deviceId = await identity.GetDeviceIdAsync(cancellationToken);
+        var language = languageProvider?.GetRecipeLanguage();
+
+        return await PostAndMapAsync(
+            "api/ai/parse-image",
+            new { deviceId, imageBase64 = Convert.ToBase64String(image), mimeType, language },
+            cancellationToken);
+    }
+
+    public async Task<ParsedRecipe> ParseTextAsync(string text, CancellationToken cancellationToken = default)
+    {
+        var deviceId = await identity.GetDeviceIdAsync(cancellationToken);
+        var language = languageProvider?.GetRecipeLanguage();
+
+        return await PostAndMapAsync(
+            "api/ai/parse-text",
+            new { deviceId, text, language },
+            cancellationToken);
+    }
+
+    // Posts an import request and maps the response into a domain recipe. Shared by every import
+    // source (URL, image, text) so credit/error handling stays identical across all of them.
+    private async Task<ParsedRecipe> PostAndMapAsync(string endpoint, object body, CancellationToken cancellationToken)
+    {
+        using var response = await http.PostAsJsonAsync(endpoint, body, cancellationToken);
 
         if (response.StatusCode == HttpStatusCode.PaymentRequired)
             throw new InsufficientCreditsException();

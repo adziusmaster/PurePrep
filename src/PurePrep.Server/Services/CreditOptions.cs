@@ -22,6 +22,12 @@ public sealed class CreditOptions
     public int CostPerParse { get; set; } = 1;
 
     /// <summary>
+    /// Credits charged per AI parse from an image (photo / screenshot). Vision input is markedly more
+    /// token-hungry than plain page text, so it is priced higher than a URL/text import.
+    /// </summary>
+    public int CostPerImageParse { get; set; } = 2;
+
+    /// <summary>
     /// Credits charged per AI recipe translation into a new language. Each translation is cached on
     /// the device forever, so a language is only ever paid for once. Configurable (and promo-able to
     /// 0) for future tuning.

@@ -15,4 +15,14 @@
 	     not USE_EXACT_ALARM: the latter is reserved for alarm-clock apps and draws Play review.
 	     Where it is not granted the alarm is scheduled inexactly rather than not at all. -->
 	<uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
+	<!-- Import-from-photo lets the user snap a cookbook page / screenshot. The camera is optional
+	     (required="false") so the app still installs on camera-less devices, where only the gallery
+	     picker is offered. Gallery picks on Android 13+ use the system photo picker, which needs no
+	     storage permission. -->
+	<uses-permission android:name="android.permission.CAMERA" />
+	<uses-feature android:name="android.hardware.camera" android:required="false" />
+	<!-- Hands-free voice step navigation in Focus Mode uses the on-device speech recogniser, which
+	     needs the microphone. It is requested the first time the cook turns the mic on, and touch /
+	     swipe navigation works unchanged if it is refused. -->
+	<uses-permission android:name="android.permission.RECORD_AUDIO" />
 </manifest>

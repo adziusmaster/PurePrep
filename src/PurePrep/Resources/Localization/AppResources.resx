@@ -569,4 +569,58 @@ Add stock a ladle at a time, stirring.</value>
   <data name="ExportSavedFormat" xml:space="preserve">
     <value>Saved to {0} as {1}.</value>
   </data>
+  <data name="ImportPhoto" xml:space="preserve">
+    <value>Photo</value>
+  </data>
+  <data name="ImportText" xml:space="preserve">
+    <value>Paste text</value>
+  </data>
+  <data name="ImportPhotoTitle" xml:space="preserve">
+    <value>Import from a photo</value>
+  </data>
+  <data name="ImportPhotoTake" xml:space="preserve">
+    <value>Take a photo</value>
+  </data>
+  <data name="ImportPhotoChoose" xml:space="preserve">
+    <value>Choose from gallery</value>
+  </data>
+  <data name="ImportPhotoUnavailable" xml:space="preserve">
+    <value>The camera isn’t available on this device.</value>
+  </data>
+  <data name="ImportPhotoHint" xml:space="preserve">
+    <value>Snap a cookbook page or a screenshot — costs 2 credits.</value>
+  </data>
+  <data name="ImportTextTitle" xml:space="preserve">
+    <value>Paste recipe text</value>
+  </data>
+  <data name="ImportTextBody" xml:space="preserve">
+    <value>Paste a recipe from anywhere — notes, a message, a PDF — and we’ll tidy it into steps.</value>
+  </data>
+  <data name="ImportTextPlaceholder" xml:space="preserve">
+    <value>Paste the full recipe here…</value>
+  </data>
+  <data name="ErrPasteText" xml:space="preserve">
+    <value>Paste a recipe first, then tap Import.</value>
+  </data>
+  <data name="Start" xml:space="preserve">
+    <value>Start</value>
+  </data>
+  <data name="TimerNameTitle" xml:space="preserve">
+    <value>Name this timer</value>
+  </data>
+  <data name="TimerNameMessage" xml:space="preserve">
+    <value>Give it a name so you can tell your timers apart.</value>
+  </data>
+  <data name="ReadAloud" xml:space="preserve">
+    <value>Read aloud</value>
+  </data>
+  <data name="ReadStep" xml:space="preserve">
+    <value>Read step</value>
+  </data>
+  <data name="VoiceControl" xml:space="preserve">
+    <value>Voice</value>
+  </data>
+  <data name="VoiceListening" xml:space="preserve">
+    <value>Listening…</value>
+  </data>
 </root>

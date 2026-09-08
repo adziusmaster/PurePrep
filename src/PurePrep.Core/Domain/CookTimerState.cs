@@ -9,6 +9,12 @@ namespace PurePrep.Domain;
 /// </summary>
 public sealed record CookTimerState(string Label, int TotalSeconds, DateTimeOffset EndsAt)
 {
+    /// <summary>
+    /// Stable identifier for this timer within a run. Timers are concurrent now, so each needs its
+    /// own id to key persistence, its Android alarm/notification, and the "stop this one" button.
+    /// </summary>
+    public int Id { get; init; }
+
     /// <summary>Begins a timer of <paramref name="totalSeconds"/> from <paramref name="now"/>.</summary>
     public static CookTimerState Start(string label, int totalSeconds, DateTimeOffset now) =>
         new(label, totalSeconds, now.AddSeconds(totalSeconds));

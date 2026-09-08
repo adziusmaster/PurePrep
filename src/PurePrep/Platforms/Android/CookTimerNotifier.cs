@@ -17,8 +17,9 @@ namespace PurePrep.Platforms.Android;
 public sealed class CookTimerNotifier : ICookTimerNotifier
 {
     internal const string ChannelId = "pureprep_cook_timers";
-    internal const int NotificationId = 4201;
-    private const int RequestCode = 4201;
+    // Concurrent timers each need a distinct notification + alarm request code. They are keyed off
+    // this base plus the timer's id, kept well clear of any other notification ids in the app.
+    internal const int NotificationBase = 4201;
 
     public bool IsSupported => true;
 
@@ -37,7 +38,7 @@ public sealed class CookTimerNotifier : ICookTimerNotifier
         return status == PermissionStatus.Granted;
     }
 
-    public Task ScheduleAsync(string label, DateTimeOffset endsAt, CancellationToken cancellationToken = default)
+    public Task ScheduleAsync(int id, string label, DateTimeOffset endsAt, CancellationToken cancellationToken = default)
     {
         CreateChannel();
 
@@ -46,7 +47,7 @@ public sealed class CookTimerNotifier : ICookTimerNotifier
             return Task.CompletedTask;
 
         var triggerAt = endsAt.ToUnixTimeMilliseconds();
-        var pending = BuildPendingIntent(label);
+        var pending = BuildPendingIntent(id, label);
 
         // SetExactAndAllowWhileIdle needs the exact-alarm capability from Android 12 onward. Where
         // it is unavailable we still schedule, just inexactly: a cook timer that fires a little
@@ -59,23 +60,25 @@ public sealed class CookTimerNotifier : ICookTimerNotifier
         return Task.CompletedTask;
     }
 
-    public Task CancelAsync(CancellationToken cancellationToken = default)
+    public Task CancelAsync(int id, CancellationToken cancellationToken = default)
     {
         var manager = (AlarmManager?)Context.GetSystemService(Context.AlarmService);
-        manager?.Cancel(BuildPendingIntent(label: string.Empty));
+        manager?.Cancel(BuildPendingIntent(id, label: string.Empty));
 
-        NotificationManagerCompat.From(Context).Cancel(NotificationId);
+        NotificationManagerCompat.From(Context).Cancel(NotificationBase + id);
         return Task.CompletedTask;
     }
 
-    private static PendingIntent BuildPendingIntent(string label)
+    private static PendingIntent BuildPendingIntent(int id, string label)
     {
         var intent = new Intent(Context, typeof(CookTimerAlarmReceiver));
+        intent.SetAction($"pureprep.timer.{id}");
         intent.PutExtra(CookTimerAlarmReceiver.LabelExtra, label);
+        intent.PutExtra(CookTimerAlarmReceiver.IdExtra, id);
 
         // Mutable pending intents are rejected from Android 12; Immutable is required here.
         var flags = PendingIntentFlags.UpdateCurrent | PendingIntentFlags.Immutable;
-        return PendingIntent.GetBroadcast(Context, RequestCode, intent, flags)!;
+        return PendingIntent.GetBroadcast(Context, NotificationBase + id, intent, flags)!;
     }
 
     internal static void CreateChannel()
@@ -103,6 +106,7 @@ public sealed class CookTimerNotifier : ICookTimerNotifier
 public sealed class CookTimerAlarmReceiver : BroadcastReceiver
 {
     internal const string LabelExtra = "pureprep.timer.label";
+    internal const string IdExtra = "pureprep.timer.id";
 
     public override void OnReceive(Context? context, Intent? intent)
     {
@@ -111,6 +115,7 @@ public sealed class CookTimerAlarmReceiver : BroadcastReceiver
 
         CookTimerNotifier.CreateChannel();
 
+        var id = intent?.GetIntExtra(IdExtra, 0) ?? 0;
         var label = intent?.GetStringExtra(LabelExtra);
         var body = string.IsNullOrWhiteSpace(label)
             ? "Your cooking timer has finished."
@@ -137,7 +142,7 @@ public sealed class CookTimerAlarmReceiver : BroadcastReceiver
         try
         {
             NotificationManagerCompat.From(context)
-                .Notify(CookTimerNotifier.NotificationId, builder.Build());
+                .Notify(CookTimerNotifier.NotificationBase + id, builder.Build());
         }
         catch (Java.Lang.SecurityException)
         {

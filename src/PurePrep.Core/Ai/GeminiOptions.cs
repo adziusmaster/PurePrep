@@ -25,6 +25,14 @@ public interface IGeminiClient
     Task<AiRecipe> ExtractAsync(string pageText, string? targetLanguage = null, CancellationToken ct = default);
 
     /// <summary>
+    /// Extracts a recipe directly from an image — a photo of a cookbook page, a handwritten card, or
+    /// a screenshot of a social post. The model reads the legible text and returns the same clean
+    /// Title/Ingredients/Steps structure as <see cref="ExtractAsync"/>. Vision input costs more tokens
+    /// than plain text, which is why the caller charges a higher credit price for it.
+    /// </summary>
+    Task<AiRecipe> ExtractFromImageAsync(byte[] image, string mimeType, string? targetLanguage = null, CancellationToken ct = default);
+
+    /// <summary>
     /// Translates an already-structured recipe into <paramref name="targetLanguage"/> faithfully,
     /// preserving the exact ingredient/step count and every quantity, unit, and number. Unlike
     /// <see cref="ExtractAsync"/> there is no page fetch or extraction — the given content is trusted

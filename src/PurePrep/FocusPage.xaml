@@ -30,12 +30,23 @@
 
             <Border Grid.Column="2" BackgroundColor="{DynamicResource Surface}" Stroke="{DynamicResource Line}"
                     StrokeThickness="1" Padding="12,6" StrokeShape="RoundRectangle 20" VerticalOptions="Center">
-                <HorizontalStackLayout Spacing="8" VerticalOptions="Center">
-                    <Label Text="{loc:Translate ScreenOn}" TextColor="{DynamicResource Muted}" FontSize="12.5"
-                           FontAttributes="Bold" VerticalOptions="Center" />
-                    <Switch IsToggled="{Binding KeepScreenAwake, Mode=TwoWay}" VerticalOptions="Center"
-                            OnColor="{DynamicResource Lime}" ThumbColor="{DynamicResource BgElevated}"
-                            Scale="0.8" />
+                <HorizontalStackLayout Spacing="12" VerticalOptions="Center">
+                    <HorizontalStackLayout Spacing="6" VerticalOptions="Center"
+                                           AutomationProperties.IsInAccessibleTree="True"
+                                           AutomationProperties.Name="{loc:Translate ReadAloud}">
+                        <Label Text="&#128266;" FontSize="14" VerticalOptions="Center" />
+                        <Switch IsToggled="{Binding ReadStepsAloud, Mode=TwoWay}" VerticalOptions="Center"
+                                OnColor="{DynamicResource Lime}" ThumbColor="{DynamicResource BgElevated}"
+                                Scale="0.8" />
+                    </HorizontalStackLayout>
+                    <BoxView WidthRequest="1" Color="{DynamicResource Line}" VerticalOptions="Fill" />
+                    <HorizontalStackLayout Spacing="8" VerticalOptions="Center">
+                        <Label Text="{loc:Translate ScreenOn}" TextColor="{DynamicResource Muted}" FontSize="12.5"
+                               FontAttributes="Bold" VerticalOptions="Center" />
+                        <Switch IsToggled="{Binding KeepScreenAwake, Mode=TwoWay}" VerticalOptions="Center"
+                                OnColor="{DynamicResource Lime}" ThumbColor="{DynamicResource BgElevated}"
+                                Scale="0.8" />
+                    </HorizontalStackLayout>
                 </HorizontalStackLayout>
             </Border>
         </Grid>
@@ -70,35 +81,48 @@
         <Border Grid.Row="3" BackgroundColor="{DynamicResource Surface}" Stroke="{DynamicResource LineSoft}"
                 StrokeThickness="1" Padding="24" StrokeShape="RoundRectangle 22" VerticalOptions="Fill"
                 IsVisible="{Binding ShowIngredients, Converter={StaticResource InvertedBoolConverter}}">
+          <Border.GestureRecognizers>
+              <!-- Swipe the step card to move between steps: left goes forward, right goes back —
+                   hands-free-ish navigation when a finger is all you can spare mid-cook. -->
+              <SwipeGestureRecognizer Direction="Left" Command="{Binding NextCommand}" />
+              <SwipeGestureRecognizer Direction="Right" Command="{Binding PreviousCommand}" />
+          </Border.GestureRecognizers>
           <ScrollView VerticalScrollBarVisibility="Never">
             <VerticalStackLayout Spacing="20" VerticalOptions="Center">
                 <Label Text="{Binding CurrentStep.Instruction}" TextColor="{DynamicResource Ink}" FontSize="27"
                        FontAttributes="Bold" LineHeight="1.18" />
                 <BoxView HeightRequest="1" Color="{DynamicResource Line}" />
 
-                <!-- Active countdown -->
-                <Border BackgroundColor="{DynamicResource LimeWash}" Stroke="{DynamicResource Lime}"
-                        StrokeThickness="1" Padding="16,14" StrokeShape="RoundRectangle 16"
-                        IsVisible="{Binding IsTimerRunning}">
-                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12" VerticalOptions="Center">
-                        <VerticalStackLayout>
-                            <Label Text="{Binding ActiveTimerLabel}" TextColor="{DynamicResource LimeBright}"
-                                   FontSize="12.5" CharacterSpacing="1.2" FontAttributes="Bold" />
-                            <Label Text="{Binding ActiveTimerDisplay}" TextColor="{DynamicResource Ink}"
-                                   FontSize="34" FontAttributes="Bold" />
-                        </VerticalStackLayout>
-                        <Border Grid.Column="1" BackgroundColor="{DynamicResource Surface}"
-                                Stroke="{DynamicResource Line}" StrokeThickness="1" Padding="16,12"
-                                MinimumHeightRequest="48" StrokeShape="RoundRectangle 12" VerticalOptions="Center"
-                                local:TapFeedback.IsEnabled="True" AutomationProperties.IsInAccessibleTree="True" AutomationProperties.Name="{loc:Translate Stop}">
-                            <Border.GestureRecognizers>
-                                <TapGestureRecognizer Command="{Binding CancelTimerCommand}" />
-                            </Border.GestureRecognizers>
-                            <Label Text="{loc:Translate Stop}" TextColor="{DynamicResource Danger}" FontSize="13.5"
-                                   FontAttributes="Bold" VerticalOptions="Center" />
-                        </Border>
-                    </Grid>
-                </Border>
+                <!-- Active countdowns: several timers can run at once, each named and stoppable. -->
+                <VerticalStackLayout Spacing="8" IsVisible="{Binding HasActiveTimers}"
+                                     BindableLayout.ItemsSource="{Binding ActiveTimers}">
+                    <BindableLayout.ItemTemplate>
+                        <DataTemplate>
+                            <Border BackgroundColor="{DynamicResource LimeWash}" Stroke="{DynamicResource Lime}"
+                                    StrokeThickness="1" Padding="16,14" StrokeShape="RoundRectangle 16">
+                                <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12" VerticalOptions="Center">
+                                    <VerticalStackLayout>
+                                        <Label Text="{Binding Label}" TextColor="{DynamicResource LimeBright}"
+                                               FontSize="12.5" CharacterSpacing="1.2" FontAttributes="Bold"
+                                               LineBreakMode="TailTruncation" MaxLines="1" />
+                                        <Label Text="{Binding Display}" TextColor="{DynamicResource Ink}"
+                                               FontSize="34" FontAttributes="Bold" />
+                                    </VerticalStackLayout>
+                                    <Border Grid.Column="1" BackgroundColor="{DynamicResource Surface}"
+                                            Stroke="{DynamicResource Line}" StrokeThickness="1" Padding="16,12"
+                                            MinimumHeightRequest="48" StrokeShape="RoundRectangle 12" VerticalOptions="Center"
+                                            local:TapFeedback.IsEnabled="True" AutomationProperties.IsInAccessibleTree="True" AutomationProperties.Name="{loc:Translate Stop}">
+                                        <Border.GestureRecognizers>
+                                            <TapGestureRecognizer Command="{Binding StopCommand}" />
+                                        </Border.GestureRecognizers>
+                                        <Label Text="{loc:Translate Stop}" TextColor="{DynamicResource Danger}" FontSize="13.5"
+                                               FontAttributes="Bold" VerticalOptions="Center" />
+                                    </Border>
+                                </Grid>
+                            </Border>
+                        </DataTemplate>
+                    </BindableLayout.ItemTemplate>
+                </VerticalStackLayout>
 
                 <!-- Detected timer chips -->
                 <VerticalStackLayout Spacing="8" IsVisible="{Binding HasStepTimers}">
@@ -131,6 +155,51 @@
 
                 <Label Text="{loc:Translate FocusHint}"
                        TextColor="{DynamicResource Muted}" FontSize="13.5" />
+
+                <!-- Replay the current step aloud, and toggle hands-free voice navigation. -->
+                <HorizontalStackLayout Spacing="10">
+                    <Border BackgroundColor="{DynamicResource BgElevated}" Stroke="{DynamicResource LineSoft}"
+                            StrokeThickness="1" Padding="14,10" MinimumHeightRequest="44" StrokeShape="RoundRectangle 12"
+                            local:TapFeedback.IsEnabled="True"
+                            AutomationProperties.IsInAccessibleTree="True" AutomationProperties.Name="{loc:Translate ReadStep}">
+                        <Border.GestureRecognizers>
+                            <TapGestureRecognizer Command="{Binding ReadStepCommand}" />
+                        </Border.GestureRecognizers>
+                        <HorizontalStackLayout Spacing="8" VerticalOptions="Center">
+                            <Label Text="&#128266;" FontSize="15" VerticalOptions="Center" />
+                            <Label Text="{loc:Translate ReadStep}" TextColor="{DynamicResource Ink}" FontSize="13.5"
+                                   FontAttributes="Bold" VerticalOptions="Center" />
+                        </HorizontalStackLayout>
+                    </Border>
+
+                    <!-- Mic toggle: only shown where speech recognition is available. Two overlaid
+                         borders give a clear on/off state without a value converter. -->
+                    <Grid IsVisible="{Binding IsVoiceSupported}">
+                        <Grid.GestureRecognizers>
+                            <TapGestureRecognizer Command="{Binding ToggleVoiceCommand}" />
+                        </Grid.GestureRecognizers>
+                        <Border BackgroundColor="{DynamicResource BgElevated}" Stroke="{DynamicResource LineSoft}"
+                                StrokeThickness="1" Padding="14,10" MinimumHeightRequest="44" StrokeShape="RoundRectangle 12"
+                                local:TapFeedback.IsEnabled="True"
+                                IsVisible="{Binding IsListening, Converter={StaticResource InvertedBoolConverter}}"
+                                AutomationProperties.IsInAccessibleTree="True" AutomationProperties.Name="{loc:Translate VoiceControl}">
+                            <HorizontalStackLayout Spacing="8" VerticalOptions="Center">
+                                <Label Text="&#127908;" FontSize="15" VerticalOptions="Center" />
+                                <Label Text="{loc:Translate VoiceControl}" TextColor="{DynamicResource Ink}" FontSize="13.5"
+                                       FontAttributes="Bold" VerticalOptions="Center" />
+                            </HorizontalStackLayout>
+                        </Border>
+                        <Border BackgroundColor="{DynamicResource Lime}" Stroke="{DynamicResource Lime}"
+                                StrokeThickness="1" Padding="14,10" MinimumHeightRequest="44" StrokeShape="RoundRectangle 12"
+                                IsVisible="{Binding IsListening}">
+                            <HorizontalStackLayout Spacing="8" VerticalOptions="Center">
+                                <Label Text="&#127908;" FontSize="15" VerticalOptions="Center" />
+                                <Label Text="{loc:Translate VoiceListening}" TextColor="{DynamicResource LimeInk}" FontSize="13.5"
+                                       FontAttributes="Bold" VerticalOptions="Center" />
+                            </HorizontalStackLayout>
+                        </Border>
+                    </Grid>
+                </HorizontalStackLayout>
             </VerticalStackLayout>
           </ScrollView>
         </Border>

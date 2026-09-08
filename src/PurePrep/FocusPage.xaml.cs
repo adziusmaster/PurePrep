@@ -12,10 +12,23 @@ public partial class FocusPage : ContentPage
     {
         InitializeComponent();
         var timers = IPlatformApplication.Current?.Services.GetService<PurePrep.Services.CookTimerService>();
-        _viewModel = new FocusModeViewModel(recipe, Dispatcher, timers);
+        var voice = IPlatformApplication.Current?.Services.GetService<PurePrep.Application.IVoiceCommandListener>();
+        _viewModel = new FocusModeViewModel(recipe, Dispatcher, timers, voice);
         _viewModel.Completed += OnCompleted;
+        _viewModel.RequestTimerNameAsync = PromptTimerNameAsync;
         BindingContext = _viewModel;
     }
+
+    // Lets the cook name a timer as it starts (pre-filled with the detected duration), so several
+    // concurrent countdowns stay tellable apart. Returns null when the prompt is dismissed.
+    private async Task<string?> PromptTimerNameAsync(Domain.StepTimer timer) =>
+        await DisplayPromptAsync(
+            Localization.AppResources.Get("TimerNameTitle"),
+            Localization.AppResources.Get("TimerNameMessage"),
+            accept: Localization.AppResources.Get("Start"),
+            cancel: Localization.AppResources.Get("Cancel"),
+            initialValue: timer.Label,
+            maxLength: 40);
 
     protected override void OnAppearing()
     {

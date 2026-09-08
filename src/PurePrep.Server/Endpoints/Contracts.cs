@@ -3,6 +3,12 @@ namespace PurePrep.Server.Endpoints;
 // --- AI parse ---
 public sealed record ParseRequest(Guid DeviceId, string Url, string? Language = null);
 
+/// <summary>Import from a photo/screenshot of a recipe. The image is base64-encoded; costs more credits.</summary>
+public sealed record ParseImageRequest(Guid DeviceId, string ImageBase64, string? MimeType = null, string? Language = null);
+
+/// <summary>Import from pasted recipe text (notes, messages, anything not behind a URL).</summary>
+public sealed record ParseTextRequest(Guid DeviceId, string Text, string? Language = null);
+
 public sealed record RecipeResponse(
     string Title,
     string? SourceUrl,

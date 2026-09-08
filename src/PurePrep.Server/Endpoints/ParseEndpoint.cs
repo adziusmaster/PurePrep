@@ -10,6 +10,16 @@ namespace PurePrep.Server.Endpoints;
 
 public static class ParseEndpoint
 {
+    // A generous ceiling on the decoded image size. Clients downscale before upload; this simply
+    // stops an oversized or malicious payload reaching Gemini (its inline-data limit is ~20 MB).
+    private const int MaxImageBytes = 12 * 1024 * 1024;
+
+    // Image formats Gemini's vision models accept.
+    private static readonly HashSet<string> AllowedImageTypes = new(StringComparer.OrdinalIgnoreCase)
+    {
+        "image/jpeg", "image/png", "image/webp", "image/heic", "image/heif",
+    };
+
     public static async Task<IResult> Parse(
         ParseRequest request,
         HttpContext http,
@@ -31,38 +41,151 @@ public static class ParseEndpoint
         if (!Uri.TryCreate(request.Url, UriKind.Absolute, out var url))
             return Fail(StatusCodes.Status400BadRequest, ImportErrorCode.InvalidUrl, "A valid absolute URL is required.");
 
-        // Seed the free allowance the first time this device is seen, subject to the origin cap.
-        await CreditsEndpoint.EnsureSeededAsync(request.DeviceId, http, credits, freeCredits, ipHasher, ct);
+        return await RunExtractionAsync(
+            request.DeviceId,
+            creditOptions.Value.CostPerParse,
+            logHost: url.Host,
+            sourceUrl: url.ToString(),
+            extract: async token =>
+            {
+                var html = await fetcher.FetchAsync(url, token);
 
-        var cost = creditOptions.Value.CostPerParse;
-        if (!await credits.TrySpendAsync(request.DeviceId, cost, ct))
+                // Give the model the page's own schema.org recipe data (unambiguous ingredient and step
+                // boundaries, plus the yield) alongside the raw page for context. Structured data is
+                // laid down first so a capped input never loses it.
+                var structured = StructuredRecipeExtractor.TryExtract(html);
+                var input = RecipeExtractionInput.Build(structured, PageText.Extract(html), geminiOptions.Value.MaxInputChars);
+
+                return await gemini.ExtractAsync(input, request.Language, token);
+            },
+            http, credits, freeCredits, ipHasher, dbFactory, log, ct);
+    }
+
+    public static async Task<IResult> ParseImage(
+        ParseImageRequest request,
+        HttpContext http,
+        ICreditStore credits,
+        IFreeCreditPolicy freeCredits,
+        IClientIpHasher ipHasher,
+        IGeminiClient gemini,
+        IOptions<CreditOptions> creditOptions,
+        IDbContextFactory<ServerDbContext> dbFactory,
+        ILoggerFactory loggerFactory,
+        CancellationToken ct)
+    {
+        var log = loggerFactory.CreateLogger("ParseEndpoint");
+
+        if (request.DeviceId == Guid.Empty)
+            return Fail(StatusCodes.Status400BadRequest, ImportErrorCode.InvalidRequest, "A valid deviceId is required.");
+        if (string.IsNullOrWhiteSpace(request.ImageBase64))
+            return Fail(StatusCodes.Status400BadRequest, ImportErrorCode.InvalidRequest, "An image is required.");
+
+        byte[] bytes;
+        try
+        {
+            bytes = Convert.FromBase64String(request.ImageBase64);
+        }
+        catch (FormatException)
+        {
+            return Fail(StatusCodes.Status400BadRequest, ImportErrorCode.InvalidRequest, "The image could not be read.");
+        }
+
+        if (bytes.Length == 0)
+            return Fail(StatusCodes.Status400BadRequest, ImportErrorCode.InvalidRequest, "The image is empty.");
+        if (bytes.Length > MaxImageBytes)
+            return Fail(StatusCodes.Status400BadRequest, ImportErrorCode.InvalidRequest, "That image is too large. Try a smaller photo.");
+
+        // Default to JPEG when the client did not say — the most common photo type. Reject anything the
+        // vision model cannot read, rather than paying for a request that is bound to fail.
+        var mime = string.IsNullOrWhiteSpace(request.MimeType) ? "image/jpeg" : request.MimeType.Trim();
+        if (!AllowedImageTypes.Contains(mime))
+            return Fail(StatusCodes.Status400BadRequest, ImportErrorCode.InvalidRequest, "That image type isn't supported.");
+
+        return await RunExtractionAsync(
+            request.DeviceId,
+            creditOptions.Value.CostPerImageParse,
+            logHost: "image",
+            sourceUrl: null,
+            extract: token => gemini.ExtractFromImageAsync(bytes, mime, request.Language, token),
+            http, credits, freeCredits, ipHasher, dbFactory, log, ct);
+    }
+
+    public static async Task<IResult> ParseText(
+        ParseTextRequest request,
+        HttpContext http,
+        ICreditStore credits,
+        IFreeCreditPolicy freeCredits,
+        IClientIpHasher ipHasher,
+        IGeminiClient gemini,
+        IOptions<CreditOptions> creditOptions,
+        IOptions<GeminiOptions> geminiOptions,
+        IDbContextFactory<ServerDbContext> dbFactory,
+        ILoggerFactory loggerFactory,
+        CancellationToken ct)
+    {
+        var log = loggerFactory.CreateLogger("ParseEndpoint");
+
+        if (request.DeviceId == Guid.Empty)
+            return Fail(StatusCodes.Status400BadRequest, ImportErrorCode.InvalidRequest, "A valid deviceId is required.");
+
+        var text = request.Text?.Trim();
+        if (string.IsNullOrWhiteSpace(text))
+            return Fail(StatusCodes.Status400BadRequest, ImportErrorCode.InvalidRequest, "Some recipe text is required.");
+
+        var max = geminiOptions.Value.MaxInputChars;
+        if (text.Length > max)
+            text = text[..max];
+
+        return await RunExtractionAsync(
+            request.DeviceId,
+            creditOptions.Value.CostPerParse,
+            logHost: "text",
+            sourceUrl: null,
+            extract: token => gemini.ExtractAsync(text, request.Language, token),
+            http, credits, freeCredits, ipHasher, dbFactory, log, ct);
+    }
+
+    /// <summary>
+    /// The shared spend → extract → refund-on-failure pipeline behind every import source (URL, image,
+    /// pasted text). It seeds free credits, charges up front, runs the source-specific extractor, and
+    /// guarantees the credit is returned if anything goes wrong — a failed import must never cost.
+    /// </summary>
+    private static async Task<IResult> RunExtractionAsync(
+        Guid deviceId,
+        int cost,
+        string logHost,
+        string? sourceUrl,
+        Func<CancellationToken, Task<AiRecipe>> extract,
+        HttpContext http,
+        ICreditStore credits,
+        IFreeCreditPolicy freeCredits,
+        IClientIpHasher ipHasher,
+        IDbContextFactory<ServerDbContext> dbFactory,
+        ILogger log,
+        CancellationToken ct)
+    {
+        // Seed the free allowance the first time this device is seen, subject to the origin cap.
+        await CreditsEndpoint.EnsureSeededAsync(deviceId, http, credits, freeCredits, ipHasher, ct);
+
+        if (!await credits.TrySpendAsync(deviceId, cost, ct))
             return Fail(StatusCodes.Status402PaymentRequired, ImportErrorCode.InsufficientCredits, "Insufficient credits.");
 
-        var deviceHash = ipHasher.Hash(request.DeviceId.ToString()) ?? string.Empty;
+        var deviceHash = ipHasher.Hash(deviceId.ToString()) ?? string.Empty;
 
         try
         {
-            var html = await fetcher.FetchAsync(url, ct);
+            var ai = await extract(ct);
 
-            // Give the model the page's own schema.org recipe data (unambiguous ingredient and step
-            // boundaries, plus the yield) alongside the raw page for context. Structured data is
-            // laid down first so a capped input never loses it.
-            var structured = StructuredRecipeExtractor.TryExtract(html);
-            var input = RecipeExtractionInput.Build(structured, PageText.Extract(html), geminiOptions.Value.MaxInputChars);
-
-            var ai = await gemini.ExtractAsync(input, request.Language, ct);
-
-            // A page that loaded but yielded nothing usable is a distinct outcome from a fetch or
-            // service failure: refund and tell the user the page simply had no recipe.
+            // A source that yielded nothing usable is a distinct outcome from a fetch or service
+            // failure: refund and tell the user there was simply no recipe to read.
             if (!ai.Ingredients.Any() && !ai.Steps.Any())
-                throw new NoRecipeExtractedException($"No recipe extracted from '{url.Host}'.");
+                throw new NoRecipeExtractedException($"No recipe extracted from '{logHost}'.");
 
             var system = UnitConverter.Detect(ai.Ingredients.Concat(ai.Steps));
-            var recipe = new RecipeResponse(
-                ai.Title, url.ToString(), system.ToString(), ai.Ingredients, ai.Steps);
+            var recipe = new RecipeResponse(ai.Title, sourceUrl, system.ToString(), ai.Ingredients, ai.Steps);
 
-            await LogAsync(dbFactory, deviceHash, url.Host, success: true, ct);
-            var remaining = await credits.GetBalanceAsync(request.DeviceId, ct);
+            await LogAsync(dbFactory, deviceHash, logHost, success: true, ct);
+            var remaining = await credits.GetBalanceAsync(deviceId, ct);
             return Results.Ok(new ParseResponse(recipe, remaining));
         }
         catch (Exception ex)
@@ -70,8 +193,8 @@ public static class ParseEndpoint
             // Never charge for a failed parse. The refund deliberately ignores the request's
             // cancellation token: if the caller walked away mid-request, the credit must still
             // come back — the previous code passed `ct` here and silently skipped the refund.
-            await credits.RefundAsync(request.DeviceId, cost, CancellationToken.None);
-            await LogAsync(dbFactory, deviceHash, url.Host, success: false, CancellationToken.None);
+            await credits.RefundAsync(deviceId, cost, CancellationToken.None);
+            await LogAsync(dbFactory, deviceHash, logHost, success: false, CancellationToken.None);
 
             // Every failure maps to a stable code + a friendly message. The client localizes the code,
             // so the user never sees a raw "502 Bad Gateway" and each failure mode reads distinctly.
@@ -87,7 +210,7 @@ public static class ParseEndpoint
                     "That site wouldn't let us read the page. Try opening it in your browser and pasting the recipe, or use a different link."),
 
                 NoRecipeExtractedException => Fail(StatusCodes.Status502BadGateway, ImportErrorCode.NoRecipe,
-                    "We couldn't find a recipe on that page. Try a direct link to the recipe itself."),
+                    "We couldn't find a recipe there. Try a direct link to the recipe, a clearer photo, or paste the text."),
 
                 OperationCanceledException when ct.IsCancellationRequested => Fail(
                     StatusCodes.Status499ClientClosedRequest, ImportErrorCode.Cancelled, "The import was cancelled."),
@@ -110,7 +233,7 @@ public static class ParseEndpoint
         // gets a neutral message; the detail belongs in the log, where it is actionable.
         log.LogError(ex, "Recipe extraction failed.");
         return Fail(StatusCodes.Status502BadGateway, ImportErrorCode.ServiceError,
-            "We couldn't read a recipe from that page. Your credit has been returned.");
+            "We couldn't read a recipe from that. Your credit has been returned.");
     }
 
     private static async Task LogAsync(

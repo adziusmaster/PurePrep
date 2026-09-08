@@ -1,7 +1,9 @@
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Windows.Input;
 using Microsoft.Maui.Dispatching;
+using PurePrep.Application;
 using PurePrep.Domain;
 using PurePrep.Localization;
 using PurePrep.Services;
@@ -14,20 +16,27 @@ public sealed class FocusModeViewModel : INotifyPropertyChanged
     private int _currentStepIndex;
     private bool _showIngredients;
     private bool _keepScreenAwake;
+    private bool _readStepsAloud;
+    private CancellationTokenSource? _speechCts;
 
     private IReadOnlyList<StepTimer> _currentStepTimers = Array.Empty<StepTimer>();
     private readonly CookTimerService? _timers;
+    private readonly IVoiceCommandListener? _voice;
+    private bool _isListening;
 
-    public FocusModeViewModel(ParsedRecipe recipe, IDispatcher? dispatcher = null, CookTimerService? timers = null)
+    public FocusModeViewModel(ParsedRecipe recipe, IDispatcher? dispatcher = null, CookTimerService? timers = null, IVoiceCommandListener? voice = null)
     {
         Recipe = recipe;
         _dispatcher = dispatcher;
         _timers = timers;
+        _voice = voice;
+        ActiveTimers = new ObservableCollection<ActiveTimerItem>();
 
         Ingredients = recipe.Ingredients
             .Select(text => new CheckableIngredient(text))
             .ToArray();
         _keepScreenAwake = CookingSettings.KeepScreenAwake;
+        _readStepsAloud = CookingSettings.ReadStepsAloud;
         PreviousCommand = new Command(() => CurrentStepIndex--, () => !IsFirstStep);
         NextCommand = new Command(() => CurrentStepIndex++, () => !IsLastStep);
         AdvanceCommand = new Command(() =>
@@ -40,7 +49,8 @@ public sealed class FocusModeViewModel : INotifyPropertyChanged
         });
         ToggleIngredientsCommand = new Command(() => ShowIngredients = !ShowIngredients);
         StartTimerCommand = new Command<StepTimer>(timer => _ = StartTimerAsync(timer));
-        CancelTimerCommand = new Command(() => _ = CancelTimerAsync());
+        ReadStepCommand = new Command(() => SpeakCurrentStep(force: true));
+        ToggleVoiceCommand = new Command(() => _ = ToggleVoiceAsync());
         UpdateCurrentStepTimers();
     }
 
@@ -73,6 +83,7 @@ public sealed class FocusModeViewModel : INotifyPropertyChanged
             ((Command)PreviousCommand).ChangeCanExecute();
             ((Command)NextCommand).ChangeCanExecute();
             UpdateCurrentStepTimers();
+            SpeakCurrentStep(force: false);
         }
     }
 
@@ -105,6 +116,27 @@ public sealed class FocusModeViewModel : INotifyPropertyChanged
         }
     }
 
+    /// <summary>
+    /// Toggles (and persists) reading each step aloud. Turning it on reads the current step at once;
+    /// turning it off stops any speech mid-sentence, so it doubles as a hush button.
+    /// </summary>
+    public bool ReadStepsAloud
+    {
+        get => _readStepsAloud;
+        set
+        {
+            if (value == _readStepsAloud) return;
+            _readStepsAloud = value;
+            CookingSettings.ReadStepsAloud = value;
+            OnPropertyChanged();
+
+            if (value)
+                SpeakCurrentStep(force: true);
+            else
+                StopSpeaking();
+        }
+    }
+
     public RecipeStep? CurrentStep => Steps.Count == 0 ? null : Steps[CurrentStepIndex];
     public string StepLabel => Steps.Count == 0
         ? AppResources.Get("NoSteps")
@@ -122,7 +154,123 @@ public sealed class FocusModeViewModel : INotifyPropertyChanged
     public ICommand AdvanceCommand { get; }
     public ICommand ToggleIngredientsCommand { get; }
     public ICommand StartTimerCommand { get; }
-    public ICommand CancelTimerCommand { get; }
+    public ICommand ReadStepCommand { get; }
+    public ICommand ToggleVoiceCommand { get; }
+
+    // ===== Voice step navigation =====
+
+    /// <summary>True where hands-free voice commands can be offered (mic + recogniser present).</summary>
+    public bool IsVoiceSupported => _voice?.IsSupported ?? false;
+
+    /// <summary>True while the microphone is actively listening for "next" / "back" / "repeat".</summary>
+    public bool IsListening
+    {
+        get => _isListening;
+        private set
+        {
+            if (value == _isListening) return;
+            _isListening = value;
+            OnPropertyChanged();
+        }
+    }
+
+    private async Task ToggleVoiceAsync()
+    {
+        if (_voice is null || !_voice.IsSupported)
+            return;
+
+        if (_isListening)
+        {
+            await _voice.StopAsync();
+            IsListening = false;
+            return;
+        }
+
+        // Only flips on if listening actually started — a refused mic permission leaves it off.
+        IsListening = await _voice.StartAsync();
+    }
+
+    private void OnVoiceCommand(object? sender, VoiceCommand command)
+    {
+        // Recogniser callbacks may not arrive on the UI thread on every device; marshal to be safe.
+        void Apply()
+        {
+            switch (command)
+            {
+                case VoiceCommand.Next:
+                    if (!IsLastStep) CurrentStepIndex++;
+                    break;
+                case VoiceCommand.Previous:
+                    if (!IsFirstStep) CurrentStepIndex--;
+                    break;
+                case VoiceCommand.Repeat:
+                    SpeakCurrentStep(force: true);
+                    break;
+            }
+        }
+
+        if (_dispatcher is not null && !_dispatcher.IsDispatchRequired)
+            Apply();
+        else if (_dispatcher is not null)
+            _dispatcher.Dispatch(Apply);
+        else
+            Apply();
+    }
+
+    // ===== Read aloud (text-to-speech) =====
+
+    // Speaks the current step. When force is false it only speaks if the read-aloud toggle is on,
+    // so it can be called blindly on every step change. Any in-flight speech is cancelled first so
+    // stepping quickly through a recipe never leaves a backlog of overlapping instructions.
+    private void SpeakCurrentStep(bool force)
+    {
+        if (!force && !_readStepsAloud)
+            return;
+
+        var text = CurrentStep?.Instruction;
+        if (string.IsNullOrWhiteSpace(text))
+            return;
+
+        StopSpeaking();
+        var cts = new CancellationTokenSource();
+        _speechCts = cts;
+
+        _ = Task.Run(async () =>
+        {
+            try
+            {
+                await TextToSpeech.Default.SpeakAsync(text, null, cts.Token);
+            }
+            catch (OperationCanceledException)
+            {
+                // Superseded by a newer step or hushed by the user — expected, nothing to do.
+            }
+            catch
+            {
+                // TTS is unavailable or no engine is installed; reading aloud is a bonus, not a
+                // requirement, so fail silently rather than disrupt cooking.
+            }
+        });
+    }
+
+    private void StopSpeaking()
+    {
+        if (_speechCts is null)
+            return;
+
+        try
+        {
+            _speechCts.Cancel();
+        }
+        catch (ObjectDisposedException)
+        {
+        }
+        finally
+        {
+            _speechCts.Dispose();
+            _speechCts = null;
+        }
+    }
 
     // ===== Cook timers =====
 
@@ -130,18 +278,46 @@ public sealed class FocusModeViewModel : INotifyPropertyChanged
     public IReadOnlyList<StepTimer> CurrentStepTimers => _currentStepTimers;
     public bool HasStepTimers => _currentStepTimers.Count > 0;
 
-    /// <summary>True while a countdown is active.</summary>
-    public bool IsTimerRunning => _timers?.IsRunning ?? false;
-    public string ActiveTimerLabel => _timers?.Label ?? string.Empty;
+    /// <summary>
+    /// Every timer currently counting down — several can run at once. The overview strip binds to
+    /// this, so a roast, a sauce and a rest all stay in view with their own name and countdown.
+    /// </summary>
+    public ObservableCollection<ActiveTimerItem> ActiveTimers { get; }
+    public bool HasActiveTimers => ActiveTimers.Count > 0;
 
-    /// <summary>Remaining time as mm:ss (or h:mm:ss for long timers).</summary>
-    public string ActiveTimerDisplay => _timers?.Display ?? string.Empty;
+    /// <summary>
+    /// Asked (by the page) for a name when a timer is started, pre-filled with the detected label,
+    /// so concurrent timers are told apart at a glance. A null result cancels the start; when unset
+    /// the detected label is used as-is.
+    /// </summary>
+    public Func<StepTimer, Task<string?>>? RequestTimerNameAsync { get; set; }
 
-    private void OnTimerTick(object? sender, EventArgs e)
+    private void OnTimerTick(object? sender, EventArgs e) => SyncActiveTimers();
+
+    // Reconciles the bound collection with the service's live timer set: refreshes each countdown,
+    // drops timers that have stopped/finished, and adds any newly started ones. Editing in place
+    // (rather than clearing) keeps the strip from flickering every second.
+    private void SyncActiveTimers()
     {
-        OnPropertyChanged(nameof(IsTimerRunning));
-        OnPropertyChanged(nameof(ActiveTimerLabel));
-        OnPropertyChanged(nameof(ActiveTimerDisplay));
+        var live = _timers?.Timers ?? Array.Empty<Domain.CookTimerState>();
+
+        for (var i = ActiveTimers.Count - 1; i >= 0; i--)
+        {
+            if (live.All(t => t.Id != ActiveTimers[i].Id))
+                ActiveTimers.RemoveAt(i);
+        }
+
+        foreach (var timer in live)
+        {
+            var existing = ActiveTimers.FirstOrDefault(t => t.Id == timer.Id);
+            var display = _timers?.Display(timer) ?? string.Empty;
+            if (existing is null)
+                ActiveTimers.Add(new ActiveTimerItem(timer.Id, timer.Label, display, StopTimer));
+            else
+                existing.Display = display;
+        }
+
+        OnPropertyChanged(nameof(HasActiveTimers));
     }
 
     private void UpdateCurrentStepTimers()
@@ -156,13 +332,26 @@ public sealed class FocusModeViewModel : INotifyPropertyChanged
         if (timer is null || _timers is null)
             return;
 
-        await _timers.StartAsync(timer.Label, timer.TotalSeconds);
+        var label = timer.Label;
+        if (RequestTimerNameAsync is not null)
+        {
+            var chosen = await RequestTimerNameAsync(timer);
+            if (chosen is null)
+                return; // The user cancelled the name prompt.
+
+            chosen = chosen.Trim();
+            if (chosen.Length > 0)
+                label = chosen;
+        }
+
+        await _timers.StartAsync(label, timer.TotalSeconds);
+        SyncActiveTimers();
     }
 
-    private async Task CancelTimerAsync()
+    private void StopTimer(int id)
     {
         if (_timers is not null)
-            await _timers.StopAsync();
+            _ = _timers.StopAsync(id);
     }
 
     private static void Haptic()
@@ -184,6 +373,12 @@ public sealed class FocusModeViewModel : INotifyPropertyChanged
     /// </summary>
     public void Attach()
     {
+        if (_voice is not null)
+        {
+            _voice.CommandRecognized -= OnVoiceCommand;
+            _voice.CommandRecognized += OnVoiceCommand;
+        }
+
         if (_timers is null)
             return;
 
@@ -200,6 +395,18 @@ public sealed class FocusModeViewModel : INotifyPropertyChanged
     /// </summary>
     public void Detach()
     {
+        StopSpeaking();
+
+        if (_voice is not null)
+        {
+            _voice.CommandRecognized -= OnVoiceCommand;
+            if (_isListening)
+            {
+                _ = _voice.StopAsync();
+                IsListening = false;
+            }
+        }
+
         if (_timers is not null)
             _timers.Tick -= OnTimerTick;
     }
@@ -208,4 +415,40 @@ public sealed class FocusModeViewModel : INotifyPropertyChanged
 
     private void OnPropertyChanged([CallerMemberName] string? propertyName = null) =>
         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+}
+
+/// <summary>
+/// One row in the active-timers overview strip: a name, a live countdown, and a stop button. Its
+/// <see cref="Display"/> is updated in place every second so the strip does not flicker.
+/// </summary>
+public sealed class ActiveTimerItem : INotifyPropertyChanged
+{
+    private string _display;
+
+    public ActiveTimerItem(int id, string label, string display, Action<int> stop)
+    {
+        Id = id;
+        Label = label;
+        _display = display;
+        StopCommand = new Command(() => stop(id));
+    }
+
+    public int Id { get; }
+    public string Label { get; }
+
+    public string Display
+    {
+        get => _display;
+        set
+        {
+            if (value == _display)
+                return;
+            _display = value;
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Display)));
+        }
+    }
+
+    public ICommand StopCommand { get; }
+
+    public event PropertyChangedEventHandler? PropertyChanged;
 }

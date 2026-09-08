@@ -97,8 +97,12 @@ public sealed class GeminiClient(HttpClient http, IOptions<GeminiOptions> option
             generationConfig = new
             {
                 // Deterministic extraction: re-importing the same page should yield the same recipe.
-                // Testers saw the step count wobble between imports; temperature 0 removes that variance.
+                // Testers saw the step count wobble between imports (e.g. "Replace" producing a
+                // different number of steps each time). temperature 0 alone is not enough: Gemini uses
+                // a *random* seed unless one is supplied, so decoding could still drift. Pinning both
+                // temperature and the seed makes the same page parse to the same steps every time.
                 temperature = 0.0,
+                seed = 7,
                 responseMimeType = "application/json",
                 responseSchema = new
                 {
@@ -189,8 +193,10 @@ public sealed class GeminiClient(HttpClient http, IOptions<GeminiOptions> option
             contents = new[] { new { role = "user", parts = new[] { new { text = inputJson } } } },
             generationConfig = new
             {
-                // Faithful, stable translation — no creative variance.
+                // Faithful, stable translation — no creative variance. A fixed seed (matching the
+                // extractor) keeps repeated translations of the same recipe byte-for-byte stable.
                 temperature = 0.0,
+                seed = 7,
                 responseMimeType = "application/json",
                 responseSchema = new
                 {

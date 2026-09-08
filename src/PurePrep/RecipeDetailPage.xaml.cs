@@ -69,17 +69,22 @@ public partial class RecipeDetailPage : ContentPage
         var original = _library.FindById(_recipe.Id) ?? _recipe;
         var sourceLanguage = original.OriginalLanguage ?? DetectOriginalLanguage(original);
 
-        // Offer every supported language except the one the recipe is already in. Cached languages are
-        // ticked so the user can tell which switches are free.
+        // Offer every supported language, INCLUDING the one the recipe is already written in. The
+        // original language and any cached translation are ticked so the user can tell which switches
+        // are free. Previously the recipe's own language was hidden entirely, which testers read as a
+        // bug ("English never shows in the list") and left no way to switch back to the original from
+        // this list — only the separate "Show original" link, which is easy to miss.
         var languages = LocalizationService.Supported
-            .Where(l => l.Code.Length == 2 && !string.Equals(l.Code, sourceLanguage, StringComparison.OrdinalIgnoreCase))
+            .Where(l => l.Code.Length == 2)
             .ToList();
 
         var labelToCode = new Dictionary<string, string>();
         var names = new List<string>();
         foreach (var l in languages)
         {
-            var label = original.HasTranslation(l.Code) ? $"{l.NativeName}  \u2713" : l.NativeName;
+            var isSource = string.Equals(l.Code, sourceLanguage, StringComparison.OrdinalIgnoreCase);
+            var isFree = isSource || original.HasTranslation(l.Code);
+            var label = isFree ? $"{l.NativeName}  \u2713" : l.NativeName;
             labelToCode[label] = l.Code;
             names.Add(label);
         }
@@ -88,6 +93,13 @@ public partial class RecipeDetailPage : ContentPage
             AppResources.Get("Cancel"), null, names.ToArray());
         if (string.IsNullOrEmpty(choice) || !labelToCode.TryGetValue(choice, out var targetCode))
             return;
+
+        // The recipe's own language — bring back the pristine original text, free and instant.
+        if (string.Equals(targetCode, sourceLanguage, StringComparison.OrdinalIgnoreCase))
+        {
+            await ApplyRecipeAsync(original, original.WithDisplayLanguage(null));
+            return;
+        }
 
         // Already cached — switching is free and instant.
         if (original.HasTranslation(targetCode))

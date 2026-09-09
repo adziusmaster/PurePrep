@@ -3,6 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:local="clr-namespace:PurePrep"
              xmlns:loc="clr-namespace:PurePrep.Localization"
+             xmlns:controls="clr-namespace:PurePrep.Controls"
              x:Class="PurePrep.MainPage"
              Shell.NavBarIsVisible="False"
              NavigationPage.HasNavigationBar="False"
@@ -11,7 +12,16 @@
     <!-- Outer grid lets the upgrade sheet float above the content. -->
     <Grid>
         <Grid x:Name="ContentRoot" MaximumWidthRequest="760" HorizontalOptions="Center"
-              Padding="20,12,20,0" RowSpacing="20" RowDefinitions="Auto,Auto,*">
+              Padding="20,12,20,0">
+
+            <!-- The whole page is one scrolling list: the header, import box and library heading
+                 live in the CollectionView's Header so they scroll away with the recipes. This is
+                 what makes browsing work in landscape, where fixed top rows would otherwise squeeze
+                 the list to nothing. -->
+            <CollectionView ItemsSource="{Binding Recipes}" SelectionMode="None"
+                            VerticalScrollBarVisibility="Never">
+                <CollectionView.Header>
+                    <VerticalStackLayout Spacing="20" Padding="0,0,0,4">
 
             <!-- ===== Header ===== -->
             <VerticalStackLayout Spacing="14">
@@ -58,7 +68,7 @@
             </VerticalStackLayout>
 
             <!-- ===== Import ===== -->
-            <VerticalStackLayout Grid.Row="1" Spacing="9">
+            <VerticalStackLayout Spacing="9">
                 <!-- Stroke brightens when a shared link has just landed, so the ready-to-import
                      box is the first thing the eye goes to after coming in from the share sheet. -->
                 <Border BackgroundColor="{DynamicResource Surface}"
@@ -145,8 +155,8 @@
                 </Border>
             </VerticalStackLayout>
 
-            <!-- ===== Library ===== -->
-            <Grid Grid.Row="2" RowDefinitions="Auto,Auto,*" RowSpacing="14">
+            <!-- ===== Library heading + search (scroll with the page) ===== -->
+            <VerticalStackLayout Spacing="14">
                 <Grid ColumnDefinitions="*,Auto" VerticalOptions="Center">
                     <VerticalStackLayout Spacing="2">
                         <Label Text="{loc:Translate YourRecipes}" TextColor="{DynamicResource Ink}" FontSize="20"
@@ -167,7 +177,7 @@
                 </Grid>
 
                 <!-- Search -->
-                <Border Grid.Row="1" BackgroundColor="{DynamicResource Surface}"
+                <Border BackgroundColor="{DynamicResource Surface}"
                         Stroke="{DynamicResource LineSoft}" StrokeThickness="1"
                         Padding="14,2" StrokeShape="RoundRectangle 13"
                         IsVisible="{Binding HasRecipes}">
@@ -180,9 +190,11 @@
                                ClearButtonVisibility="WhileEditing" />
                     </Grid>
                 </Border>
+                </VerticalStackLayout>
 
-                <CollectionView Grid.Row="2" ItemsSource="{Binding Recipes}" SelectionMode="None"
-                                VerticalScrollBarVisibility="Never">
+                    </VerticalStackLayout>
+                </CollectionView.Header>
+
                     <CollectionView.ItemTemplate>
                         <DataTemplate>
                             <Border Margin="0,0,0,12" Padding="0" BackgroundColor="{DynamicResource Surface}"
@@ -283,7 +295,6 @@
                         </Grid>
                     </CollectionView.EmptyView>
                 </CollectionView>
-            </Grid>
         </Grid>
 
         <!-- ===== Upgrade sheet (floats above content) ===== -->
@@ -332,16 +343,14 @@
                     </VerticalStackLayout>
                 </Border>
 
-                <!-- Pack picker: one button per pack (hidden where billing is unavailable) -->
+                <!-- Pack picker: one on-brand card per pack (hidden where billing is unavailable) -->
                 <VerticalStackLayout Spacing="8" BindableLayout.ItemsSource="{Binding CreditPacks}"
                                      IsVisible="{Binding IsBillingSupported}">
                     <BindableLayout.ItemTemplate>
                         <DataTemplate>
-                            <Button Text="{Binding Label}"
-                                    Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.BuyPackCommand}"
-                                    CommandParameter="{Binding .}"
-                                    BackgroundColor="{DynamicResource Lime}" TextColor="{DynamicResource LimeInk}"
-                                    FontAttributes="Bold" FontSize="15" HeightRequest="50" CornerRadius="15" />
+                            <controls:CreditPackCard Credits="{Binding Credits}" Price="{Binding DisplayPrice}"
+                                                     TapCommand="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.BuyPackCommand}"
+                                                     TapCommandParameter="{Binding .}" />
                         </DataTemplate>
                     </BindableLayout.ItemTemplate>
                 </VerticalStackLayout>

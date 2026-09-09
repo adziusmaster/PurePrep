@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:local="clr-namespace:PurePrep"
+             xmlns:loc="clr-namespace:PurePrep.Localization"
+             x:Class="PurePrep.Controls.CreditPackCard"
+             x:Name="Root">
+
+    <!-- One on-brand, tappable pack card, shared by the main paywall and the Settings buy sheet so
+         both places look identical: a credit chip, the pack headline, and the live price as the
+         lime call-to-action badge. Tapping anywhere on the card triggers the purchase. -->
+    <Border BackgroundColor="{DynamicResource Surface}" Stroke="{DynamicResource LineSoft}"
+            StrokeThickness="1" StrokeShape="RoundRectangle 16" Padding="12"
+            local:TapFeedback.IsEnabled="True" AutomationProperties.IsInAccessibleTree="True">
+        <Border.GestureRecognizers>
+            <TapGestureRecognizer Command="{Binding TapCommand, Source={x:Reference Root}}"
+                                  CommandParameter="{Binding TapCommandParameter, Source={x:Reference Root}}" />
+        </Border.GestureRecognizers>
+        <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12">
+            <Border WidthRequest="46" HeightRequest="46" BackgroundColor="{DynamicResource LimeWash}"
+                    Stroke="{DynamicResource LineSoft}" StrokeThickness="1" StrokeShape="RoundRectangle 14"
+                    VerticalOptions="Center">
+                <Label x:Name="CreditsChipLabel" TextColor="{DynamicResource LimeBright}" FontSize="17"
+                       FontAttributes="Bold" HorizontalOptions="Center" VerticalOptions="Center" />
+            </Border>
+            <VerticalStackLayout Grid.Column="1" Spacing="1" VerticalOptions="Center">
+                <Label x:Name="CreditsLabel" TextColor="{DynamicResource Ink}" FontSize="15.5"
+                       FontAttributes="Bold" />
+                <Label Text="{loc:Translate SmartCredits}" TextColor="{DynamicResource Muted}"
+                       FontSize="12.5" />
+            </VerticalStackLayout>
+            <Border Grid.Column="2" BackgroundColor="{DynamicResource Lime}" StrokeThickness="0"
+                    StrokeShape="RoundRectangle 12" Padding="14,9" VerticalOptions="Center">
+                <Label x:Name="PriceLabel" TextColor="{DynamicResource LimeInk}" FontSize="14.5"
+                       FontAttributes="Bold" VerticalOptions="Center" />
+            </Border>
+        </Grid>
+    </Border>
+</ContentView>

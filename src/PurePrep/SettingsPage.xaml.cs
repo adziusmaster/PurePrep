@@ -56,19 +56,14 @@ public partial class SettingsPage : ContentPage, IHardwareBackHandler
         BuyPackContainer.Children.Clear();
         foreach (var pack in packs)
         {
-            var button = new Button
-            {
-                Text = AppResources.Format("PackOptionFormat", pack.Credits, pack.DisplayPrice),
-                FontAttributes = FontAttributes.Bold,
-                FontSize = 15,
-                HeightRequest = 50,
-                CornerRadius = 15,
-                BackgroundColor = Token("Lime"),
-                TextColor = Token("LimeInk"),
-            };
             var captured = pack;
-            button.Clicked += (_, _) => _ = PurchasePackAsync(captured);
-            BuyPackContainer.Children.Add(button);
+            var card = new Controls.CreditPackCard
+            {
+                Credits = pack.Credits,
+                Price = pack.DisplayPrice,
+                TapCommand = new Command(() => _ = PurchasePackAsync(captured)),
+            };
+            BuyPackContainer.Children.Add(card);
         }
     }
 

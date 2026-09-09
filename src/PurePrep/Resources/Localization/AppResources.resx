@@ -491,6 +491,10 @@ Add stock a ladle at a time, stirring.</value>
   <data name="SmartCredits" xml:space="preserve">
     <value>Smart Credits</value>
   </data>
+  <data name="PackCreditsFormat" xml:space="preserve">
+    <value>{0} credits</value>
+    <comment>Pack card headline. {0} = number of credits.</comment>
+  </data>
   <data name="Privacy" xml:space="preserve">
     <value>Privacy policy</value>
   </data>

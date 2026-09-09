@@ -1,0 +1,71 @@
+<en-GB>
+What's new in 1.3.0
+• Hands-free cooking. In Focus Mode, have steps read aloud, swipe between them, or use voice commands (next/back/repeat).
+• Multiple timers. Run several named timers at once — a roast, a sauce and a rest together.
+• Import from anywhere. Snap a photo of a page or paste recipe text, not just links (photo import = 2 credits).
+• A sample recipe waiting in every new library.
+Thanks for testing PurePrep!
+</en-GB>
+
+<en-US>
+What's new in 1.3.0
+• Hands-free cooking. In Focus Mode, have steps read aloud, swipe between them, or use voice commands (next/back/repeat).
+• Multiple timers. Run several named timers at once — a roast, a sauce and a rest together.
+• Import from anywhere. Snap a photo of a page or paste recipe text, not just links (photo import = 2 credits).
+• A sample recipe waiting in every new library.
+Thanks for testing PurePrep!
+</en-US>
+
+<de-DE>
+Neu in 1.3.0
+• Freihändig kochen. Im Fokus-Modus Schritte vorlesen lassen, wischen oder Sprachbefehle nutzen (weiter/zurück/wiederholen).
+• Mehrere Timer. Mehrere benannte Timer gleichzeitig – Braten, Soße und Ruhezeit zusammen.
+• Import von überall. Foto einer Seite machen oder Rezepttext einfügen, nicht nur Links (Foto-Import = 2 Credits).
+• Ein Beispielrezept in jeder neuen Sammlung.
+Danke fürs Testen von PurePrep!
+</de-DE>
+
+<es-ES>
+Novedades en 1.3.0
+• Cocina manos libres. En modo Concentración: escucha los pasos, desliza entre ellos o usa la voz (siguiente/atrás/repite).
+• Varios temporizadores. Varios con nombre a la vez: un asado, una salsa y un reposo juntos.
+• Importa de todo. Haz una foto de una página o pega el texto, no solo enlaces (foto = 2 créditos).
+• Una receta de ejemplo en cada biblioteca nueva.
+¡Gracias por probar PurePrep!
+</es-ES>
+
+<fr-FR>
+Nouveautés de la 1.3.0
+• Cuisine mains libres. En mode Focus : lecture des étapes à voix haute, balayage ou commandes vocales (suivant/précédent/répète).
+• Plusieurs minuteurs. Plusieurs minuteurs nommés à la fois : rôti, sauce et repos ensemble.
+• Importez de partout. Photographiez une page ou collez le texte, pas seulement des liens (photo = 2 crédits).
+• Une recette d'exemple dans chaque nouvelle bibliothèque.
+Merci de tester PurePrep !
+</fr-FR>
+
+<it-IT>
+Novità della 1.3.0
+• Cucina a mani libere. In modalità Focus: ascolta i passaggi, scorri o usa la voce (avanti/indietro/ripeti).
+• Più timer. Più timer con nome insieme: arrosto, salsa e riposo contemporaneamente.
+• Importa da ovunque. Fotografa una pagina o incolla il testo, non solo i link (foto = 2 crediti).
+• Una ricetta di esempio in ogni nuova raccolta.
+Grazie per aver provato PurePrep!
+</it-IT>
+
+<nl-NL>
+Nieuw in 1.3.0
+• Handenvrij koken. In de Focus-modus stappen laten voorlezen, vegen of spraakopdrachten gebruiken (volgende/terug/herhaal).
+• Meerdere timers. Meerdere timers met naam tegelijk: braadstuk, saus en rusttijd samen.
+• Importeer van overal. Maak een foto van een pagina of plak recepttekst, niet alleen links (foto = 2 credits).
+• Een voorbeeldrecept in elke nieuwe collectie.
+Bedankt voor het testen van PurePrep!
+</nl-NL>
+
+<pl-PL>
+Co nowego w 1.3.0
+• Gotowanie bez rąk. W trybie Skupienia: odsłuchaj kroki, przesuwaj między nimi lub użyj głosu (dalej/wstecz/powtórz).
+• Kilka minutników. Kilka nazwanych naraz: pieczeń, sos i odpoczynek jednocześnie.
+• Importuj skądkolwiek. Zrób zdjęcie strony lub wklej tekst, nie tylko linki (zdjęcie = 2 kredyty).
+• Przykładowy przepis w każdej nowej bibliotece.
+Dziękujemy za testowanie PurePrep!
+</pl-PL>

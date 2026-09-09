@@ -32,6 +32,7 @@
                     StrokeThickness="1" Padding="12,6" StrokeShape="RoundRectangle 20" VerticalOptions="Center">
                 <HorizontalStackLayout Spacing="12" VerticalOptions="Center">
                     <HorizontalStackLayout Spacing="6" VerticalOptions="Center"
+                                           IsVisible="{Binding CanReadAloud}"
                                            AutomationProperties.IsInAccessibleTree="True"
                                            AutomationProperties.Name="{loc:Translate ReadAloud}">
                         <Label Text="&#128266;" FontSize="14" VerticalOptions="Center" />
@@ -39,7 +40,8 @@
                                 OnColor="{DynamicResource Lime}" ThumbColor="{DynamicResource BgElevated}"
                                 Scale="0.8" />
                     </HorizontalStackLayout>
-                    <BoxView WidthRequest="1" Color="{DynamicResource Line}" VerticalOptions="Fill" />
+                    <BoxView WidthRequest="1" Color="{DynamicResource Line}" VerticalOptions="Fill"
+                             IsVisible="{Binding CanReadAloud}" />
                     <HorizontalStackLayout Spacing="8" VerticalOptions="Center">
                         <Label Text="{loc:Translate ScreenOn}" TextColor="{DynamicResource Muted}" FontSize="12.5"
                                FontAttributes="Bold" VerticalOptions="Center" />
@@ -160,7 +162,7 @@
                 <HorizontalStackLayout Spacing="10">
                     <Border BackgroundColor="{DynamicResource BgElevated}" Stroke="{DynamicResource LineSoft}"
                             StrokeThickness="1" Padding="14,10" MinimumHeightRequest="44" StrokeShape="RoundRectangle 12"
-                            local:TapFeedback.IsEnabled="True"
+                            local:TapFeedback.IsEnabled="True" IsVisible="{Binding CanReadAloud}"
                             AutomationProperties.IsInAccessibleTree="True" AutomationProperties.Name="{loc:Translate ReadStep}">
                         <Border.GestureRecognizers>
                             <TapGestureRecognizer Command="{Binding ReadStepCommand}" />
@@ -200,6 +202,10 @@
                         </Border>
                     </Grid>
                 </HorizontalStackLayout>
+
+                <!-- Tells the cook exactly what to say, with the words in the recipe's language. -->
+                <Label Text="{Binding VoiceCommandsHint}" IsVisible="{Binding IsVoiceSupported}"
+                       TextColor="{DynamicResource Muted}" FontSize="12.5" />
             </VerticalStackLayout>
           </ScrollView>
         </Border>

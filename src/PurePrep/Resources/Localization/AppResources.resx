@@ -627,4 +627,33 @@ Add stock a ladle at a time, stirring.</value>
   <data name="VoiceListening" xml:space="preserve">
     <value>Listening…</value>
   </data>
+  <data name="VoiceCommandsHintFormat" xml:space="preserve">
+    <value>Say “{0}”, “{1}” or “{2}”.</value>
+    <comment>Hands-free hint. {0}=next word, {1}=back word, {2}=repeat word, in the recipe language.</comment>
+  </data>
+  <data name="SectionReadingVoice" xml:space="preserve">
+    <value>READING &amp; VOICE</value>
+  </data>
+  <data name="ReadingVoice" xml:space="preserve">
+    <value>Reading voice</value>
+  </data>
+  <data name="ReadingVoiceAuto" xml:space="preserve">
+    <value>Automatic (match recipe)</value>
+  </data>
+  <data name="ReadingVoiceDesc" xml:space="preserve">
+    <value>Steps are read in the recipe's language. Choosing a voice only affects recipes in that voice's language; other languages still pick a matching voice automatically.</value>
+  </data>
+  <data name="TestVoice" xml:space="preserve">
+    <value>Test voice</value>
+  </data>
+  <data name="TestVoiceSample" xml:space="preserve">
+    <value>Simmer gently for ten minutes, then stir in the garlic.</value>
+    <comment>Sample sentence spoken by the Test voice button.</comment>
+  </data>
+  <data name="VoiceCommandsTitle" xml:space="preserve">
+    <value>Hands-free commands</value>
+  </data>
+  <data name="VoiceCommandsDesc" xml:space="preserve">
+    <value>In Focus Mode, tap the mic and speak to move through the recipe without touching the screen.</value>
+  </data>
 </root>

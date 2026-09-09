@@ -35,6 +35,19 @@ public static class LocalizationService
         private set => Preferences.Set(PreferenceKey, value);
     }
 
+    /// <summary>
+    /// The two-letter ISO code actually in effect right now (resolving "follow system"), used as a
+    /// best-effort fallback for hands-free features when a recipe carries no language of its own.
+    /// </summary>
+    public static string EffectiveTwoLetterCode
+    {
+        get
+        {
+            try { return CultureInfo.CurrentUICulture.TwoLetterISOLanguageName; }
+            catch { return "en"; }
+        }
+    }
+
     /// <summary>Applies the stored (or given) language to the current + default thread cultures.</summary>
     public static void Apply(string? code = null)
     {

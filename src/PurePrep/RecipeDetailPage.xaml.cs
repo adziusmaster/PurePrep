@@ -222,7 +222,7 @@ public partial class RecipeDetailPage : ContentPage
     }
 
     private async void OnCookClicked(object? sender, EventArgs e) =>
-        await Navigation.PushAsync(new FocusPage(_viewModel.CookRecipe));
+        await Navigation.PushAsync(new FocusPage(_viewModel.CookRecipe, _viewModel.SpokenLanguageCode));
 
     private async void OnDeleteTapped(object? sender, EventArgs e)
     {

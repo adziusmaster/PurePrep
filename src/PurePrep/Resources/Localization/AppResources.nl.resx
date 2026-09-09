@@ -569,4 +569,34 @@ Voeg de bouillon pollepel voor pollepel toe, al roerend.</value>
   <data name="ExportSavedFormat" xml:space="preserve">
     <value>Opgeslagen in {0} als {1}.</value>
   </data>
+  <data name="PackCreditsFormat" xml:space="preserve">
+    <value>{0} credits</value>
+  </data>
+  <data name="VoiceCommandsHintFormat" xml:space="preserve">
+    <value>Zeg “{0}”, “{1}” of “{2}”.</value>
+  </data>
+  <data name="SectionReadingVoice" xml:space="preserve">
+    <value>VOORLEZEN &amp; STEM</value>
+  </data>
+  <data name="ReadingVoice" xml:space="preserve">
+    <value>Voorleesstem</value>
+  </data>
+  <data name="ReadingVoiceAuto" xml:space="preserve">
+    <value>Automatisch (volgt recept)</value>
+  </data>
+  <data name="ReadingVoiceDesc" xml:space="preserve">
+    <value>Stappen worden voorgelezen in de taal van het recept. Een gekozen stem geldt alleen voor recepten in die taal; voor andere talen wordt automatisch een passende stem gekozen.</value>
+  </data>
+  <data name="TestVoice" xml:space="preserve">
+    <value>Stem testen</value>
+  </data>
+  <data name="TestVoiceSample" xml:space="preserve">
+    <value>Laat tien minuten zachtjes sudderen en roer dan de knoflook erdoor.</value>
+  </data>
+  <data name="VoiceCommandsTitle" xml:space="preserve">
+    <value>Handsfree opdrachten</value>
+  </data>
+  <data name="VoiceCommandsDesc" xml:space="preserve">
+    <value>Tik in de focusmodus op de microfoon en spreek om zonder het scherm aan te raken door het recept te gaan.</value>
+  </data>
 </root>

@@ -50,6 +50,28 @@ public static class UnitConverter
     private static readonly Dictionary<string, Unit> AliasToUnit = BuildAliasLookup();
     private static readonly Regex Token = BuildTokenRegex();
 
+    // Ingredients named here are liquids that cooks measure in *fluid* ounces even when the recipe
+    // just writes "ounces" (spirits, wine, and other pourable liquids). Without this, "2 ounces
+    // tequila" is converted as weight (~55 g) instead of volume (~60 ml). Kept deliberately
+    // conservative: words commonly sold by weight (cheese, chocolate, "cream cheese", "tomato
+    // sauce") are omitted, so only clear liquids trigger the fluid reading. English-only, matching
+    // the rest of the alias set.
+    private static readonly Regex LiquidContext = new(
+        @"\b(tequila|vodka|rum|gin|whisk(?:e)?y|bourbon|brandy|cognac|scotch|mezcal|sake|sherry|vermouth|" +
+        @"liqueur|schnapps|aperol|campari|amaretto|cointreau|triple\s+sec|absinthe|wine|prosecco|champagne|" +
+        @"beer|ale|lager|cider|water|milk|buttermilk|cream|juice|broth|stock|oil|vinegar|syrup|soda|cola|" +
+        @"tonic|seltzer|espresso|coffee|brine|liquor)\b",
+        RegexOptions.IgnoreCase | RegexOptions.Compiled);
+
+    // "cream" is a liquid, but "cream cheese" and "sour cream" are sold and measured by weight, so
+    // an ounce there really is an ounce. Exclude those spellings from the liquid reading.
+    private static readonly Regex SolidCreamContext = new(
+        @"\b(cream\s+cheese|sour\s+cream|creamed|creamy)\b",
+        RegexOptions.IgnoreCase | RegexOptions.Compiled);
+
+    private static bool IsLiquidContext(string text) =>
+        LiquidContext.IsMatch(text) && !SolidCreamContext.IsMatch(text);
+
     private static readonly Dictionary<char, double> UnicodeFractions = new()
     {
         ['¼'] = 0.25, ['½'] = 0.5, ['¾'] = 0.75, ['⅓'] = 1.0 / 3, ['⅔'] = 2.0 / 3,
@@ -88,12 +110,20 @@ public static class UnitConverter
     {
         if (string.IsNullOrWhiteSpace(text)) return text;
         text = Normalize(text);
+        var liquidContext = IsLiquidContext(text);
         return Token.Replace(text, match =>
         {
             if (!TryResolveUnit(match.Groups["unit"].Value, out var unit))
                 return match.Value;
             if (IsAmbiguousBareTemperature(match.Groups["unit"].Value, match.Groups["qty"].Value))
                 return match.Value;
+
+            // A weight-ounce in a line naming a pourable liquid is really a fluid ounce, so it
+            // converts by volume (ml) rather than mass (g).
+            if (unit.Dimension == Dimension.Mass && unit.Key == "oz" && liquidContext
+                && TryResolveUnit("floz", out var fluid))
+                unit = fluid;
+
             if (unit.System == to) // already in the target system for this dimension
                 return match.Value;
 

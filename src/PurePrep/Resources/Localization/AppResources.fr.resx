@@ -569,4 +569,34 @@ Ajoutez le bouillon louche par louche en remuant.</value>
   <data name="ExportSavedFormat" xml:space="preserve">
     <value>Enregistré dans {0} sous {1}.</value>
   </data>
+  <data name="PackCreditsFormat" xml:space="preserve">
+    <value>{0} crédits</value>
+  </data>
+  <data name="VoiceCommandsHintFormat" xml:space="preserve">
+    <value>Dites « {0} », « {1} » ou « {2} ».</value>
+  </data>
+  <data name="SectionReadingVoice" xml:space="preserve">
+    <value>LECTURE ET VOIX</value>
+  </data>
+  <data name="ReadingVoice" xml:space="preserve">
+    <value>Voix de lecture</value>
+  </data>
+  <data name="ReadingVoiceAuto" xml:space="preserve">
+    <value>Automatique (selon la recette)</value>
+  </data>
+  <data name="ReadingVoiceDesc" xml:space="preserve">
+    <value>Les étapes sont lues dans la langue de la recette. Choisir une voix n'affecte que les recettes dans la langue de cette voix ; pour les autres langues, une voix adaptée est choisie automatiquement.</value>
+  </data>
+  <data name="TestVoice" xml:space="preserve">
+    <value>Tester la voix</value>
+  </data>
+  <data name="TestVoiceSample" xml:space="preserve">
+    <value>Laissez mijoter dix minutes, puis incorporez l'ail.</value>
+  </data>
+  <data name="VoiceCommandsTitle" xml:space="preserve">
+    <value>Commandes mains libres</value>
+  </data>
+  <data name="VoiceCommandsDesc" xml:space="preserve">
+    <value>En mode Focus, touchez le micro et parlez pour parcourir la recette sans toucher l'écran.</value>
+  </data>
 </root>

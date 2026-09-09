@@ -569,4 +569,34 @@ Brühe kellenweise unter Rühren zugeben.</value>
   <data name="ExportSavedFormat" xml:space="preserve">
     <value>In {0} als {1} gespeichert.</value>
   </data>
+  <data name="PackCreditsFormat" xml:space="preserve">
+    <value>{0} Credits</value>
+  </data>
+  <data name="VoiceCommandsHintFormat" xml:space="preserve">
+    <value>Sag „{0}“, „{1}“ oder „{2}“.</value>
+  </data>
+  <data name="SectionReadingVoice" xml:space="preserve">
+    <value>VORLESEN &amp; SPRACHE</value>
+  </data>
+  <data name="ReadingVoice" xml:space="preserve">
+    <value>Vorlesestimme</value>
+  </data>
+  <data name="ReadingVoiceAuto" xml:space="preserve">
+    <value>Automatisch (passend zum Rezept)</value>
+  </data>
+  <data name="ReadingVoiceDesc" xml:space="preserve">
+    <value>Schritte werden in der Sprache des Rezepts vorgelesen. Eine gewählte Stimme gilt nur für Rezepte in deren Sprache; für andere Sprachen wird automatisch eine passende Stimme gewählt.</value>
+  </data>
+  <data name="TestVoice" xml:space="preserve">
+    <value>Stimme testen</value>
+  </data>
+  <data name="TestVoiceSample" xml:space="preserve">
+    <value>Zehn Minuten sanft köcheln lassen, dann den Knoblauch einrühren.</value>
+  </data>
+  <data name="VoiceCommandsTitle" xml:space="preserve">
+    <value>Freihändige Befehle</value>
+  </data>
+  <data name="VoiceCommandsDesc" xml:space="preserve">
+    <value>Tippe im Fokus-Modus auf das Mikrofon und sprich, um ohne Berühren durch das Rezept zu navigieren.</value>
+  </data>
 </root>

@@ -1,0 +1,87 @@
+<en-GB>
+What's new in 1.3.1
+• Read steps aloud in the recipe's own language, and pick your reading voice in Settings.
+• Clearer voice commands — Focus Mode now shows exactly what to say.
+• Fixed browsing recipes in landscape.
+• Fixed importing a recipe by photo on some devices.
+• Liquid measures (e.g. ounces of a spirit) now convert to millilitres.
+• Tidier, consistent credit-pack picker.
+Thanks for testing PurePrep!
+</en-GB>
+
+<en-US>
+What's new in 1.3.1
+• Read steps aloud in the recipe's own language, and pick your reading voice in Settings.
+• Clearer voice commands — Focus Mode now shows exactly what to say.
+• Fixed browsing recipes in landscape.
+• Fixed importing a recipe by photo on some devices.
+• Liquid measures (e.g. ounces of a spirit) now convert to milliliters.
+• Tidier, consistent credit-pack picker.
+Thanks for testing PurePrep!
+</en-US>
+
+<de-DE>
+Neu in 1.3.1
+• Schritte in der Sprache des Rezepts vorlesen und die Vorlesestimme in den Einstellungen wählen.
+• Klarere Sprachbefehle – der Fokus-Modus zeigt jetzt, was du sagen kannst.
+• Rezepte im Querformat lassen sich wieder durchblättern.
+• Foto-Import von Rezepten auf einigen Geräten behoben.
+• Flüssigkeitsmengen (z. B. Unzen Spirituose) werden in Milliliter umgerechnet.
+• Aufgeräumte, einheitliche Credit-Pakete.
+Danke fürs Testen von PurePrep!
+</de-DE>
+
+<es-ES>
+Novedades en 1.3.1
+• Escucha los pasos en el idioma de la receta y elige la voz de lectura en Ajustes.
+• Comandos de voz más claros: el modo Concentración muestra qué decir.
+• Corregida la navegación de recetas en horizontal.
+• Corregida la importación por foto en algunos dispositivos.
+• Las medidas líquidas (p. ej. onzas de un licor) se convierten a mililitros.
+• Selector de packs de créditos más ordenado y coherente.
+¡Gracias por probar PurePrep!
+</es-ES>
+
+<fr-FR>
+Nouveautés de la 1.3.1
+• Lecture des étapes dans la langue de la recette, et choix de la voix dans les Réglages.
+• Commandes vocales plus claires : le mode Focus indique quoi dire.
+• Correction de la navigation des recettes en mode paysage.
+• Correction de l'import d'une recette par photo sur certains appareils.
+• Les mesures liquides (ex. onces d'un spiritueux) sont converties en millilitres.
+• Sélecteur de packs de crédits plus net et cohérent.
+Merci de tester PurePrep !
+</fr-FR>
+
+<it-IT>
+Novità della 1.3.1
+• Leggi i passaggi nella lingua della ricetta e scegli la voce di lettura nelle Impostazioni.
+• Comandi vocali più chiari: la modalità Focus mostra cosa dire.
+• Corretta la navigazione delle ricette in orizzontale.
+• Corretto l'import di una ricetta da foto su alcuni dispositivi.
+• Le misure liquide (es. once di un liquore) vengono convertite in millilitri.
+• Selettore dei pacchetti di crediti più ordinato e coerente.
+Grazie per aver provato PurePrep!
+</it-IT>
+
+<nl-NL>
+Nieuw in 1.3.1
+• Laat stappen voorlezen in de taal van het recept en kies je voorleesstem in Instellingen.
+• Duidelijkere spraakopdrachten — de Focus-modus laat zien wat je kunt zeggen.
+• Recepten bladeren in liggende stand werkt weer.
+• Import van een recept via foto op sommige toestellen opgelost.
+• Vloeibare maten (bijv. ounces drank) worden nu omgerekend naar milliliters.
+• Nettere, consistente keuze van creditpakketten.
+Bedankt voor het testen van PurePrep!
+</nl-NL>
+
+<pl-PL>
+Co nowego w 1.3.1
+• Odczyt kroków w języku przepisu i wybór głosu czytania w Ustawieniach.
+• Czytelniejsze polecenia głosowe — tryb Skupienia pokazuje, co możesz powiedzieć.
+• Naprawiono przeglądanie przepisów w orientacji poziomej.
+• Naprawiono import przepisu ze zdjęcia na części urządzeń.
+• Miary płynów (np. uncje alkoholu) są przeliczane na mililitry.
+• Schludniejszy, spójny wybór pakietów kredytów.
+Dziękujemy za testowanie PurePrep!
+</pl-PL>

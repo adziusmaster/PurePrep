@@ -18,6 +18,7 @@ public sealed class VoiceCommandListener : Java.Lang.Object, IVoiceCommandListen
 {
     private SpeechRecognizer? _recognizer;
     private bool _listening;
+    private string? _languageTag;
 
     private static Context Context => global::Android.App.Application.Context;
 
@@ -25,7 +26,7 @@ public sealed class VoiceCommandListener : Java.Lang.Object, IVoiceCommandListen
 
     public event EventHandler<VoiceCommand>? CommandRecognized;
 
-    public async Task<bool> StartAsync(CancellationToken cancellationToken = default)
+    public async Task<bool> StartAsync(string? languageTag = null, CancellationToken cancellationToken = default)
     {
         if (!IsSupported)
             return false;
@@ -38,6 +39,7 @@ public sealed class VoiceCommandListener : Java.Lang.Object, IVoiceCommandListen
 
         await MainThread.InvokeOnMainThreadAsync(() =>
         {
+            _languageTag = languageTag;
             _listening = true;
             EnsureRecognizer();
             StartListening();
@@ -83,8 +85,12 @@ public sealed class VoiceCommandListener : Java.Lang.Object, IVoiceCommandListen
         var intent = new Intent(RecognizerIntent.ActionRecognizeSpeech);
         intent.PutExtra(RecognizerIntent.ExtraLanguageModel, RecognizerIntent.LanguageModelFreeForm);
         intent.PutExtra(RecognizerIntent.ExtraPartialResults, true);
-        // Bias the recogniser towards the device language, matching the recipe/app language.
-        intent.PutExtra(RecognizerIntent.ExtraLanguage, Java.Util.Locale.Default);
+        // Bias the recogniser towards the recipe's language so commands are heard in the language the
+        // steps are actually read in; fall back to the device language when it is unknown.
+        var locale = string.IsNullOrWhiteSpace(_languageTag)
+            ? Java.Util.Locale.Default
+            : Java.Util.Locale.ForLanguageTag(_languageTag);
+        intent.PutExtra(RecognizerIntent.ExtraLanguage, locale);
 
         try
         {
@@ -119,51 +125,12 @@ public sealed class VoiceCommandListener : Java.Lang.Object, IVoiceCommandListen
 
         foreach (var phrase in phrases)
         {
-            if (TryMatch(phrase, out var command))
+            if (VoiceCommandVocabulary.TryMatch(phrase, out var command))
             {
                 CommandRecognized?.Invoke(this, command);
                 return;
             }
         }
-    }
-
-    private static bool TryMatch(string? phrase, out VoiceCommand command)
-    {
-        command = default;
-        if (string.IsNullOrWhiteSpace(phrase))
-            return false;
-
-        var text = phrase.ToLowerInvariant();
-
-        if (Contains(text, "repeat", "again", "read", "powtórz", "wiederhol", "repite", "répète", "ripeti", "herhaal"))
-        {
-            command = VoiceCommand.Repeat;
-            return true;
-        }
-
-        if (Contains(text, "back", "previous", "wstecz", "poprzedni", "zurück", "atrás", "précédent", "indietro", "terug"))
-        {
-            command = VoiceCommand.Previous;
-            return true;
-        }
-
-        if (Contains(text, "next", "forward", "continue", "dalej", "następny", "weiter", "siguiente", "suivant", "avanti", "volgende", "verder"))
-        {
-            command = VoiceCommand.Next;
-            return true;
-        }
-
-        return false;
-    }
-
-    private static bool Contains(string text, params string[] needles)
-    {
-        foreach (var needle in needles)
-        {
-            if (text.Contains(needle, StringComparison.Ordinal))
-                return true;
-        }
-        return false;
     }
 
     // ===== IRecognitionListener =====

@@ -569,4 +569,34 @@ Aggiungi il brodo un mestolo alla volta, mescolando.</value>
   <data name="ExportSavedFormat" xml:space="preserve">
     <value>Salvato in {0} come {1}.</value>
   </data>
+  <data name="PackCreditsFormat" xml:space="preserve">
+    <value>{0} crediti</value>
+  </data>
+  <data name="VoiceCommandsHintFormat" xml:space="preserve">
+    <value>Di' «{0}», «{1}» o «{2}».</value>
+  </data>
+  <data name="SectionReadingVoice" xml:space="preserve">
+    <value>LETTURA E VOCE</value>
+  </data>
+  <data name="ReadingVoice" xml:space="preserve">
+    <value>Voce di lettura</value>
+  </data>
+  <data name="ReadingVoiceAuto" xml:space="preserve">
+    <value>Automatica (in base alla ricetta)</value>
+  </data>
+  <data name="ReadingVoiceDesc" xml:space="preserve">
+    <value>I passaggi vengono letti nella lingua della ricetta. La voce scelta vale solo per le ricette nella sua lingua; per le altre lingue viene scelta automaticamente una voce adatta.</value>
+  </data>
+  <data name="TestVoice" xml:space="preserve">
+    <value>Prova voce</value>
+  </data>
+  <data name="TestVoiceSample" xml:space="preserve">
+    <value>Fai sobbollire dolcemente per dieci minuti, poi unisci l'aglio.</value>
+  </data>
+  <data name="VoiceCommandsTitle" xml:space="preserve">
+    <value>Comandi a mani libere</value>
+  </data>
+  <data name="VoiceCommandsDesc" xml:space="preserve">
+    <value>In modalità Focus, tocca il microfono e parla per scorrere la ricetta senza toccare lo schermo.</value>
+  </data>
 </root>

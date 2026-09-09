@@ -569,4 +569,34 @@ Añade el caldo cucharón a cucharón, removiendo.</value>
   <data name="ExportSavedFormat" xml:space="preserve">
     <value>Guardado en {0} como {1}.</value>
   </data>
+  <data name="PackCreditsFormat" xml:space="preserve">
+    <value>{0} créditos</value>
+  </data>
+  <data name="VoiceCommandsHintFormat" xml:space="preserve">
+    <value>Di «{0}», «{1}» o «{2}».</value>
+  </data>
+  <data name="SectionReadingVoice" xml:space="preserve">
+    <value>LECTURA Y VOZ</value>
+  </data>
+  <data name="ReadingVoice" xml:space="preserve">
+    <value>Voz de lectura</value>
+  </data>
+  <data name="ReadingVoiceAuto" xml:space="preserve">
+    <value>Automática (según la receta)</value>
+  </data>
+  <data name="ReadingVoiceDesc" xml:space="preserve">
+    <value>Los pasos se leen en el idioma de la receta. Elegir una voz solo afecta a las recetas en el idioma de esa voz; para otros idiomas se elige una voz compatible automáticamente.</value>
+  </data>
+  <data name="TestVoice" xml:space="preserve">
+    <value>Probar voz</value>
+  </data>
+  <data name="TestVoiceSample" xml:space="preserve">
+    <value>Cocina a fuego lento diez minutos y luego añade el ajo.</value>
+  </data>
+  <data name="VoiceCommandsTitle" xml:space="preserve">
+    <value>Comandos manos libres</value>
+  </data>
+  <data name="VoiceCommandsDesc" xml:space="preserve">
+    <value>En el modo Concentración, toca el micrófono y habla para avanzar por la receta sin tocar la pantalla.</value>
+  </data>
 </root>

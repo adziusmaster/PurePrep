@@ -4,6 +4,15 @@
 	     credit/purchase state would otherwise be extractable via `adb backup` on a debuggable
 	     device and auto-synced off-device. The library has its own explicit export/import instead. -->
 	<application android:allowBackup="false" android:icon="@mipmap/appicon" android:roundIcon="@mipmap/appicon_round" android:supportsRtl="true"></application>
+	<!-- Android 11+ package visibility: without declaring the intents we launch, the system hides
+	     the apps that can service them, so intent resolution returns null. The photo-capture intent
+	     must be listed here or MediaPicker.CapturePhotoAsync throws "camera not available" even on a
+	     device that plainly has a camera (e.g. Pixel). -->
+	<queries>
+		<intent>
+			<action android:name="android.media.action.IMAGE_CAPTURE" />
+		</intent>
+	</queries>
 	<uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 	<uses-permission android:name="android.permission.INTERNET" />
 	<!-- Required by Google Play Billing so in-app products / purchases work. -->

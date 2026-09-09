@@ -569,4 +569,34 @@ Dodawaj bulion po chochli, mieszając.</value>
   <data name="ExportSavedFormat" xml:space="preserve">
     <value>Zapisano w {0} jako {1}.</value>
   </data>
+  <data name="PackCreditsFormat" xml:space="preserve">
+    <value>{0} kredytów</value>
+  </data>
+  <data name="VoiceCommandsHintFormat" xml:space="preserve">
+    <value>Powiedz „{0}”, „{1}” lub „{2}”.</value>
+  </data>
+  <data name="SectionReadingVoice" xml:space="preserve">
+    <value>CZYTANIE I GŁOS</value>
+  </data>
+  <data name="ReadingVoice" xml:space="preserve">
+    <value>Głos czytania</value>
+  </data>
+  <data name="ReadingVoiceAuto" xml:space="preserve">
+    <value>Automatycznie (dopasuj do przepisu)</value>
+  </data>
+  <data name="ReadingVoiceDesc" xml:space="preserve">
+    <value>Kroki są czytane w języku przepisu. Wybrany głos dotyczy tylko przepisów w jego języku; dla innych języków głos jest dobierany automatycznie.</value>
+  </data>
+  <data name="TestVoice" xml:space="preserve">
+    <value>Przetestuj głos</value>
+  </data>
+  <data name="TestVoiceSample" xml:space="preserve">
+    <value>Gotuj na wolnym ogniu przez dziesięć minut, potem dodaj czosnek.</value>
+  </data>
+  <data name="VoiceCommandsTitle" xml:space="preserve">
+    <value>Polecenia głosowe</value>
+  </data>
+  <data name="VoiceCommandsDesc" xml:space="preserve">
+    <value>W trybie skupienia dotknij mikrofonu i mów, aby przechodzić przez przepis bez dotykania ekranu.</value>
+  </data>
 </root>

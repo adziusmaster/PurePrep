@@ -22,14 +22,19 @@ public sealed class FocusModeViewModel : INotifyPropertyChanged
     private IReadOnlyList<StepTimer> _currentStepTimers = Array.Empty<StepTimer>();
     private readonly CookTimerService? _timers;
     private readonly IVoiceCommandListener? _voice;
+    private readonly ReadAloudService? _readAloud;
+    private readonly string? _spokenLanguage;
     private bool _isListening;
+    private bool _canReadAloud;
 
-    public FocusModeViewModel(ParsedRecipe recipe, IDispatcher? dispatcher = null, CookTimerService? timers = null, IVoiceCommandListener? voice = null)
+    public FocusModeViewModel(ParsedRecipe recipe, IDispatcher? dispatcher = null, CookTimerService? timers = null, IVoiceCommandListener? voice = null, ReadAloudService? readAloud = null, string? spokenLanguage = null)
     {
         Recipe = recipe;
         _dispatcher = dispatcher;
         _timers = timers;
         _voice = voice;
+        _readAloud = readAloud;
+        _spokenLanguage = string.IsNullOrWhiteSpace(spokenLanguage) ? null : spokenLanguage;
         ActiveTimers = new ObservableCollection<ActiveTimerItem>();
 
         Ingredients = recipe.Ingredients
@@ -137,6 +142,22 @@ public sealed class FocusModeViewModel : INotifyPropertyChanged
         }
     }
 
+    /// <summary>
+    /// True once we've confirmed an installed voice can speak this recipe's language. The read-aloud
+    /// controls stay hidden until then (and forever, if the language has no voice), so the cook is
+    /// never offered a feature that would only produce a comically-mispronounced reading.
+    /// </summary>
+    public bool CanReadAloud
+    {
+        get => _canReadAloud;
+        private set
+        {
+            if (value == _canReadAloud) return;
+            _canReadAloud = value;
+            OnPropertyChanged();
+        }
+    }
+
     public RecipeStep? CurrentStep => Steps.Count == 0 ? null : Steps[CurrentStepIndex];
     public string StepLabel => Steps.Count == 0
         ? AppResources.Get("NoSteps")
@@ -159,8 +180,29 @@ public sealed class FocusModeViewModel : INotifyPropertyChanged
 
     // ===== Voice step navigation =====
 
-    /// <summary>True where hands-free voice commands can be offered (mic + recogniser present).</summary>
-    public bool IsVoiceSupported => _voice?.IsSupported ?? false;
+    /// <summary>
+    /// True where hands-free voice commands can be offered: the platform can recognise speech AND we
+    /// understand the command words in this recipe's language. Offering it for an unsupported
+    /// language would just leave the mic listening for words it can never match.
+    /// </summary>
+    public bool IsVoiceSupported =>
+        (_voice?.IsSupported ?? false) && VoiceCommandVocabulary.IsLanguageSupported(_spokenLanguage ?? DeviceLanguage);
+
+    /// <summary>
+    /// A short "say next / back / repeat" hint, with the example words in the recipe's language, so
+    /// it is always clear what the cook can actually say.
+    /// </summary>
+    public string VoiceCommandsHint
+    {
+        get
+        {
+            var phrases = VoiceCommandVocabulary.ExamplesFor(_spokenLanguage ?? DeviceLanguage);
+            return AppResources.Format("VoiceCommandsHintFormat", phrases.Next, phrases.Previous, phrases.Repeat);
+        }
+    }
+
+    // The app UI language, used as a best-effort fallback when a recipe has no recorded language.
+    private static string DeviceLanguage => LocalizationService.EffectiveTwoLetterCode;
 
     /// <summary>True while the microphone is actively listening for "next" / "back" / "repeat".</summary>
     public bool IsListening
@@ -176,7 +218,7 @@ public sealed class FocusModeViewModel : INotifyPropertyChanged
 
     private async Task ToggleVoiceAsync()
     {
-        if (_voice is null || !_voice.IsSupported)
+        if (_voice is null || !IsVoiceSupported)
             return;
 
         if (_isListening)
@@ -186,8 +228,9 @@ public sealed class FocusModeViewModel : INotifyPropertyChanged
             return;
         }
 
-        // Only flips on if listening actually started — a refused mic permission leaves it off.
-        IsListening = await _voice.StartAsync();
+        // Bias recognition towards the recipe's language, and only flip on if listening actually
+        // started — a refused mic permission leaves it off.
+        IsListening = await _voice.StartAsync(_spokenLanguage ?? DeviceLanguage);
     }
 
     private void OnVoiceCommand(object? sender, VoiceCommand command)
@@ -227,6 +270,11 @@ public sealed class FocusModeViewModel : INotifyPropertyChanged
         if (!force && !_readStepsAloud)
             return;
 
+        // Never read aloud in a language we have no voice for — that mismatched reading (e.g. a
+        // Polish recipe spoken by an English voice) is exactly the problem the gating exists to avoid.
+        if (!_canReadAloud)
+            return;
+
         var text = CurrentStep?.Instruction;
         if (string.IsNullOrWhiteSpace(text))
             return;
@@ -234,12 +282,17 @@ public sealed class FocusModeViewModel : INotifyPropertyChanged
         StopSpeaking();
         var cts = new CancellationTokenSource();
         _speechCts = cts;
+        var language = _spokenLanguage;
+        var voiceId = CookingSettings.PreferredVoiceId;
 
         _ = Task.Run(async () =>
         {
             try
             {
-                await TextToSpeech.Default.SpeakAsync(text, null, cts.Token);
+                if (_readAloud is not null)
+                    await _readAloud.SpeakAsync(text, language, voiceId, cts.Token);
+                else
+                    await TextToSpeech.Default.SpeakAsync(text, null, cts.Token);
             }
             catch (OperationCanceledException)
             {
@@ -251,6 +304,37 @@ public sealed class FocusModeViewModel : INotifyPropertyChanged
                 // requirement, so fail silently rather than disrupt cooking.
             }
         });
+    }
+
+    // Confirms (once) whether an installed voice can read this recipe's language, so the read-aloud
+    // controls only appear when they will actually work. Runs when the page attaches.
+    private async Task EvaluateReadAloudAsync()
+    {
+        bool available;
+        if (_readAloud is null)
+        {
+            available = true; // Non-Android / test host: assume the default engine can cope.
+        }
+        else
+        {
+            try { available = await _readAloud.IsLanguageAvailableAsync(_spokenLanguage); }
+            catch { available = false; }
+        }
+
+        // The TTS locale query can resume off the UI thread; apply the result (which raises a
+        // binding notification) back on it. If read-aloud was left on and this recipe's language can
+        // be spoken, start reading the current step now that a voice is confirmed.
+        void Apply()
+        {
+            CanReadAloud = available;
+            if (available && _readStepsAloud)
+                SpeakCurrentStep(force: true);
+        }
+
+        if (_dispatcher is null || !_dispatcher.IsDispatchRequired)
+            Apply();
+        else
+            _dispatcher.Dispatch(Apply);
     }
 
     private void StopSpeaking()
@@ -373,6 +457,8 @@ public sealed class FocusModeViewModel : INotifyPropertyChanged
     /// </summary>
     public void Attach()
     {
+        _ = EvaluateReadAloudAsync();
+
         if (_voice is not null)
         {
             _voice.CommandRecognized -= OnVoiceCommand;

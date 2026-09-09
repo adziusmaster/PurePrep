@@ -52,6 +52,17 @@ public sealed class RecipeDetailViewModel : INotifyPropertyChanged
     /// </summary>
     public ParsedRecipe CookRecipe => RecipeScaling.ScaleRecipe(_display, _factor);
 
+    /// <summary>
+    /// The language the recipe's text is currently in, for reading aloud and voice commands: the
+    /// displayed translation when one is shown, otherwise the recipe's original language, falling
+    /// back to the app UI language when neither is known (legacy recipes).
+    /// </summary>
+    public string SpokenLanguageCode =>
+        FirstNonEmpty(_recipe.DisplayLanguage, _recipe.OriginalLanguage) ?? LocalizationService.EffectiveTwoLetterCode;
+
+    private static string? FirstNonEmpty(params string?[] values) =>
+        values.FirstOrDefault(v => !string.IsNullOrWhiteSpace(v));
+
     public string Title => _active.Title;
     public int StepCount => _active.StepCount;
     public int IngredientCount => _active.IngredientCount;

@@ -190,6 +190,52 @@
                     </Border>
                 </VerticalStackLayout>
 
+                <!-- Reading & voice -->
+                <VerticalStackLayout Spacing="12">
+                    <Label Text="{loc:Translate SectionReadingVoice}" TextColor="{DynamicResource Muted}" FontSize="11.5"
+                           CharacterSpacing="1.8" FontAttributes="Bold" />
+
+                    <!-- Reading voice picker (installed voices). Hidden when the device has no TTS
+                         engine, so the cook is never shown an empty control. -->
+                    <VerticalStackLayout x:Name="ReadingVoiceCard" Spacing="10" IsVisible="False">
+                        <Border BackgroundColor="{DynamicResource Surface}" Stroke="{DynamicResource Line}"
+                                StrokeThickness="1" Padding="16,4" StrokeShape="RoundRectangle 18">
+                            <Picker x:Name="ReadingVoicePicker" TextColor="{DynamicResource Ink}"
+                                    Title="{loc:Translate ReadingVoice}" TitleColor="{DynamicResource Muted}"
+                                    SelectedIndexChanged="OnReadingVoiceChanged" />
+                        </Border>
+                        <Border BackgroundColor="{DynamicResource LimeWash}" Stroke="{DynamicResource LineSoft}"
+                                StrokeThickness="1" Padding="14,10" MinimumHeightRequest="44" StrokeShape="RoundRectangle 13"
+                                HorizontalOptions="Start" local:TapFeedback.IsEnabled="True"
+                                AutomationProperties.IsInAccessibleTree="True" AutomationProperties.Name="{loc:Translate TestVoice}">
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer Tapped="OnTestVoiceTapped" />
+                            </Border.GestureRecognizers>
+                            <HorizontalStackLayout Spacing="8" VerticalOptions="Center">
+                                <Label Text="&#128266;" FontSize="15" VerticalOptions="Center" />
+                                <Label Text="{loc:Translate TestVoice}" TextColor="{DynamicResource LimeBright}"
+                                       FontSize="13.5" FontAttributes="Bold" VerticalOptions="Center" />
+                            </HorizontalStackLayout>
+                        </Border>
+                    </VerticalStackLayout>
+
+                    <!-- What the cook can say, hands-free. -->
+                    <Border BackgroundColor="{DynamicResource Surface}" Stroke="{DynamicResource Line}"
+                            StrokeThickness="1" Padding="16,12" StrokeShape="RoundRectangle 18">
+                        <VerticalStackLayout Spacing="6">
+                            <Label Text="{loc:Translate VoiceCommandsTitle}" TextColor="{DynamicResource Ink}"
+                                   FontSize="15" FontAttributes="Bold" />
+                            <Label Text="{loc:Translate VoiceCommandsDesc}" TextColor="{DynamicResource Muted}"
+                                   FontSize="13" LineHeight="1.25" />
+                            <Label x:Name="VoiceCommandsExamplesLabel" TextColor="{DynamicResource LimeBright}"
+                                   FontSize="13.5" FontAttributes="Bold" />
+                        </VerticalStackLayout>
+                    </Border>
+
+                    <Label Text="{loc:Translate ReadingVoiceDesc}"
+                           TextColor="{DynamicResource Faint}" FontSize="12.5" />
+                </VerticalStackLayout>
+
                 <!-- Backup -->
                 <VerticalStackLayout Spacing="12">
                     <Label Text="{loc:Translate SectionBackup}" TextColor="{DynamicResource Muted}" FontSize="11.5"

@@ -24,10 +24,12 @@ public interface IVoiceCommandListener
     event EventHandler<VoiceCommand>? CommandRecognized;
 
     /// <summary>
-    /// Requests microphone permission if needed and begins listening. Returns whether listening
-    /// actually started; callers show the mic as "off" when it did not.
+    /// Requests microphone permission if needed and begins listening. <paramref name="languageTag"/>
+    /// is the BCP-47 language of the recipe being cooked (e.g. "pl-PL"), used to bias recognition;
+    /// null follows the device language. Returns whether listening actually started; callers show
+    /// the mic as "off" when it did not.
     /// </summary>
-    Task<bool> StartAsync(CancellationToken cancellationToken = default);
+    Task<bool> StartAsync(string? languageTag = null, CancellationToken cancellationToken = default);
 
     /// <summary>Stops listening and releases the microphone.</summary>
     Task StopAsync();
@@ -38,6 +40,6 @@ public sealed class UnsupportedVoiceCommandListener : IVoiceCommandListener
 {
     public bool IsSupported => false;
     public event EventHandler<VoiceCommand>? CommandRecognized { add { } remove { } }
-    public Task<bool> StartAsync(CancellationToken cancellationToken = default) => Task.FromResult(false);
+    public Task<bool> StartAsync(string? languageTag = null, CancellationToken cancellationToken = default) => Task.FromResult(false);
     public Task StopAsync() => Task.CompletedTask;
 }

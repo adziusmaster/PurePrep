@@ -63,6 +63,9 @@ public static class MauiProgram
 #endif
 		builder.Services.AddSingleton<CookTimerService>();
 
+		// Reads steps aloud in the recipe's own language (resolves an installed TTS voice for it).
+		builder.Services.AddSingleton<PurePrep.Services.ReadAloudService>();
+
 		// Hands-free voice step navigation in Focus Mode (Android on-device speech recognition).
 #if ANDROID
 		builder.Services.AddSingleton<PurePrep.Application.IVoiceCommandListener, PurePrep.Platforms.Android.VoiceCommandListener>();

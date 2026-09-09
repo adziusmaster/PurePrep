@@ -8,12 +8,13 @@ public partial class FocusPage : ContentPage
 {
     private readonly FocusModeViewModel _viewModel;
 
-    public FocusPage(ParsedRecipe recipe)
+    public FocusPage(ParsedRecipe recipe, string? spokenLanguage = null)
     {
         InitializeComponent();
         var timers = IPlatformApplication.Current?.Services.GetService<PurePrep.Services.CookTimerService>();
         var voice = IPlatformApplication.Current?.Services.GetService<PurePrep.Application.IVoiceCommandListener>();
-        _viewModel = new FocusModeViewModel(recipe, Dispatcher, timers, voice);
+        var readAloud = IPlatformApplication.Current?.Services.GetService<PurePrep.Services.ReadAloudService>();
+        _viewModel = new FocusModeViewModel(recipe, Dispatcher, timers, voice, readAloud, spokenLanguage);
         _viewModel.Completed += OnCompleted;
         _viewModel.RequestTimerNameAsync = PromptTimerNameAsync;
         BindingContext = _viewModel;

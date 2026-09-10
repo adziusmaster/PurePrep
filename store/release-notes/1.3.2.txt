@@ -1,0 +1,71 @@
+<en-GB>
+What's new in 1.3.2
+• Voice commands now listen in the recipe's language, not just English.
+• Read-aloud follows the recipe's language automatically — no setup needed.
+• Smoother, more reliable swiping between steps in Focus Mode.
+• Redesigned, consistent "Buy Smart Credits" screen everywhere.
+Thanks for testing PurePrep!
+</en-GB>
+
+<en-US>
+What's new in 1.3.2
+• Voice commands now listen in the recipe's language, not just English.
+• Read-aloud follows the recipe's language automatically — no setup needed.
+• Smoother, more reliable swiping between steps in Focus Mode.
+• Redesigned, consistent "Buy Smart Credits" screen everywhere.
+Thanks for testing PurePrep!
+</en-US>
+
+<de-DE>
+Neu in 1.3.2
+• Sprachbefehle hören jetzt in der Sprache des Rezepts zu, nicht nur auf Englisch.
+• Das Vorlesen folgt automatisch der Sprache des Rezepts – ohne Einrichtung.
+• Flüssigeres, zuverlässigeres Wischen zwischen Schritten im Fokus-Modus.
+• Überarbeiteter, einheitlicher „Smart Credits kaufen“-Dialog überall.
+Danke fürs Testen von PurePrep!
+</de-DE>
+
+<es-ES>
+Novedades en 1.3.2
+• Los comandos de voz ahora escuchan en el idioma de la receta, no solo en inglés.
+• La lectura en voz alta sigue el idioma de la receta automáticamente, sin ajustes.
+• Deslizamiento más fluido y fiable entre pasos en el modo Concentración.
+• Pantalla "Comprar créditos" rediseñada y coherente en todas partes.
+¡Gracias por probar PurePrep!
+</es-ES>
+
+<fr-FR>
+Nouveautés de la 1.3.2
+• Les commandes vocales écoutent désormais dans la langue de la recette, pas seulement en anglais.
+• La lecture à voix haute suit automatiquement la langue de la recette, sans réglage.
+• Balayage plus fluide et fiable entre les étapes en mode Focus.
+• Écran « Acheter des crédits » repensé et cohérent partout.
+Merci de tester PurePrep !
+</fr-FR>
+
+<it-IT>
+Novità della 1.3.2
+• I comandi vocali ora ascoltano nella lingua della ricetta, non solo in inglese.
+• La lettura ad alta voce segue automaticamente la lingua della ricetta, senza impostazioni.
+• Scorrimento più fluido e affidabile tra i passaggi nella modalità Focus.
+• Schermata "Acquista crediti" ridisegnata e coerente ovunque.
+Grazie per aver provato PurePrep!
+</it-IT>
+
+<nl-NL>
+Nieuw in 1.3.2
+• Spraakopdrachten luisteren nu in de taal van het recept, niet alleen Engels.
+• Voorlezen volgt automatisch de taal van het recept — zonder instellen.
+• Soepeler en betrouwbaarder vegen tussen stappen in de Focus-modus.
+• Herontworpen, consistent scherm "Credits kopen" overal.
+Bedankt voor het testen van PurePrep!
+</nl-NL>
+
+<pl-PL>
+Co nowego w 1.3.2
+• Polecenia głosowe rozpoznają teraz język przepisu, nie tylko angielski.
+• Czytanie na głos automatycznie używa języka przepisu — bez ustawiania.
+• Płynniejsze i pewniejsze przesuwanie między krokami w trybie Skupienia.
+• Przeprojektowany, spójny ekran „Kup kredyty” w całej aplikacji.
+Dziękujemy za testowanie PurePrep!
+</pl-PL>

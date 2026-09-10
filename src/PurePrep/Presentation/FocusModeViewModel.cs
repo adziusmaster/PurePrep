@@ -283,14 +283,13 @@ public sealed class FocusModeViewModel : INotifyPropertyChanged
         var cts = new CancellationTokenSource();
         _speechCts = cts;
         var language = _spokenLanguage;
-        var voiceId = CookingSettings.PreferredVoiceId;
 
         _ = Task.Run(async () =>
         {
             try
             {
                 if (_readAloud is not null)
-                    await _readAloud.SpeakAsync(text, language, voiceId, cts.Token);
+                    await _readAloud.SpeakAsync(text, language, null, cts.Token);
                 else
                     await TextToSpeech.Default.SpeakAsync(text, null, cts.Token);
             }

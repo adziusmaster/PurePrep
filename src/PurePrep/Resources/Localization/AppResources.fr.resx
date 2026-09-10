@@ -107,7 +107,7 @@
     <value>Plus de crédits Smart</value>
   </data>
   <data name="OutOfCreditsBody" xml:space="preserve">
-    <value>Rechargez pour continuer à importer des recettes par lien. Vos recettes enregistrées restent gratuites pour toujours.</value>
+    <value>Vous avez utilisé votre dernier crédit. Rechargez pour importer d'autres recettes par lien ou photo — tout ce que vous avez enregistré reste gratuit.</value>
   </data>
   <data name="TopUpCredits" xml:space="preserve">
     <value>Recharger des crédits</value>
@@ -447,7 +447,7 @@ Ajoutez le bouillon louche par louche en remuant.</value>
     <value>Pourquoi les Smart Credits ?</value>
   </data>
   <data name="WhyCreditsBody" xml:space="preserve">
-    <value>L'import par lien utilise l'IA pour lire la page et comprendre la recette. Cette IA tourne sur des serveurs payants, donc chaque import coûte un Smart Credit. Enregistrer, modifier et cuisiner vos recettes reste toujours gratuit.</value>
+    <value>L'import par lien ou photo utilise l'IA pour lire la page et en extraire la recette. Cette IA tourne sur des serveurs payants : chaque import coûte donc un crédit (la photo en coûte deux). Enregistrer, modifier et cuisiner vos recettes reste toujours gratuit.</value>
   </data>
   <data name="PackOptionFormat" xml:space="preserve">
     <value>{0} crédits · {1}</value>
@@ -456,7 +456,7 @@ Ajoutez le bouillon louche par louche en remuant.</value>
     <value>Acheter des Smart Credits</value>
   </data>
   <data name="BuyCreditsDesc" xml:space="preserve">
-    <value>Les crédits permettent d'importer des recettes par lien. L'IA qui lit chaque page tourne sur des serveurs payants.</value>
+    <value>Faites le plein de crédits pour importer des recettes par lien ou photo. Enregistrer, modifier et cuisiner sont toujours gratuits.</value>
   </data>
   <data name="BuyCreditsChoosePack" xml:space="preserve">
     <value>Choisissez un pack de crédits</value>

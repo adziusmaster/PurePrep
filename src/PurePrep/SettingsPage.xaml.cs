@@ -18,8 +18,6 @@ public partial class SettingsPage : ContentPage, IHardwareBackHandler
 
     // Recipe-language options: index 0 = follow the app language (""), then each concrete language.
     private readonly List<string> _recipeLanguageCodes = new();
-    private readonly ReadAloudService? _readAloud;
-    private readonly List<Microsoft.Maui.Media.Locale> _voices = new();
 
     public SettingsPage(ThemeService theme, ISmartCreditsClient? credits = null, IBillingService? billing = null)
     {
@@ -27,101 +25,26 @@ public partial class SettingsPage : ContentPage, IHardwareBackHandler
         _theme = theme;
         _credits = credits;
         _billing = billing;
-        _readAloud = IPlatformApplication.Current?.Services.GetService<ReadAloudService>();
 
         KeepAwakeSwitch.IsToggled = CookingSettings.KeepScreenAwake;
         VersionLabel.Text = $"{AppInfo.Current.VersionString} ({AppInfo.Current.BuildString})";
         // The buy-credits row only works where in-app billing is available (real Android build).
         BuyCreditsCard.IsVisible = _billing?.IsSupported == true;
+
+        // Drive the shared buy-credits sheet: tapping a pack purchases it; the scrim/close dismisses.
+        BuyCreditsSheet.IsBillingSupported = _billing?.IsSupported == true;
+        BuyCreditsSheet.BuyCommand = new Command<CreditPack>(pack => _ = PurchasePackAsync(pack));
+        BuyCreditsSheet.DismissCommand = new Command(() => ShowBuySheet(false));
+
         RefreshAppearancePills();
         RefreshUnitPills();
         BuildLanguagePicker();
         BuildRecipeLanguagePicker();
-        BuildVoiceCommandsHelp();
-        _ = BuildReadingVoicePickerAsync();
-    }
-
-    // Shows the three navigation words in the app's language, so the cook knows what to say.
-    private void BuildVoiceCommandsHelp()
-    {
-        var phrases = VoiceCommandVocabulary.ExamplesFor(LocalizationService.EffectiveTwoLetterCode);
-        VoiceCommandsExamplesLabel.Text =
-            AppResources.Format("VoiceCommandsHintFormat", phrases.Next, phrases.Previous, phrases.Repeat);
-    }
-
-    // Populates the reading-voice picker from the installed TTS voices. Left hidden when the device
-    // has no speech engine, so the section degrades to just the voice-commands help.
-    private async Task BuildReadingVoicePickerAsync()
-    {
-        if (_readAloud is null)
-            return;
-
-        var voices = await _readAloud.GetVoicesAsync();
-        if (voices.Count == 0)
-            return;
-
-        _voices.Clear();
-        _voices.AddRange(voices);
-
-        var items = new List<string> { AppResources.Get("ReadingVoiceAuto") };
-        items.AddRange(_voices.Select(VoiceDisplayName));
-        ReadingVoicePicker.ItemsSource = items;
-
-        var current = CookingSettings.PreferredVoiceId;
-        var index = string.IsNullOrEmpty(current)
-            ? 0
-            : _voices.FindIndex(v => ReadAloudService.VoiceId(v) == current) + 1;
-        ReadingVoicePicker.SelectedIndex = index < 0 ? 0 : index;
-
-        ReadingVoiceCard.IsVisible = true;
-    }
-
-    private static string VoiceDisplayName(Microsoft.Maui.Media.Locale voice)
-    {
-        var region = string.IsNullOrWhiteSpace(voice.Country) ? voice.Language : $"{voice.Language}-{voice.Country}";
-        var label = region;
-        try
-        {
-            label = new System.Globalization.CultureInfo(region).DisplayName;
-        }
-        catch
-        {
-            // Some engines report non-standard tags; the raw code is a fine fallback.
-        }
-
-        return string.IsNullOrWhiteSpace(voice.Name) ? label : $"{label} · {voice.Name}";
-    }
-
-    private void OnReadingVoiceChanged(object? sender, EventArgs e)
-    {
-        var index = ReadingVoicePicker.SelectedIndex;
-        CookingSettings.PreferredVoiceId = index <= 0
-            ? string.Empty
-            : ReadAloudService.VoiceId(_voices[index - 1]);
-    }
-
-    private async void OnTestVoiceTapped(object? sender, EventArgs e)
-    {
-        if (_readAloud is null)
-            return;
-
-        var index = ReadingVoicePicker.SelectedIndex;
-        var voiceId = index <= 0 ? null : ReadAloudService.VoiceId(_voices[index - 1]);
-        var language = index <= 0 ? LocalizationService.EffectiveTwoLetterCode : _voices[index - 1].Language;
-
-        try
-        {
-            await _readAloud.SpeakAsync(AppResources.Get("TestVoiceSample"), language, voiceId, CancellationToken.None);
-        }
-        catch
-        {
-            // Test playback is best-effort; a failure here should never disrupt Settings.
-        }
     }
 
     private async void OnBuyCreditsTapped(object? sender, EventArgs e)
     {
-        if (_billing is null || _credits is null || !_billing.IsSupported || BuySheet.IsVisible)
+        if (_billing is null || _credits is null || !_billing.IsSupported || BuyCreditsSheet.IsOpen)
             return;
 
         // Resolve live, tax-inclusive Play prices (falls back to placeholder labels if unavailable),
@@ -130,34 +53,17 @@ public partial class SettingsPage : ContentPage, IHardwareBackHandler
         if (packs.Count == 0)
             return;
 
-        BuildPackButtons(packs);
+        BuyCreditsSheet.Packs = packs;
         ShowBuySheet(true);
-    }
-
-    private void BuildPackButtons(IReadOnlyList<CreditPack> packs)
-    {
-        BuyPackContainer.Children.Clear();
-        foreach (var pack in packs)
-        {
-            var captured = pack;
-            var card = new Controls.CreditPackCard
-            {
-                Credits = pack.Credits,
-                Price = pack.DisplayPrice,
-                TapCommand = new Command(() => _ = PurchasePackAsync(captured)),
-            };
-            BuyPackContainer.Children.Add(card);
-        }
     }
 
     private void ShowBuySheet(bool show)
     {
-        BuySheetScrim.IsVisible = show;
-        BuySheet.IsVisible = show;
+        if (!show)
+            BuyCreditsSheet.IsBusy = false;
+        BuyCreditsSheet.IsOpen = show;
         BackgroundBlur.Apply(ContentRoot, show);
     }
-
-    private void OnDismissBuySheet(object? sender, EventArgs e) => ShowBuySheet(false);
 
     private async Task PurchasePackAsync(CreditPack pack)
     {
@@ -190,18 +96,13 @@ public partial class SettingsPage : ContentPage, IHardwareBackHandler
         }
     }
 
-    private void SetBuyBusy(bool busy)
-    {
-        BuyBusyIndicator.IsRunning = busy;
-        BuyBusyIndicator.IsVisible = busy;
-        BuyPackContainer.IsEnabled = !busy;
-    }
+    private void SetBuyBusy(bool busy) => BuyCreditsSheet.IsBusy = busy;
 
     // The buy sheet is an in-page overlay, so the hardware back button should close it rather than
     // pop the page. Back navigation itself is handled centrally in MainActivity.
     public bool OnHardwareBack()
     {
-        if (BuySheet.IsVisible)
+        if (BuyCreditsSheet.IsOpen)
         {
             ShowBuySheet(false);
             return true;

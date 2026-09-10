@@ -107,7 +107,7 @@
     <value>Keine Smart-Credits mehr</value>
   </data>
   <data name="OutOfCreditsBody" xml:space="preserve">
-    <value>Lade auf, um weiter Rezepte per Link zu importieren. Deine gespeicherten Rezepte bleiben für immer kostenlos.</value>
+    <value>Dein letztes Guthaben ist aufgebraucht. Lade auf, um weitere Rezepte per Link oder Foto zu importieren – alles Gespeicherte bleibt kostenlos.</value>
   </data>
   <data name="TopUpCredits" xml:space="preserve">
     <value>Credits aufladen</value>
@@ -447,7 +447,7 @@ Brühe kellenweise unter Rühren zugeben.</value>
     <value>Warum Smart Credits?</value>
   </data>
   <data name="WhyCreditsBody" xml:space="preserve">
-    <value>Der Import per Link nutzt KI, um die Seite zu lesen und das Rezept zu verstehen. Diese KI läuft auf kostenpflichtigen Servern, daher kostet jeder Import einen Smart Credit. Speichern, Bearbeiten und Kochen deiner Rezepte ist immer kostenlos.</value>
+    <value>Der Import per Link oder Foto nutzt KI, um die Seite zu lesen und das Rezept zu erkennen. Diese KI läuft auf kostenpflichtigen Servern, daher kostet jeder Import ein Guthaben (Foto-Import kostet zwei). Speichern, Bearbeiten und Kochen sind immer kostenlos.</value>
   </data>
   <data name="PackOptionFormat" xml:space="preserve">
     <value>{0} Credits · {1}</value>
@@ -456,7 +456,7 @@ Brühe kellenweise unter Rühren zugeben.</value>
     <value>Smart Credits kaufen</value>
   </data>
   <data name="BuyCreditsDesc" xml:space="preserve">
-    <value>Mit Credits importierst du Rezepte per Link. Die KI, die jede Seite liest, läuft auf kostenpflichtigen Servern.</value>
+    <value>Fülle dein Guthaben auf, um Rezepte per Link oder Foto zu importieren. Speichern, Bearbeiten und Kochen sind immer kostenlos.</value>
   </data>
   <data name="BuyCreditsChoosePack" xml:space="preserve">
     <value>Credit-Paket wählen</value>

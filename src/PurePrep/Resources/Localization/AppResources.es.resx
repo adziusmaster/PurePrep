@@ -107,7 +107,7 @@
     <value>Sin créditos Smart</value>
   </data>
   <data name="OutOfCreditsBody" xml:space="preserve">
-    <value>Recarga para seguir importando recetas por enlace. Tus recetas guardadas seguirán siendo gratis para siempre.</value>
+    <value>Has usado tu último crédito. Recarga para importar más recetas por enlace o foto; todo lo que ya guardaste sigue siendo gratis.</value>
   </data>
   <data name="TopUpCredits" xml:space="preserve">
     <value>Recargar créditos</value>
@@ -447,7 +447,7 @@ Añade el caldo cucharón a cucharón, removiendo.</value>
     <value>¿Por qué Smart Credits?</value>
   </data>
   <data name="WhyCreditsBody" xml:space="preserve">
-    <value>Importar por enlace usa IA para leer la página y entender la receta. Esa IA se ejecuta en servidores de pago, así que cada importación cuesta un Smart Credit. Guardar, editar y cocinar tus recetas siempre es gratis.</value>
+    <value>Importar por enlace o foto usa IA para leer la página y extraer la receta. Esa IA funciona en servidores de pago, así que cada importación cuesta un crédito (la foto cuesta dos). Guardar, editar y cocinar tus recetas siempre es gratis.</value>
   </data>
   <data name="PackOptionFormat" xml:space="preserve">
     <value>{0} créditos · {1}</value>
@@ -456,7 +456,7 @@ Añade el caldo cucharón a cucharón, removiendo.</value>
     <value>Comprar Smart Credits</value>
   </data>
   <data name="BuyCreditsDesc" xml:space="preserve">
-    <value>Los créditos te permiten importar recetas por enlace. La IA que lee cada página se ejecuta en servidores de pago.</value>
+    <value>Consigue créditos para importar recetas por enlace o foto. Guardar, editar y cocinar siempre son gratis.</value>
   </data>
   <data name="BuyCreditsChoosePack" xml:space="preserve">
     <value>Elige un paquete de créditos</value>

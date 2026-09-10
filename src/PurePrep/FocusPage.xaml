@@ -80,14 +80,14 @@
         <!-- Step card (hidden while the ingredients panel is open) -->
         <!-- Fill, not Center, with the content in a ScrollView: a long instruction at this size used
              to overflow the card and clip, and did so sooner at larger system font scales. -->
-        <Border Grid.Row="3" BackgroundColor="{DynamicResource Surface}" Stroke="{DynamicResource LineSoft}"
+        <Border x:Name="StepCard" Grid.Row="3" BackgroundColor="{DynamicResource Surface}" Stroke="{DynamicResource LineSoft}"
                 StrokeThickness="1" Padding="24" StrokeShape="RoundRectangle 22" VerticalOptions="Fill"
                 IsVisible="{Binding ShowIngredients, Converter={StaticResource InvertedBoolConverter}}">
           <Border.GestureRecognizers>
-              <!-- Swipe the step card to move between steps: left goes forward, right goes back —
-                   hands-free-ish navigation when a finger is all you can spare mid-cook. -->
-              <SwipeGestureRecognizer Direction="Left" Command="{Binding NextCommand}" />
-              <SwipeGestureRecognizer Direction="Right" Command="{Binding PreviousCommand}" />
+              <!-- Drag the step card sideways to move between steps: left goes forward, right goes back.
+                   A PanGestureRecognizer (not SwipeGestureRecognizer) so the card tracks the finger and
+                   never misses a quick flick — the built-in swipe recogniser was laggy on Android. -->
+              <PanGestureRecognizer PanUpdated="OnStepPanUpdated" />
           </Border.GestureRecognizers>
           <ScrollView VerticalScrollBarVisibility="Never">
             <VerticalStackLayout Spacing="20" VerticalOptions="Center">

@@ -87,10 +87,13 @@ public sealed class VoiceCommandListener : Java.Lang.Object, IVoiceCommandListen
         intent.PutExtra(RecognizerIntent.ExtraPartialResults, true);
         // Bias the recogniser towards the recipe's language so commands are heard in the language the
         // steps are actually read in; fall back to the device language when it is unknown.
-        var locale = string.IsNullOrWhiteSpace(_languageTag)
-            ? Java.Util.Locale.Default
-            : Java.Util.Locale.ForLanguageTag(_languageTag);
-        intent.PutExtra(RecognizerIntent.ExtraLanguage, locale);
+        //
+        // EXTRA_LANGUAGE must be a BCP-47 *string* tag — handing it a Locale object stores a
+        // Serializable extra the engine reads back as null, silently transcribing in the device
+        // language instead (why every non-English recipe used to be "wonky").
+        var tag = ResolveLanguageTag(_languageTag);
+        intent.PutExtra(RecognizerIntent.ExtraLanguage, tag);
+        intent.PutExtra(RecognizerIntent.ExtraLanguagePreference, tag);
 
         try
         {
@@ -101,6 +104,37 @@ public sealed class VoiceCommandListener : Java.Lang.Object, IVoiceCommandListen
             // If arming fails we simply stop; touch/swipe navigation is unaffected.
             _listening = false;
         }
+    }
+
+    // Maps a language code (from the recipe or the device) to a concrete BCP-47 tag the speech engine
+    // can match to an installed model. Two-letter codes are region-qualified for our supported
+    // languages (a bare "pl" picks a model far less reliably than "pl-PL"); anything already carrying
+    // a region, or unknown, is passed through as its normalised tag.
+    private static readonly Dictionary<string, string> RegionByLanguage = new(StringComparer.OrdinalIgnoreCase)
+    {
+        ["en"] = "en-US",
+        ["de"] = "de-DE",
+        ["es"] = "es-ES",
+        ["fr"] = "fr-FR",
+        ["it"] = "it-IT",
+        ["pl"] = "pl-PL",
+        ["nl"] = "nl-NL",
+    };
+
+    private static string ResolveLanguageTag(string? languageTag)
+    {
+        if (string.IsNullOrWhiteSpace(languageTag))
+            return Java.Util.Locale.Default.ToLanguageTag();
+
+        var locale = Java.Util.Locale.ForLanguageTag(languageTag);
+
+        // Already region-qualified (e.g. "pt-BR")? Trust it as-is.
+        if (!string.IsNullOrEmpty(locale.Country))
+            return locale.ToLanguageTag();
+
+        return RegionByLanguage.TryGetValue(locale.Language, out var qualified)
+            ? qualified
+            : locale.ToLanguageTag();
     }
 
     // Re-arms the next listening session on the UI thread, unless the user has switched the mic off.

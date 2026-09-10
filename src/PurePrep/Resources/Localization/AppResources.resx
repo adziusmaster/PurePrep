@@ -107,7 +107,7 @@
     <value>Out of Smart Credits</value>
   </data>
   <data name="OutOfCreditsBody" xml:space="preserve">
-    <value>Top up to keep importing recipes by link. Your saved recipes stay free forever.</value>
+    <value>You've used your last credit. Top up to import more recipes by link or photo — everything you've already saved stays free.</value>
   </data>
   <data name="TopUpCredits" xml:space="preserve">
     <value>Top up credits</value>
@@ -447,7 +447,7 @@ Add stock a ladle at a time, stirring.</value>
     <value>Why Smart Credits?</value>
   </data>
   <data name="WhyCreditsBody" xml:space="preserve">
-    <value>Importing by link uses AI to read the page and understand the recipe. That AI runs on paid servers, so each import costs a Smart Credit. Saving, editing and cooking your recipes is always free.</value>
+    <value>Importing by link or photo uses AI to read the page and pull out the recipe. That AI runs on paid servers, so each import costs a credit (photo imports cost two). Saving, editing and cooking your recipes is always free.</value>
   </data>
   <data name="PackOptionFormat" xml:space="preserve">
     <value>{0} credits · {1}</value>
@@ -456,7 +456,7 @@ Add stock a ladle at a time, stirring.</value>
     <value>Buy Smart Credits</value>
   </data>
   <data name="BuyCreditsDesc" xml:space="preserve">
-    <value>Credits let you import recipes by link. The AI that reads each page runs on paid servers.</value>
+    <value>Stock up on credits for importing recipes by link or photo. Saving, editing and cooking are always free.</value>
   </data>
   <data name="BuyCreditsChoosePack" xml:space="preserve">
     <value>Choose a credit pack</value>

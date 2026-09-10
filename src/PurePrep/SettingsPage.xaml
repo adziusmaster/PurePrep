@@ -2,6 +2,7 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:local="clr-namespace:PurePrep"
+             xmlns:controls="clr-namespace:PurePrep.Controls"
              xmlns:loc="clr-namespace:PurePrep.Localization"
              x:Class="PurePrep.SettingsPage"
              Shell.NavBarIsVisible="False"
@@ -190,52 +191,6 @@
                     </Border>
                 </VerticalStackLayout>
 
-                <!-- Reading & voice -->
-                <VerticalStackLayout Spacing="12">
-                    <Label Text="{loc:Translate SectionReadingVoice}" TextColor="{DynamicResource Muted}" FontSize="11.5"
-                           CharacterSpacing="1.8" FontAttributes="Bold" />
-
-                    <!-- Reading voice picker (installed voices). Hidden when the device has no TTS
-                         engine, so the cook is never shown an empty control. -->
-                    <VerticalStackLayout x:Name="ReadingVoiceCard" Spacing="10" IsVisible="False">
-                        <Border BackgroundColor="{DynamicResource Surface}" Stroke="{DynamicResource Line}"
-                                StrokeThickness="1" Padding="16,4" StrokeShape="RoundRectangle 18">
-                            <Picker x:Name="ReadingVoicePicker" TextColor="{DynamicResource Ink}"
-                                    Title="{loc:Translate ReadingVoice}" TitleColor="{DynamicResource Muted}"
-                                    SelectedIndexChanged="OnReadingVoiceChanged" />
-                        </Border>
-                        <Border BackgroundColor="{DynamicResource LimeWash}" Stroke="{DynamicResource LineSoft}"
-                                StrokeThickness="1" Padding="14,10" MinimumHeightRequest="44" StrokeShape="RoundRectangle 13"
-                                HorizontalOptions="Start" local:TapFeedback.IsEnabled="True"
-                                AutomationProperties.IsInAccessibleTree="True" AutomationProperties.Name="{loc:Translate TestVoice}">
-                            <Border.GestureRecognizers>
-                                <TapGestureRecognizer Tapped="OnTestVoiceTapped" />
-                            </Border.GestureRecognizers>
-                            <HorizontalStackLayout Spacing="8" VerticalOptions="Center">
-                                <Label Text="&#128266;" FontSize="15" VerticalOptions="Center" />
-                                <Label Text="{loc:Translate TestVoice}" TextColor="{DynamicResource LimeBright}"
-                                       FontSize="13.5" FontAttributes="Bold" VerticalOptions="Center" />
-                            </HorizontalStackLayout>
-                        </Border>
-                    </VerticalStackLayout>
-
-                    <!-- What the cook can say, hands-free. -->
-                    <Border BackgroundColor="{DynamicResource Surface}" Stroke="{DynamicResource Line}"
-                            StrokeThickness="1" Padding="16,12" StrokeShape="RoundRectangle 18">
-                        <VerticalStackLayout Spacing="6">
-                            <Label Text="{loc:Translate VoiceCommandsTitle}" TextColor="{DynamicResource Ink}"
-                                   FontSize="15" FontAttributes="Bold" />
-                            <Label Text="{loc:Translate VoiceCommandsDesc}" TextColor="{DynamicResource Muted}"
-                                   FontSize="13" LineHeight="1.25" />
-                            <Label x:Name="VoiceCommandsExamplesLabel" TextColor="{DynamicResource LimeBright}"
-                                   FontSize="13.5" FontAttributes="Bold" />
-                        </VerticalStackLayout>
-                    </Border>
-
-                    <Label Text="{loc:Translate ReadingVoiceDesc}"
-                           TextColor="{DynamicResource Faint}" FontSize="12.5" />
-                </VerticalStackLayout>
-
                 <!-- Backup -->
                 <VerticalStackLayout Spacing="12">
                     <Label Text="{loc:Translate SectionBackup}" TextColor="{DynamicResource Muted}" FontSize="11.5"
@@ -291,40 +246,10 @@
         </Grid>
         </ScrollView>
 
-        <!-- Light scrim (tap outside the sheet to dismiss); background is blurred natively on Android. -->
-        <BoxView x:Name="BuySheetScrim" Color="#26000000" IsVisible="False" AutomationProperties.IsInAccessibleTree="True" AutomationProperties.Name="{loc:Translate Close}">
-            <BoxView.GestureRecognizers>
-                <TapGestureRecognizer Tapped="OnDismissBuySheet" />
-            </BoxView.GestureRecognizers>
-        </BoxView>
-
-        <!-- Buy-credits sheet (mirrors the main paywall). Pack buttons are built in code-behind from
-             the live Play prices so the displayed price matches checkout. -->
-        <Border x:Name="BuySheet" IsVisible="False"
-                BackgroundColor="{DynamicResource Surface}" Stroke="{DynamicResource LimeDim}"
-                StrokeThickness="1" Padding="18" Margin="14,0,14,18" StrokeShape="RoundRectangle 22"
-                VerticalOptions="End" MaximumWidthRequest="720" HorizontalOptions="Center">
-            <VerticalStackLayout Spacing="14">
-                <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10">
-                    <Label Text="{loc:Translate BuyCreditsChoosePack}" TextColor="{DynamicResource Ink}"
-                           FontSize="17" FontAttributes="Bold" VerticalOptions="Center" />
-                    <Border Grid.Column="1" WidthRequest="32" HeightRequest="32"
-                            BackgroundColor="{DynamicResource BgElevated}" Stroke="{DynamicResource Line}"
-                            StrokeThickness="1" StrokeShape="RoundRectangle 16"
-                            VerticalOptions="Start" HorizontalOptions="End" local:TapFeedback.IsEnabled="True">
-                        <Border.GestureRecognizers>
-                            <TapGestureRecognizer Tapped="OnDismissBuySheet" />
-                        </Border.GestureRecognizers>
-                        <Label Text="&#10005;" TextColor="{DynamicResource Muted}" FontSize="14"
-                               HorizontalOptions="Center" VerticalOptions="Center" />
-                    </Border>
-                </Grid>
-
-                <VerticalStackLayout x:Name="BuyPackContainer" Spacing="8" />
-
-                <ActivityIndicator x:Name="BuyBusyIndicator" IsRunning="False" IsVisible="False"
-                                   Color="{DynamicResource Lime}" HeightRequest="24" />
-            </VerticalStackLayout>
-        </Border>
+        <!-- Shared buy-credits sheet (identical to the main paywall). Packs, busy state and the
+             buy/dismiss commands are supplied from code-behind; background is blurred on Android. -->
+        <controls:BuyCreditsSheet x:Name="BuyCreditsSheet" IsOpen="False"
+                                  Title="{loc:Translate BuyCredits}"
+                                  Subtitle="{loc:Translate BuyCreditsDesc}" />
     </Grid>
 </ContentPage>

@@ -107,7 +107,7 @@
     <value>Crediti Smart esauriti</value>
   </data>
   <data name="OutOfCreditsBody" xml:space="preserve">
-    <value>Ricarica per continuare a importare ricette da link. Le ricette salvate restano gratis per sempre.</value>
+    <value>Hai usato il tuo ultimo credito. Ricarica per importare altre ricette da link o foto: tutto ciò che hai salvato resta gratis.</value>
   </data>
   <data name="TopUpCredits" xml:space="preserve">
     <value>Ricarica crediti</value>
@@ -447,7 +447,7 @@ Aggiungi il brodo un mestolo alla volta, mescolando.</value>
     <value>Perché i Smart Credits?</value>
   </data>
   <data name="WhyCreditsBody" xml:space="preserve">
-    <value>L'importazione tramite link usa l'IA per leggere la pagina e capire la ricetta. Questa IA gira su server a pagamento, quindi ogni importazione costa uno Smart Credit. Salvare, modificare e cucinare le tue ricette è sempre gratis.</value>
+    <value>L'importazione da link o foto usa l'IA per leggere la pagina ed estrarre la ricetta. Quell'IA gira su server a pagamento, quindi ogni importazione costa un credito (la foto ne costa due). Salvare, modificare e cucinare le tue ricette è sempre gratis.</value>
   </data>
   <data name="PackOptionFormat" xml:space="preserve">
     <value>{0} crediti · {1}</value>
@@ -456,7 +456,7 @@ Aggiungi il brodo un mestolo alla volta, mescolando.</value>
     <value>Acquista Smart Credits</value>
   </data>
   <data name="BuyCreditsDesc" xml:space="preserve">
-    <value>I crediti ti permettono di importare ricette da un link. L'IA che legge ogni pagina gira su server a pagamento.</value>
+    <value>Fai il pieno di crediti per importare ricette da link o foto. Salvare, modificare e cucinare sono sempre gratis.</value>
   </data>
   <data name="BuyCreditsChoosePack" xml:space="preserve">
     <value>Scegli un pacchetto di crediti</value>

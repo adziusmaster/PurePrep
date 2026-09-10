@@ -296,18 +296,5 @@
                     </CollectionView.EmptyView>
                 </CollectionView>
         </Grid>
-
-        <!-- ===== Buy Smart Credits sheet (shared control; identical in Settings) ===== -->
-        <!-- Opened as the out-of-credits paywall. Background is blurred natively on Android via a
-             RenderEffect toggled in code-behind off IsUpgradePromptVisible. -->
-        <controls:BuyCreditsSheet IsOpen="{Binding IsUpgradePromptVisible}"
-                                  Title="{loc:Translate OutOfCreditsTitle}"
-                                  Subtitle="{loc:Translate OutOfCreditsBody}"
-                                  Packs="{Binding CreditPacks}"
-                                  BuyCommand="{Binding BuyPackCommand}"
-                                  TopUpCommand="{Binding TopUpCommand}"
-                                  DismissCommand="{Binding DismissUpgradeCommand}"
-                                  IsBusy="{Binding IsPurchasing}"
-                                  IsBillingSupported="{Binding IsBillingSupported}" />
     </Grid>
 </ContentPage>

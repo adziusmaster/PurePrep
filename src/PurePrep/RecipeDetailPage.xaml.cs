@@ -59,8 +59,7 @@ public partial class RecipeDetailPage : ContentPage
         var svc = IPlatformApplication.Current?.Services.GetService<IRecipeTranslator>();
         if (svc is null)
         {
-            await DisplayAlert(AppResources.Get("Translate"), AppResources.Get("TranslateUnsupported"),
-                AppResources.Get("Ok"));
+            await Services.AppDialog.AlertAsync(this, AppResources.Get("Translate"), AppResources.Get("TranslateUnsupported"), AppResources.Get("Ok"));
             return;
         }
 
@@ -89,8 +88,7 @@ public partial class RecipeDetailPage : ContentPage
             names.Add(label);
         }
 
-        var choice = await DisplayActionSheet(AppResources.Get("TranslateTo"),
-            AppResources.Get("Cancel"), null, names.ToArray());
+        var choice = await Services.AppDialog.ChooseAsync(this, AppResources.Get("TranslateTo"), AppResources.Get("Cancel"), names.ToArray());
         if (string.IsNullOrEmpty(choice) || !labelToCode.TryGetValue(choice, out var targetCode))
             return;
 
@@ -109,11 +107,7 @@ public partial class RecipeDetailPage : ContentPage
         }
 
         var targetName = languages.First(l => l.Code == targetCode).NativeName;
-        var proceed = await DisplayAlert(
-            AppResources.Get("Translate"),
-            AppResources.Format("TranslateCostFormat", targetName),
-            AppResources.Get("TranslateConfirm"),
-            AppResources.Get("Cancel"));
+        var proceed = await Services.AppDialog.ConfirmAsync(this, AppResources.Get("Translate"), AppResources.Format("TranslateCostFormat", targetName), AppResources.Get("TranslateConfirm"), AppResources.Get("Cancel"));
         if (!proceed)
             return;
 
@@ -133,13 +127,12 @@ public partial class RecipeDetailPage : ContentPage
         catch (RecipeImportException ex)
         {
             BusyOverlay.IsVisible = false;
-            await DisplayAlert(AppResources.Get("Translate"), ImportErrorText.ForCode(ex.Code), AppResources.Get("Ok"));
+            await Services.AppDialog.AlertAsync(this, AppResources.Get("Translate"), ImportErrorText.ForCode(ex.Code), AppResources.Get("Ok"));
         }
         catch (Exception)
         {
             BusyOverlay.IsVisible = false;
-            await DisplayAlert(AppResources.Get("Translate"), ImportErrorText.ForCode(ImportErrorCode.Unknown),
-                AppResources.Get("Ok"));
+            await Services.AppDialog.AlertAsync(this, AppResources.Get("Translate"), ImportErrorText.ForCode(ImportErrorCode.Unknown), AppResources.Get("Ok"));
         }
         finally
         {
@@ -161,12 +154,7 @@ public partial class RecipeDetailPage : ContentPage
 
         var open = AppResources.Get("SourceOpen");
         var copy = AppResources.Get("SourceCopy");
-        var choice = await DisplayActionSheet(
-            _viewModel.SourceHost,
-            AppResources.Get("Cancel"),
-            null,
-            open,
-            copy);
+        var choice = await Services.AppDialog.ChooseAsync(this, _viewModel.SourceHost, AppResources.Get("Cancel"), open, copy);
 
         if (choice == open)
         {
@@ -205,20 +193,14 @@ public partial class RecipeDetailPage : ContentPage
 
     private async Task ShowInsufficientCreditsAsync()
     {
-        var goToSettings = await DisplayAlert(
-            AppResources.Get("Translate"),
-            AppResources.Get("TranslateInsufficientCredits"),
-            AppResources.Get("BuyCredits"),
-            AppResources.Get("Cancel"));
+        var goToSettings = await Services.AppDialog.ConfirmAsync(this, AppResources.Get("Translate"), AppResources.Get("TranslateInsufficientCredits"), AppResources.Get("BuyCredits"), AppResources.Get("Cancel"));
         if (!goToSettings)
             return;
 
         var services = this.Handler?.MauiContext?.Services;
-        var theme = services?.GetService(typeof(ThemeService)) as ThemeService;
         var credits = services?.GetService(typeof(ISmartCreditsClient)) as ISmartCreditsClient;
         var billing = services?.GetService(typeof(IBillingService)) as IBillingService;
-        if (theme is not null)
-            await Navigation.PushAsync(new SettingsPage(theme, credits, billing));
+        await Navigation.PushAsync(new BuyCreditsPage(billing, credits));
     }
 
     private async void OnCookClicked(object? sender, EventArgs e) =>
@@ -226,11 +208,7 @@ public partial class RecipeDetailPage : ContentPage
 
     private async void OnDeleteTapped(object? sender, EventArgs e)
     {
-        var confirmed = await DisplayAlert(
-            AppResources.Get("DeleteRecipeTitle"),
-            AppResources.Format("DeleteRecipeBodyFormat", _recipe.Title),
-            AppResources.Get("Delete"),
-            AppResources.Get("Cancel"));
+        var confirmed = await Services.AppDialog.ConfirmAsync(this, AppResources.Get("DeleteRecipeTitle"), AppResources.Format("DeleteRecipeBodyFormat", _recipe.Title), AppResources.Get("Delete"), AppResources.Get("Cancel"));
         if (!confirmed)
             return;
 

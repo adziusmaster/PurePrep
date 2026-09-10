@@ -76,6 +76,20 @@ Verify the signature:
 # -> "jar verified." signed by CN=adziusmaster, OU=PurePrep, O=PurePrep, L=Warsaw, C=PL
 ```
 
+## Native debug symbols (clears the Play "no debug symbols" warning)
+
+The `.aab` bundles native code (the .NET/Mono runtime plus `libxamarin-app.so`). Play shows an
+(informational, non-blocking) warning until you provide a native symbols file. Build it from the
+signed AAB:
+
+```sh
+store/make-native-symbols.sh
+# -> src/PurePrep/bin/Release/net10.0-android/native-debug-symbols.zip
+```
+
+Then upload it once for the release in Play Console:
+**Release → App bundle explorer → (pick the version) → Downloads → Native debug symbols → Upload.**
+
 ## Before each Play upload
 
 Bump the Android **version code** in `src/PurePrep/PurePrep.csproj`

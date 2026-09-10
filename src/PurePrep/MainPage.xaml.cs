@@ -45,8 +45,38 @@ public partial class MainPage : ContentPage, IHardwareBackHandler
 
 	private void OnViewModelPropertyChanged(object? sender, PropertyChangedEventArgs e)
 	{
-		if (e.PropertyName == nameof(RecipeLibraryViewModel.IsUpgradePromptVisible))
-			BackgroundBlur.Apply(ContentRoot, ((RecipeLibraryViewModel)BindingContext).IsUpgradePromptVisible);
+		if (e.PropertyName != nameof(RecipeLibraryViewModel.IsUpgradePromptVisible))
+			return;
+
+		var vm = (RecipeLibraryViewModel)BindingContext;
+		if (!vm.IsUpgradePromptVisible)
+			return;
+
+		// The paywall is now a real page, not an in-page overlay: open it and immediately clear the
+		// flag so it acts as a one-shot trigger (and hardware-back pops the page as usual).
+		vm.CloseUpgradePrompt();
+		Dispatcher.Dispatch(async () => await OpenBuyCreditsAsync());
+	}
+
+	private bool _buyCreditsOpen;
+
+	private async Task OpenBuyCreditsAsync()
+	{
+		if (_buyCreditsOpen)
+			return;
+		_buyCreditsOpen = true;
+		try
+		{
+			var services = this.Handler?.MauiContext?.Services;
+			var credits = services?.GetService(typeof(PurePrep.Application.ISmartCreditsClient)) as PurePrep.Application.ISmartCreditsClient;
+			var billing = services?.GetService(typeof(PurePrep.Application.IBillingService)) as PurePrep.Application.IBillingService;
+			var balance = ((RecipeLibraryViewModel)BindingContext).CreditBalance;
+			await Navigation.PushAsync(new BuyCreditsPage(billing, credits, balance));
+		}
+		finally
+		{
+			_buyCreditsOpen = false;
+		}
 	}
 
 	private void OnSharedUrlReceived(object? sender, string url) =>
@@ -74,7 +104,7 @@ public partial class MainPage : ContentPage, IHardwareBackHandler
 		string? action;
 		if (MediaPicker.Default.IsCaptureSupported)
 		{
-			action = await DisplayActionSheet(AppResources.Get("ImportPhotoTitle"), cancel, null, take, choose);
+			action = await Services.AppDialog.ChooseAsync(this, AppResources.Get("ImportPhotoTitle"), cancel, take, choose);
 		}
 		else
 		{
@@ -101,11 +131,11 @@ public partial class MainPage : ContentPage, IHardwareBackHandler
 		}
 		catch (FeatureNotSupportedException)
 		{
-			await DisplayAlert(AppResources.Get("ImportPhotoTitle"), AppResources.Get("ImportPhotoUnavailable"), AppResources.Get("Cancel"));
+			await Services.AppDialog.AlertAsync(this, AppResources.Get("ImportPhotoTitle"), AppResources.Get("ImportPhotoUnavailable"), AppResources.Get("Cancel"));
 		}
 		catch (PermissionException)
 		{
-			await DisplayAlert(AppResources.Get("ImportPhotoTitle"), AppResources.Get("ImportPhotoUnavailable"), AppResources.Get("Cancel"));
+			await Services.AppDialog.AlertAsync(this, AppResources.Get("ImportPhotoTitle"), AppResources.Get("ImportPhotoUnavailable"), AppResources.Get("Cancel"));
 		}
 	}
 
@@ -118,12 +148,7 @@ public partial class MainPage : ContentPage, IHardwareBackHandler
 		var keepBoth = AppResources.Get("DuplicateKeepBoth");
 		var cancel = AppResources.Get("Cancel");
 
-		var choice = await DisplayActionSheet(
-			string.Format(AppResources.Get("DuplicateTitleFormat"), existing.Title),
-			cancel,
-			null,
-			replace,
-			keepBoth);
+		var choice = await Services.AppDialog.ChooseAsync(this, string.Format(AppResources.Get("DuplicateTitleFormat"), existing.Title), cancel, replace, keepBoth);
 
 		if (choice == replace)
 			return DuplicateImportAction.Replace;

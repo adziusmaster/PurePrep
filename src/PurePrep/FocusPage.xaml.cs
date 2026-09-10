@@ -23,7 +23,7 @@ public partial class FocusPage : ContentPage
     // Lets the cook name a timer as it starts (pre-filled with the detected duration), so several
     // concurrent countdowns stay tellable apart. Returns null when the prompt is dismissed.
     private async Task<string?> PromptTimerNameAsync(Domain.StepTimer timer) =>
-        await DisplayPromptAsync(
+        await Services.AppDialog.PromptAsync(this,
             Localization.AppResources.Get("TimerNameTitle"),
             Localization.AppResources.Get("TimerNameMessage"),
             accept: Localization.AppResources.Get("Start"),
@@ -56,42 +56,6 @@ public partial class FocusPage : ContentPage
     private async void OnCompleted(object? sender, EventArgs e) => await Navigation.PopAsync();
 
     private async void OnBackTapped(object? sender, EventArgs e) => await Navigation.PopAsync();
-
-    // Horizontal drag over the step card = step navigation. Tracking the finger (rather than the
-    // built-in SwipeGestureRecognizer, which felt laggy and dropped quick flicks) makes it responsive:
-    // the card follows the drag, then snaps back and advances once the drag passes a small threshold.
-    private double _panTotalX;
-
-    private void OnStepPanUpdated(object? sender, PanUpdatedEventArgs e)
-    {
-        const double commitThreshold = 55;   // px of travel needed to change step
-        const double maxDrag = 44;            // clamp the visual follow so the card never flies off
-
-        switch (e.StatusType)
-        {
-            case GestureStatus.Started:
-                _panTotalX = 0;
-                break;
-
-            case GestureStatus.Running:
-                // TotalX is cumulative on Android; keep the last value for the commit decision.
-                _panTotalX = e.TotalX;
-                StepCard.TranslationX = Math.Clamp(e.TotalX, -maxDrag, maxDrag);
-                break;
-
-            case GestureStatus.Completed:
-            case GestureStatus.Canceled:
-                var committed = _panTotalX;
-                _panTotalX = 0;
-                _ = StepCard.TranslateTo(0, 0, 130, Easing.CubicOut);
-
-                if (committed <= -commitThreshold && _viewModel.NextCommand.CanExecute(null))
-                    _viewModel.NextCommand.Execute(null);
-                else if (committed >= commitThreshold && _viewModel.PreviousCommand.CanExecute(null))
-                    _viewModel.PreviousCommand.Execute(null);
-                break;
-        }
-    }
 
     // Tapping anywhere on the row toggles it, not just the checkbox — hands are busy while cooking.
     private void OnIngredientTapped(object? sender, EventArgs e)

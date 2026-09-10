@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:local="clr-namespace:PurePrep"
+             xmlns:controls="clr-namespace:PurePrep.Controls"
+             xmlns:loc="clr-namespace:PurePrep.Localization"
+             x:Class="PurePrep.BuyCreditsPage"
+             Shell.NavBarIsVisible="False"
+             NavigationPage.HasNavigationBar="False"
+             BackgroundColor="{DynamicResource Bg}">
+
+    <!-- Buying Smart Credits is a full, on-brand page (not a bare native pop-up or bottom sheet), so
+         it looks and reads like the rest of the app. This is the single credit-buying screen reached
+         from both the Home paywall and Settings. -->
+    <Grid RowDefinitions="Auto,*">
+
+        <!-- Top bar: back + screen title -->
+        <Grid Padding="20,14,20,10" ColumnDefinitions="Auto,*,Auto" ColumnSpacing="10">
+            <Border WidthRequest="48" HeightRequest="48" BackgroundColor="{DynamicResource Surface}"
+                    Stroke="{DynamicResource Line}" StrokeThickness="1" StrokeShape="RoundRectangle 14"
+                    local:TapFeedback.IsEnabled="True" AutomationProperties.IsInAccessibleTree="True"
+                    AutomationProperties.Name="{loc:Translate Back}">
+                <Border.GestureRecognizers>
+                    <TapGestureRecognizer Tapped="OnBackTapped" />
+                </Border.GestureRecognizers>
+                <Label Text="&#8249;" TextColor="{DynamicResource Ink}" FontSize="26"
+                       HorizontalOptions="Center" VerticalOptions="Center" />
+            </Border>
+            <Label Grid.Column="1" Text="{loc:Translate BuyCredits}" TextColor="{DynamicResource Ink}"
+                   FontSize="18" FontAttributes="Bold" VerticalOptions="Center" />
+        </Grid>
+
+        <ScrollView Grid.Row="1" Padding="20,4,20,28">
+            <VerticalStackLayout Spacing="18" MaximumWidthRequest="720" HorizontalOptions="Center">
+
+                <!-- Header: lime credit glyph + live balance. Showing the real balance here is what
+                     fixes the old bug where the paywall claimed "you've used your last credit" even
+                     with dozens still in the account. -->
+                <Border BackgroundColor="{DynamicResource Surface}" Stroke="{DynamicResource LimeDim}"
+                        StrokeThickness="1" Padding="18" StrokeShape="RoundRectangle 20">
+                    <Grid ColumnDefinitions="Auto,*" ColumnSpacing="14">
+                        <Border WidthRequest="48" HeightRequest="48" BackgroundColor="{DynamicResource LimeWash}"
+                                Stroke="{DynamicResource LineSoft}" StrokeThickness="1" StrokeShape="RoundRectangle 15"
+                                VerticalOptions="Center">
+                            <Label Text="&#9733;" TextColor="{DynamicResource LimeBright}" FontSize="22"
+                                   HorizontalOptions="Center" VerticalOptions="Center" />
+                        </Border>
+                        <VerticalStackLayout Grid.Column="1" Spacing="3" VerticalOptions="Center">
+                            <Label x:Name="BalanceLabel" TextColor="{DynamicResource Ink}" FontSize="17"
+                                   FontAttributes="Bold" />
+                            <Label Text="{loc:Translate BuyCreditsDesc}" TextColor="{DynamicResource Muted}"
+                                   FontSize="13" LineHeight="1.25" />
+                        </VerticalStackLayout>
+                    </Grid>
+                </Border>
+
+                <!-- Pack picker -->
+                <VerticalStackLayout x:Name="PackSection" Spacing="10">
+                    <Label Text="{loc:Translate BuyCreditsChoosePack}" TextColor="{DynamicResource Muted}"
+                           FontSize="11.5" CharacterSpacing="1.8" FontAttributes="Bold" />
+                    <VerticalStackLayout x:Name="PacksContainer" Spacing="10" />
+                </VerticalStackLayout>
+
+                <!-- Fallback for platforms without in-app billing (iOS/web preview). -->
+                <Button x:Name="TopUpButton" Text="{loc:Translate TopUpCredits}" IsVisible="False"
+                        Clicked="OnTopUpTapped"
+                        BackgroundColor="{DynamicResource Lime}" TextColor="{DynamicResource LimeInk}"
+                        FontAttributes="Bold" FontSize="15" HeightRequest="52" CornerRadius="15" />
+
+                <ActivityIndicator x:Name="BusyIndicator" IsRunning="False" IsVisible="False"
+                                   Color="{DynamicResource Lime}" HeightRequest="26" />
+
+                <!-- Why credits cost money: keeps the pricing honest and on-brand. -->
+                <Border BackgroundColor="{DynamicResource BgElevated}" Stroke="Transparent" Padding="16"
+                        StrokeShape="RoundRectangle 16">
+                    <VerticalStackLayout Spacing="5">
+                        <Label Text="{loc:Translate WhyCreditsTitle}" TextColor="{DynamicResource Ink}"
+                               FontSize="13.5" FontAttributes="Bold" />
+                        <Label Text="{loc:Translate WhyCreditsBody}" TextColor="{DynamicResource Muted}"
+                               FontSize="12.5" LineHeight="1.3" />
+                    </VerticalStackLayout>
+                </Border>
+            </VerticalStackLayout>
+        </ScrollView>
+    </Grid>
+</ContentPage>

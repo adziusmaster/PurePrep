@@ -13,8 +13,6 @@ public partial class SettingsPage : ContentPage, IHardwareBackHandler
     private readonly ThemeService _theme;
     private readonly ISmartCreditsClient? _credits;
     private readonly IBillingService? _billing;
-    private bool _suppressLanguageEvent;
-    private bool _suppressRecipeLanguageEvent;
 
     // Recipe-language options: index 0 = follow the app language (""), then each concrete language.
     private readonly List<string> _recipeLanguageCodes = new();
@@ -31,11 +29,6 @@ public partial class SettingsPage : ContentPage, IHardwareBackHandler
         // The buy-credits row only works where in-app billing is available (real Android build).
         BuyCreditsCard.IsVisible = _billing?.IsSupported == true;
 
-        // Drive the shared buy-credits sheet: tapping a pack purchases it; the scrim/close dismisses.
-        BuyCreditsSheet.IsBillingSupported = _billing?.IsSupported == true;
-        BuyCreditsSheet.BuyCommand = new Command<CreditPack>(pack => _ = PurchasePackAsync(pack));
-        BuyCreditsSheet.DismissCommand = new Command(() => ShowBuySheet(false));
-
         RefreshAppearancePills();
         RefreshUnitPills();
         BuildLanguagePicker();
@@ -44,104 +37,38 @@ public partial class SettingsPage : ContentPage, IHardwareBackHandler
 
     private async void OnBuyCreditsTapped(object? sender, EventArgs e)
     {
-        if (_billing is null || _credits is null || !_billing.IsSupported || BuyCreditsSheet.IsOpen)
+        if (_billing is null || _credits is null || !_billing.IsSupported)
             return;
 
-        // Resolve live, tax-inclusive Play prices (falls back to placeholder labels if unavailable),
-        // so the displayed price matches what the user is charged at checkout.
-        var packs = await _billing.GetPacksAsync();
-        if (packs.Count == 0)
-            return;
-
-        BuyCreditsSheet.Packs = packs;
-        ShowBuySheet(true);
+        // Buying credits is now a full, on-brand page shared with the Home paywall — the same screen
+        // in both places, instead of two differently-styled bottom sheets.
+        await Navigation.PushAsync(new BuyCreditsPage(_billing, _credits));
     }
 
-    private void ShowBuySheet(bool show)
-    {
-        if (!show)
-            BuyCreditsSheet.IsBusy = false;
-        BuyCreditsSheet.IsOpen = show;
-        BackgroundBlur.Apply(ContentRoot, show);
-    }
-
-    private async Task PurchasePackAsync(CreditPack pack)
-    {
-        if (_billing is null || _credits is null)
-            return;
-
-        SetBuyBusy(true);
-        try
-        {
-            var newBalance = await CreditPurchaseFlow.PurchaseAsync(_billing, _credits, pack.ProductId);
-            if (newBalance is null)
-                return; // user cancelled the Google purchase sheet
-
-            ShowBuySheet(false);
-            await DisplayAlert(
-                AppResources.Get("BuyCredits"),
-                AppResources.Format("RedeemSuccessFormat", pack.Credits),
-                AppResources.Get("Ok"));
-        }
-        catch (Exception ex)
-        {
-            await DisplayAlert(
-                AppResources.Get("BuyCredits"),
-                AppResources.Format("ErrCouldNotPurchaseFormat", ex.Message),
-                AppResources.Get("Ok"));
-        }
-        finally
-        {
-            SetBuyBusy(false);
-        }
-    }
-
-    private void SetBuyBusy(bool busy) => BuyCreditsSheet.IsBusy = busy;
-
-    // The buy sheet is an in-page overlay, so the hardware back button should close it rather than
-    // pop the page. Back navigation itself is handled centrally in MainActivity.
-    public bool OnHardwareBack()
-    {
-        if (BuyCreditsSheet.IsOpen)
-        {
-            ShowBuySheet(false);
-            return true;
-        }
-
-        return false;
-    }
+    // Back navigation is handled centrally in MainActivity; Settings no longer hosts an in-page
+    // overlay, so it has nothing extra to intercept.
+    public bool OnHardwareBack() => false;
 
     private void BuildLanguagePicker()
     {
-        _suppressLanguageEvent = true;
-        LanguagePicker.Items.Clear();
-
-        foreach (var lang in LocalizationService.Supported)
-        {
-            var label = lang.Code.Length == 0 ? AppResources.Get("LanguageSystem") : lang.NativeName;
-            LanguagePicker.Items.Add(label);
-        }
-
-        var currentIndex = 0;
-        for (var i = 0; i < LocalizationService.Supported.Count; i++)
-        {
-            if (LocalizationService.Supported[i].Code == LocalizationService.CurrentCode)
-            {
-                currentIndex = i;
-                break;
-            }
-        }
-
-        LanguagePicker.SelectedIndex = currentIndex;
-        _suppressLanguageEvent = false;
+        var lang = LocalizationService.Supported.FirstOrDefault(l => l.Code == LocalizationService.CurrentCode);
+        LanguageValue.Text = lang is null || lang.Code.Length == 0
+            ? AppResources.Get("LanguageSystem")
+            : lang.NativeName;
     }
 
-    private void OnLanguageChanged(object? sender, EventArgs e)
+    private async void OnLanguageTapped(object? sender, EventArgs e)
     {
-        if (_suppressLanguageEvent)
+        var options = LocalizationService.Supported
+            .Select(l => l.Code.Length == 0 ? AppResources.Get("LanguageSystem") : l.NativeName)
+            .ToArray();
+
+        var choice = await Services.AppDialog.ChooseAsync(this,
+            AppResources.Get("SectionLanguage"), AppResources.Get("Cancel"), options);
+        if (string.IsNullOrEmpty(choice))
             return;
 
-        var index = LanguagePicker.SelectedIndex;
+        var index = Array.IndexOf(options, choice);
         if (index < 0 || index >= LocalizationService.Supported.Count)
             return;
 
@@ -150,43 +77,51 @@ public partial class SettingsPage : ContentPage, IHardwareBackHandler
             return;
 
         // Rebuild the whole UI in the new language (localized XAML reads culture at load time).
-        // Dispatch so the Picker's change event finishes before its page is torn down.
         Dispatcher.Dispatch(() => (MauiApp.Current as App)?.ApplyLanguageAndReload(code));
     }
 
     private void BuildRecipeLanguagePicker()
     {
-        _suppressRecipeLanguageEvent = true;
-        RecipeLanguagePicker.Items.Clear();
         _recipeLanguageCodes.Clear();
 
         // Index 0: follow the app language.
-        RecipeLanguagePicker.Items.Add(AppResources.Get("RecipeLangSameAsApp"));
         _recipeLanguageCodes.Add(string.Empty);
-
         // Then each concrete language (skip the "System" entry, which has an empty code).
         foreach (var lang in LocalizationService.Supported.Where(l => l.Code.Length > 0))
-        {
-            RecipeLanguagePicker.Items.Add(lang.NativeName);
             _recipeLanguageCodes.Add(lang.Code);
-        }
 
-        var current = RecipeLanguageSettings.CurrentCode;
-        var index = _recipeLanguageCodes.IndexOf(current);
-        RecipeLanguagePicker.SelectedIndex = index >= 0 ? index : 0;
-        _suppressRecipeLanguageEvent = false;
+        UpdateRecipeLanguageValue();
     }
 
-    private void OnRecipeLanguageChanged(object? sender, EventArgs e)
+    private void UpdateRecipeLanguageValue()
     {
-        if (_suppressRecipeLanguageEvent)
+        var current = RecipeLanguageSettings.CurrentCode;
+        if (string.IsNullOrEmpty(current))
+        {
+            RecipeLanguageValue.Text = AppResources.Get("RecipeLangSameAsApp");
+            return;
+        }
+
+        var lang = LocalizationService.Supported.FirstOrDefault(l => l.Code == current);
+        RecipeLanguageValue.Text = lang?.NativeName ?? AppResources.Get("RecipeLangSameAsApp");
+    }
+
+    private async void OnRecipeLanguageTapped(object? sender, EventArgs e)
+    {
+        var labels = new List<string> { AppResources.Get("RecipeLangSameAsApp") };
+        labels.AddRange(LocalizationService.Supported.Where(l => l.Code.Length > 0).Select(l => l.NativeName));
+
+        var choice = await Services.AppDialog.ChooseAsync(this,
+            AppResources.Get("SectionRecipeLanguage"), AppResources.Get("Cancel"), labels.ToArray());
+        if (string.IsNullOrEmpty(choice))
             return;
 
-        var index = RecipeLanguagePicker.SelectedIndex;
+        var index = labels.IndexOf(choice);
         if (index < 0 || index >= _recipeLanguageCodes.Count)
             return;
 
         RecipeLanguageSettings.CurrentCode = _recipeLanguageCodes[index];
+        UpdateRecipeLanguageValue();
     }
 
     private async void OnRedeemCodeTapped(object? sender, EventArgs e)
@@ -194,14 +129,7 @@ public partial class SettingsPage : ContentPage, IHardwareBackHandler
         if (_credits is null)
             return;
 
-        var input = await DisplayPromptAsync(
-            AppResources.Get("RedeemCode"),
-            AppResources.Get("RedeemCodePrompt"),
-            accept: AppResources.Get("Redeem"),
-            cancel: AppResources.Get("Cancel"),
-            placeholder: AppResources.Get("RedeemCodePlaceholder"),
-            maxLength: 5,
-            keyboard: Keyboard.Text);
+        var input = await Services.AppDialog.PromptAsync(this, AppResources.Get("RedeemCode"), AppResources.Get("RedeemCodePrompt"), accept: AppResources.Get("Redeem"), cancel: AppResources.Get("Cancel"), placeholder: AppResources.Get("RedeemCodePlaceholder"), maxLength: 5, keyboard: Keyboard.Text);
 
         if (string.IsNullOrWhiteSpace(input))
             return;
@@ -217,7 +145,7 @@ public partial class SettingsPage : ContentPage, IHardwareBackHandler
             _ => AppResources.Get("RedeemInvalid"),
         };
 
-        await DisplayAlert(AppResources.Get("RedeemResultTitle"), message, AppResources.Get("Ok"));
+        await Services.AppDialog.AlertAsync(this, AppResources.Get("RedeemResultTitle"), message, AppResources.Get("Ok"));
     }
 
     private void OnBackTapped(object? sender, EventArgs e) => _ = Navigation.PopAsync();
@@ -231,8 +159,7 @@ public partial class SettingsPage : ContentPage, IHardwareBackHandler
         var recipes = await repository.GetAllAsync();
         if (recipes.Count == 0)
         {
-            await DisplayAlert(AppResources.Get("ExportRecipes"),
-                AppResources.Get("NoRecipesToExport"), AppResources.Get("Ok"));
+            await Services.AppDialog.AlertAsync(this, AppResources.Get("ExportRecipes"), AppResources.Get("NoRecipesToExport"), AppResources.Get("Ok"));
             return;
         }
 
@@ -250,22 +177,12 @@ public partial class SettingsPage : ContentPage, IHardwareBackHandler
         {
             var saveToDevice = AppResources.Get("ExportSaveToDevice");
             var share = AppResources.Get("ExportShare");
-            action = await DisplayActionSheet(
-                AppResources.Get("ExportRecipes"),
-                AppResources.Get("Cancel"),
-                null,
-                saveToDevice,
-                share);
+            action = await Services.AppDialog.ChooseAsync(this, AppResources.Get("ExportRecipes"), AppResources.Get("Cancel"), saveToDevice, share) ?? AppResources.Get("Cancel");
 
             if (action == saveToDevice)
             {
                 var location = await saver.SaveAsync(fileName, json);
-                await DisplayAlert(
-                    AppResources.Get("ExportRecipes"),
-                    location is null
-                        ? AppResources.Get("ExportSaveFailed")
-                        : string.Format(AppResources.Get("ExportSavedFormat"), location, fileName),
-                    AppResources.Get("Ok"));
+                await Services.AppDialog.AlertAsync(this, AppResources.Get("ExportRecipes"), location is null ? AppResources.Get("ExportSaveFailed") : string.Format(AppResources.Get("ExportSavedFormat"), location, fileName), AppResources.Get("Ok"));
                 return;
             }
 
@@ -319,13 +236,11 @@ public partial class SettingsPage : ContentPage, IHardwareBackHandler
                 added++;
             }
 
-            await DisplayAlert(AppResources.Get("ImportRecipes"),
-                AppResources.Format("ImportedFormat", added), AppResources.Get("Ok"));
+            await Services.AppDialog.AlertAsync(this, AppResources.Get("ImportRecipes"), AppResources.Format("ImportedFormat", added), AppResources.Get("Ok"));
         }
         catch (InvalidBackupException)
         {
-            await DisplayAlert(AppResources.Get("ImportRecipes"),
-                AppResources.Get("ImportFailed"), AppResources.Get("Ok"));
+            await Services.AppDialog.AlertAsync(this, AppResources.Get("ImportRecipes"), AppResources.Get("ImportFailed"), AppResources.Get("Ok"));
         }
     }
 

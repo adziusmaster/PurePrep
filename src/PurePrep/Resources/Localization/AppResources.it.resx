@@ -599,4 +599,10 @@ Aggiungi il brodo un mestolo alla volta, mescolando.</value>
   <data name="VoiceCommandsDesc" xml:space="preserve">
     <value>In modalità Focus, tocca il microfono e parla per scorrere la ricetta senza toccare lo schermo.</value>
   </data>
+  <data name="CreditsBalanceFormat" xml:space="preserve">
+    <value>Hai {0} crediti smart.</value>
+  </data>
+  <data name="CreditsBalanceZero" xml:space="preserve">
+    <value>Hai esaurito i crediti smart.</value>
+  </data>
 </root>

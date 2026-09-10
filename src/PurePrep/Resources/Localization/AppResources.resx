@@ -112,6 +112,12 @@
   <data name="TopUpCredits" xml:space="preserve">
     <value>Top up credits</value>
   </data>
+  <data name="CreditsBalanceFormat" xml:space="preserve">
+    <value>You have {0} Smart Credits.</value>
+  </data>
+  <data name="CreditsBalanceZero" xml:space="preserve">
+    <value>You're out of Smart Credits.</value>
+  </data>
   <data name="StepsCountFormat" xml:space="preserve">
     <value>{0} steps</value>
   </data>

@@ -73,7 +73,7 @@ public sealed class FocusModeViewModel : INotifyPropertyChanged
     public int CurrentStepIndex
     {
         get => _currentStepIndex;
-        private set
+        set
         {
             if (value < 0 || value >= Steps.Count || value == _currentStepIndex)
                 return;
@@ -321,13 +321,12 @@ public sealed class FocusModeViewModel : INotifyPropertyChanged
         }
 
         // The TTS locale query can resume off the UI thread; apply the result (which raises a
-        // binding notification) back on it. If read-aloud was left on and this recipe's language can
-        // be spoken, start reading the current step now that a voice is confirmed.
+        // binding notification) back on it. We deliberately do NOT begin reading here: opening a
+        // recipe should never start talking on its own. Reading only starts when the cook explicitly
+        // turns the read-aloud switch on (or taps "Read step"), which is far less startling.
         void Apply()
         {
             CanReadAloud = available;
-            if (available && _readStepsAloud)
-                SpeakCurrentStep(force: true);
         }
 
         if (_dispatcher is null || !_dispatcher.IsDispatchRequired)

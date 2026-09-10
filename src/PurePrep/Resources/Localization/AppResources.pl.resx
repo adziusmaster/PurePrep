@@ -599,4 +599,10 @@ Dodawaj bulion po chochli, mieszając.</value>
   <data name="VoiceCommandsDesc" xml:space="preserve">
     <value>W trybie skupienia dotknij mikrofonu i mów, aby przechodzić przez przepis bez dotykania ekranu.</value>
   </data>
+  <data name="CreditsBalanceFormat" xml:space="preserve">
+    <value>Masz {0} inteligentnych kredytów.</value>
+  </data>
+  <data name="CreditsBalanceZero" xml:space="preserve">
+    <value>Nie masz już inteligentnych kredytów.</value>
+  </data>
 </root>

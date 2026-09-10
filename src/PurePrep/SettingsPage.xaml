@@ -148,10 +148,17 @@
                     <Label Text="{loc:Translate SectionRecipeLanguage}" TextColor="{DynamicResource Muted}" FontSize="11.5"
                            CharacterSpacing="1.8" FontAttributes="Bold" />
                     <Border BackgroundColor="{DynamicResource Surface}" Stroke="{DynamicResource Line}"
-                            StrokeThickness="1" Padding="16,4" StrokeShape="RoundRectangle 18">
-                        <Picker x:Name="RecipeLanguagePicker" TextColor="{DynamicResource Ink}"
-                                TitleColor="{DynamicResource Muted}"
-                                SelectedIndexChanged="OnRecipeLanguageChanged" />
+                            StrokeThickness="1" Padding="16,14" StrokeShape="RoundRectangle 18"
+                            local:TapFeedback.IsEnabled="True">
+                        <Border.GestureRecognizers>
+                            <TapGestureRecognizer Tapped="OnRecipeLanguageTapped" />
+                        </Border.GestureRecognizers>
+                        <Grid ColumnDefinitions="*,Auto">
+                            <Label x:Name="RecipeLanguageValue" TextColor="{DynamicResource Ink}" FontSize="15"
+                                   VerticalOptions="Center" />
+                            <Label Grid.Column="1" Text="&#8250;" TextColor="{DynamicResource Muted}" FontSize="20"
+                                   VerticalOptions="Center" />
+                        </Grid>
                     </Border>
                     <Label Text="{loc:Translate RecipeLanguageDesc}"
                            TextColor="{DynamicResource Faint}" FontSize="12.5" />
@@ -162,10 +169,17 @@
                     <Label Text="{loc:Translate SectionLanguage}" TextColor="{DynamicResource Muted}" FontSize="11.5"
                            CharacterSpacing="1.8" FontAttributes="Bold" />
                     <Border BackgroundColor="{DynamicResource Surface}" Stroke="{DynamicResource Line}"
-                            StrokeThickness="1" Padding="16,4" StrokeShape="RoundRectangle 18">
-                        <Picker x:Name="LanguagePicker" TextColor="{DynamicResource Ink}"
-                                TitleColor="{DynamicResource Muted}"
-                                SelectedIndexChanged="OnLanguageChanged" />
+                            StrokeThickness="1" Padding="16,14" StrokeShape="RoundRectangle 18"
+                            local:TapFeedback.IsEnabled="True">
+                        <Border.GestureRecognizers>
+                            <TapGestureRecognizer Tapped="OnLanguageTapped" />
+                        </Border.GestureRecognizers>
+                        <Grid ColumnDefinitions="*,Auto">
+                            <Label x:Name="LanguageValue" TextColor="{DynamicResource Ink}" FontSize="15"
+                                   VerticalOptions="Center" />
+                            <Label Grid.Column="1" Text="&#8250;" TextColor="{DynamicResource Muted}" FontSize="20"
+                                   VerticalOptions="Center" />
+                        </Grid>
                     </Border>
                     <Label Text="{loc:Translate LanguageDesc}"
                            TextColor="{DynamicResource Faint}" FontSize="12.5" />
@@ -245,11 +259,5 @@
             </VerticalStackLayout>
         </Grid>
         </ScrollView>
-
-        <!-- Shared buy-credits sheet (identical to the main paywall). Packs, busy state and the
-             buy/dismiss commands are supplied from code-behind; background is blurred on Android. -->
-        <controls:BuyCreditsSheet x:Name="BuyCreditsSheet" IsOpen="False"
-                                  Title="{loc:Translate BuyCredits}"
-                                  Subtitle="{loc:Translate BuyCreditsDesc}" />
     </Grid>
 </ContentPage>

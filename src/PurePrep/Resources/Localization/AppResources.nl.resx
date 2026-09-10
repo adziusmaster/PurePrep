@@ -599,4 +599,10 @@ Voeg de bouillon pollepel voor pollepel toe, al roerend.</value>
   <data name="VoiceCommandsDesc" xml:space="preserve">
     <value>Tik in de focusmodus op de microfoon en spreek om zonder het scherm aan te raken door het recept te gaan.</value>
   </data>
+  <data name="CreditsBalanceFormat" xml:space="preserve">
+    <value>Je hebt {0} Smart Credits.</value>
+  </data>
+  <data name="CreditsBalanceZero" xml:space="preserve">
+    <value>Je Smart Credits zijn op.</value>
+  </data>
 </root>

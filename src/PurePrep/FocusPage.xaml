@@ -77,23 +77,34 @@
             </Border>
         </Grid>
 
-        <!-- Step card (hidden while the ingredients panel is open) -->
-        <!-- Fill, not Center, with the content in a ScrollView: a long instruction at this size used
-             to overflow the card and clip, and did so sooner at larger system font scales. -->
-        <Border x:Name="StepCard" Grid.Row="3" BackgroundColor="{DynamicResource Surface}" Stroke="{DynamicResource LineSoft}"
-                StrokeThickness="1" Padding="24" StrokeShape="RoundRectangle 22" VerticalOptions="Fill"
-                IsVisible="{Binding ShowIngredients, Converter={StaticResource InvertedBoolConverter}}">
-          <Border.GestureRecognizers>
-              <!-- Drag the step card sideways to move between steps: left goes forward, right goes back.
-                   A PanGestureRecognizer (not SwipeGestureRecognizer) so the card tracks the finger and
-                   never misses a quick flick — the built-in swipe recogniser was laggy on Android. -->
-              <PanGestureRecognizer PanUpdated="OnStepPanUpdated" />
-          </Border.GestureRecognizers>
-          <ScrollView VerticalScrollBarVisibility="Never">
-            <VerticalStackLayout Spacing="20" VerticalOptions="Center">
-                <Label Text="{Binding CurrentStep.Instruction}" TextColor="{DynamicResource Ink}" FontSize="27"
-                       FontAttributes="Bold" LineHeight="1.18" />
-                <BoxView HeightRequest="1" Color="{DynamicResource Line}" />
+        <!-- Step area (hidden while the ingredients panel is open): a swipeable carousel of step
+             cards up top, with the fixed cooking controls (timers, read-aloud, voice) below so a
+             running countdown never rotates out of reach. -->
+        <Grid Grid.Row="3" RowDefinitions="*,Auto" RowSpacing="14"
+              IsVisible="{Binding ShowIngredients, Converter={StaticResource InvertedBoolConverter}}">
+
+            <!-- Rotate/swipe horizontally to move between steps. Replaces the old pan-drag card,
+                 which felt laggy and dropped quick flicks on Android. Position is two-way bound so
+                 the nav buttons and voice commands keep the carousel in sync. -->
+            <CarouselView Grid.Row="0" ItemsSource="{Binding Steps}" Loop="False"
+                          Position="{Binding CurrentStepIndex, Mode=TwoWay}"
+                          PeekAreaInsets="12" HorizontalScrollBarVisibility="Never">
+                <CarouselView.ItemTemplate>
+                    <DataTemplate>
+                        <Border BackgroundColor="{DynamicResource Surface}" Stroke="{DynamicResource LineSoft}"
+                                StrokeThickness="1" Padding="24" StrokeShape="RoundRectangle 22"
+                                Margin="4,0" VerticalOptions="Fill">
+                            <ScrollView VerticalScrollBarVisibility="Never">
+                                <Label Text="{Binding Instruction}" TextColor="{DynamicResource Ink}" FontSize="27"
+                                       FontAttributes="Bold" LineHeight="1.18" VerticalOptions="Center" />
+                            </ScrollView>
+                        </Border>
+                    </DataTemplate>
+                </CarouselView.ItemTemplate>
+            </CarouselView>
+
+            <ScrollView Grid.Row="1" VerticalScrollBarVisibility="Never" MaximumHeightRequest="240">
+            <VerticalStackLayout Spacing="16">
 
                 <!-- Active countdowns: several timers can run at once, each named and stoppable. -->
                 <VerticalStackLayout Spacing="8" IsVisible="{Binding HasActiveTimers}"
@@ -208,7 +219,7 @@
                        TextColor="{DynamicResource Muted}" FontSize="12.5" />
             </VerticalStackLayout>
           </ScrollView>
-        </Border>
+        </Grid>
 
         <!-- Ingredients panel -->
         <Border Grid.Row="3" BackgroundColor="{DynamicResource Surface}" Stroke="{DynamicResource LineSoft}"

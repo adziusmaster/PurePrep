@@ -122,7 +122,11 @@ public class MainActivity : MauiAppCompatActivity
                 return;
             }
 
-            // 2. The visible page has an in-page overlay (buy sheet / upgrade prompt) — let it close.
+            // 2. A styled in-app dialog (alert/prompt/choose) is on top — cancel it.
+            if (PurePrep.Services.AppDialog.TryHandleBack())
+                return;
+
+            // 3. The visible page has an in-page overlay (buy sheet / upgrade prompt) — let it close.
             var current = (page as Microsoft.Maui.Controls.NavigationPage)?.CurrentPage ?? page;
             if (current is IHardwareBackHandler handler && handler.OnHardwareBack())
                 return;

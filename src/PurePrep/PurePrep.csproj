@@ -34,8 +34,8 @@
 		<ApplicationId>com.adziusmaster.pureprep</ApplicationId>
 
 		<!-- Versions -->
-		<ApplicationDisplayVersion>1.3.2</ApplicationDisplayVersion>
-		<ApplicationVersion>23</ApplicationVersion>
+		<ApplicationDisplayVersion>1.3.3</ApplicationDisplayVersion>
+		<ApplicationVersion>24</ApplicationVersion>
 
 		<!-- To develop, package, and publish an app to the Microsoft Store, see: https://aka.ms/MauiTemplateUnpackaged -->
 		<WindowsPackageType>None</WindowsPackageType>
@@ -51,12 +51,14 @@
 		Play Console crash/ANR analysis + size. Applies to all Release Android builds.
 		- R8 shrinker produces a deobfuscation (mapping.txt) file, auto-embedded in the .aab.
 		- Managed symbols give readable managed stack traces in Release crash reports.
-		- Native debug symbols let Play symbolicate native (runtime) crashes/ANRs.
+		- Native libs are left unstripped (AndroidStripNativeLibraries defaults to false) so they keep
+		  their symbol tables; the native-debug-symbols.zip uploaded to Play is built from them by
+		  store/make-native-symbols.sh after each Release AAB build.
 	-->
 	<PropertyGroup Condition="'$(Configuration)' == 'Release' And $([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">
 		<AndroidLinkTool>r8</AndroidLinkTool>
 		<AndroidManagedSymbols>true</AndroidManagedSymbols>
-		<AndroidPreferNativeLibrariesWithDebugSymbols>true</AndroidPreferNativeLibrariesWithDebugSymbols>
+		<AndroidStripNativeLibraries>false</AndroidStripNativeLibraries>
 	</PropertyGroup>
 
 	<!--

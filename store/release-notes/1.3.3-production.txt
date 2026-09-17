@@ -1,0 +1,87 @@
+<en-GB>
+Welcome to PurePrep!
+Paste any recipe link and get only what you cook from: title, ingredients and steps — no life stories, no pop-ups.
+• Recipes are saved on your device and work offline.
+• Focus Mode keeps the screen awake and guides you step by step.
+• Times inside steps become tappable timers.
+• Switch between metric and imperial units.
+• Recipes are translated into your language.
+Happy cooking!
+</en-GB>
+
+<en-US>
+Welcome to PurePrep!
+Paste any recipe link and get only what you cook from: title, ingredients and steps — no life stories, no pop-ups.
+• Recipes are saved on your device and work offline.
+• Focus Mode keeps the screen awake and guides you step by step.
+• Times inside steps become tappable timers.
+• Switch between metric and US units.
+• Recipes are translated into your language.
+Happy cooking!
+</en-US>
+
+<de-DE>
+Willkommen bei PurePrep!
+Füge einen Rezeptlink ein und erhalte nur das, was du zum Kochen brauchst: Titel, Zutaten und Schritte — ohne Lebensgeschichten, ohne Pop-ups.
+• Rezepte liegen auf deinem Gerät und funktionieren offline.
+• Der Fokus-Modus hält den Bildschirm wach und führt Schritt für Schritt.
+• Zeitangaben in den Schritten werden zu antippbaren Timern.
+• Wechsle zwischen metrischen und US-Einheiten.
+• Rezepte werden in deine Sprache übersetzt.
+Viel Spaß beim Kochen!
+</de-DE>
+
+<es-ES>
+¡Bienvenido a PurePrep!
+Pega el enlace de una receta y obtén solo lo que necesitas para cocinar: título, ingredientes y pasos, sin historias ni ventanas emergentes.
+• Tus recetas se guardan en el dispositivo y funcionan sin conexión.
+• El modo Concentración mantiene la pantalla encendida y te guía paso a paso.
+• Los tiempos de los pasos se convierten en temporizadores.
+• Cambia entre unidades métricas y estadounidenses.
+• Las recetas se traducen a tu idioma.
+¡Feliz cocina!
+</es-ES>
+
+<fr-FR>
+Bienvenue dans PurePrep !
+Collez le lien d'une recette et ne gardez que l'essentiel : titre, ingrédients et étapes — sans anecdotes ni pop-ups.
+• Vos recettes sont enregistrées sur l'appareil et accessibles hors ligne.
+• Le mode Focus garde l'écran allumé et vous guide étape par étape.
+• Les durées dans les étapes deviennent des minuteurs.
+• Basculez entre unités métriques et américaines.
+• Les recettes sont traduites dans votre langue.
+Bonne cuisine !
+</fr-FR>
+
+<it-IT>
+Benvenuto in PurePrep!
+Incolla il link di una ricetta e ottieni solo ciò che serve per cucinare: titolo, ingredienti e passaggi, senza racconti né pop-up.
+• Le ricette sono salvate sul dispositivo e disponibili offline.
+• La modalità Focus tiene lo schermo acceso e ti guida passo dopo passo.
+• I tempi nei passaggi diventano timer da toccare.
+• Passa tra unità metriche e statunitensi.
+• Le ricette vengono tradotte nella tua lingua.
+Buona cucina!
+</it-IT>
+
+<nl-NL>
+Welkom bij PurePrep!
+Plak een receptlink en krijg alleen waar je mee kookt: titel, ingrediënten en stappen — zonder levensverhalen of pop-ups.
+• Recepten staan op je toestel en werken offline.
+• Focus-modus houdt het scherm wakker en leidt je stap voor stap.
+• Tijden in stappen worden tikbare timers.
+• Wissel tussen metrische en Amerikaanse eenheden.
+• Recepten worden vertaald naar jouw taal.
+Veel kookplezier!
+</nl-NL>
+
+<pl-PL>
+Witaj w PurePrep!
+Wklej link do przepisu i zobacz tylko to, z czego gotujesz: tytuł, składniki i kroki — bez życiowych historii i wyskakujących okienek.
+• Przepisy zapisują się na urządzeniu i działają offline.
+• Tryb Skupienia nie wygasza ekranu i prowadzi krok po kroku.
+• Czasy w krokach zamieniają się w minutniki.
+• Przełączaj jednostki metryczne i amerykańskie.
+• Przepisy są tłumaczone na Twój język.
+Smacznego!
+</pl-PL>

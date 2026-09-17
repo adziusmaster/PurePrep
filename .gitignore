@@ -64,3 +64,6 @@ src/PurePrep.Server/pureprep.server.db*
 
 # MAUI SDK resolver scratch files
 *.SdkResolver.*.proj.Backup.tmp
+
+# macOS Finder metadata
+.DS_Store

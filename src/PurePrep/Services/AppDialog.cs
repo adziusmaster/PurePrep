@@ -1,167 +1,140 @@
-using System.Collections.Generic;
-using System.Threading.Tasks;
-using Microsoft.Maui.Controls;
 using Microsoft.Maui.Controls.Shapes;
-using Microsoft.Maui.Graphics;
-using PurePrep.Localization;
+using PurePrep.Controls;
 
 namespace PurePrep.Services;
+
+/// <summary>One option in <see cref="AppDialog.ChooseAsync(ContentPage, string, string, DialogChoice[])"/>.</summary>
+/// <param name="Text">The option's label, returned when it is chosen.</param>
+/// <param name="Destructive">Renders the row in the danger colour (e.g. Delete).</param>
+/// <param name="Icon">Optional leading icon — an <see cref="Resources.Styles.Icons"/> constant.</param>
+internal record DialogChoice(string Text, bool Destructive = false, string? Icon = null);
 
 /// <summary>
 /// In-app, on-brand replacements for MAUI's native <c>DisplayAlert</c>/<c>DisplayPromptAsync</c>/
 /// <c>DisplayActionSheet</c>. The platform dialogs looked like bare Android system pop-ups, jarringly
-/// different from the rest of the app; these render a themed card (Surface/Lime, rounded, dark) as an
-/// overlay on the current page instead, so every prompt matches the app's look.
+/// different from the rest of the app; these render inside the shared <see cref="BottomSheet"/> on
+/// the current page instead, so every prompt matches the app's look (and the app's own sheets).
 /// </summary>
 public static class AppDialog
 {
-    // The stack of dialogs currently on screen, newest last. Used so the hardware back button can
-    // dismiss the top-most dialog instead of popping the page underneath it.
-    private static readonly List<Overlay> Open = new();
-
-    /// <summary>True while at least one styled dialog is on screen.</summary>
-    public static bool IsOpen => Open.Count > 0;
+    /// <summary>True while at least one styled dialog or bottom sheet is on screen.</summary>
+    public static bool IsOpen => BottomSheet.AnyOpen;
 
     /// <summary>
-    /// Called by the Android back handler: cancels the top-most open dialog (returning its cancel
-    /// result) and reports whether it consumed the press.
+    /// Called by the Android back handler: cancels the top-most open dialog or sheet (returning its
+    /// cancel result) and reports whether it consumed the press.
     /// </summary>
-    public static bool TryHandleBack()
-    {
-        if (Open.Count == 0)
-            return false;
-        Open[^1].Cancel();
-        return true;
-    }
+    public static bool TryHandleBack() => BottomSheet.TryCancelTop();
 
     /// <summary>A simple message with a single dismiss button.</summary>
     public static Task AlertAsync(ContentPage page, string title, string? message, string dismiss)
     {
-        var overlay = new Overlay(page, title, message);
-        overlay.AddButton(dismiss, primary: true, () => overlay.Complete(true));
-        overlay.CancelResult = () => overlay.Complete(true);
-        return overlay.ShowAsync();
+        var dialog = new Dialog(page, title, message, icon: null, destructive: false);
+        dialog.SetButtons(null, (dismiss, () => dialog.Complete(true)), destructive: false);
+        dialog.CancelResult = true;
+        return dialog.ShowAsync();
     }
 
-    /// <summary>A yes/no confirmation. Resolves true when <paramref name="accept"/> is chosen.</summary>
-    public static async Task<bool> ConfirmAsync(ContentPage page, string title, string? message, string accept, string cancel)
+    /// <summary>
+    /// A yes/no confirmation. Resolves true when <paramref name="accept"/> is chosen. Pass
+    /// <paramref name="destructive"/> for irreversible actions (red accept button) and an optional
+    /// header <paramref name="icon"/> (an <see cref="Resources.Styles.Icons"/> constant).
+    /// </summary>
+    public static async Task<bool> ConfirmAsync(ContentPage page, string title, string? message, string accept, string cancel,
+        bool destructive = false, string? icon = null)
     {
-        var overlay = new Overlay(page, title, message);
-        var tcs = new TaskCompletionSource<bool>();
-        overlay.AddButton(cancel, primary: false, () => overlay.Complete(false));
-        overlay.AddButton(accept, primary: true, () => overlay.Complete(true));
-        overlay.CancelResult = () => overlay.Complete(false);
-        overlay.Resolved = result => tcs.TrySetResult(result is bool b && b);
-        await overlay.ShowAsync();
-        return await tcs.Task;
+        var dialog = new Dialog(page, title, message, icon, destructive);
+        dialog.SetButtons((cancel, () => dialog.Complete(false)), (accept, () => dialog.Complete(true)), destructive);
+        dialog.CancelResult = false;
+        return await dialog.ShowAsync() is true;
     }
 
     /// <summary>A single-line text prompt. Returns the entered text, or null when cancelled.</summary>
     public static async Task<string?> PromptAsync(ContentPage page, string title, string? message, string accept, string cancel,
         string? placeholder = null, string? initialValue = null, int maxLength = -1, Keyboard? keyboard = null)
     {
-        var overlay = new Overlay(page, title, message);
-        var entry = overlay.AddEntry(placeholder, initialValue, maxLength, keyboard);
-        var tcs = new TaskCompletionSource<string?>();
-        overlay.AddButton(cancel, primary: false, () => overlay.Complete(null));
-        overlay.AddButton(accept, primary: true, () => overlay.Complete(entry.Text ?? string.Empty));
-        overlay.CancelResult = () => overlay.Complete(null);
-        overlay.Resolved = result => tcs.TrySetResult(result as string);
-        await overlay.ShowAsync();
-        return await tcs.Task;
+        var dialog = new Dialog(page, title, message, icon: null, destructive: false);
+        var entry = dialog.AddEntry(placeholder, initialValue, maxLength, keyboard);
+        dialog.SetButtons((cancel, () => dialog.Complete(null)), (accept, () => dialog.Complete(entry.Text ?? string.Empty)), destructive: false);
+        dialog.CancelResult = null;
+        return await dialog.ShowAsync() as string;
     }
 
     /// <summary>
     /// A list of choices, mirroring <c>DisplayActionSheet</c>: returns the chosen option's text, or
-    /// null when cancelled (back / scrim / the cancel button).
+    /// null when cancelled (back / backdrop / the cancel button).
     /// </summary>
-    public static async Task<string?> ChooseAsync(ContentPage page, string title, string cancel, params string[] options)
+    public static Task<string?> ChooseAsync(ContentPage page, string title, string cancel, params string[] options) =>
+        ChooseAsync(page, title, cancel, options.Select(o => new DialogChoice(o)).ToArray());
+
+    /// <summary>
+    /// A list of choices where individual rows can be marked destructive or carry an icon. Returns
+    /// the chosen option's text, or null when cancelled.
+    /// </summary>
+    internal static async Task<string?> ChooseAsync(ContentPage page, string title, string cancel, params DialogChoice[] options)
     {
-        var overlay = new Overlay(page, title, null);
-        var tcs = new TaskCompletionSource<string?>();
+        var dialog = new Dialog(page, title, null, icon: null, destructive: false);
         foreach (var option in options)
         {
-            var captured = option;
-            overlay.AddChoice(captured, () => overlay.Complete(captured));
+            var captured = option.Text;
+            dialog.AddChoice(option, () => dialog.Complete(captured));
         }
         if (!string.IsNullOrEmpty(cancel))
-            overlay.AddButton(cancel, primary: false, () => overlay.Complete(null));
-        overlay.CancelResult = () => overlay.Complete(null);
-        overlay.Resolved = result => tcs.TrySetResult(result as string);
-        await overlay.ShowAsync();
-        return await tcs.Task;
+            dialog.AddTextButton(cancel, () => dialog.Complete(null));
+        dialog.CancelResult = null;
+        return await dialog.ShowAsync() as string;
     }
 
-    // The visual tree + lifecycle for one dialog. Kept internal to this file so the public surface
-    // stays the four intent-named helpers above.
-    private sealed class Overlay
+    // Builds one dialog's body and hosts it in a BottomSheet attached to the page. Kept private so the
+    // public surface stays the four intent-named helpers above.
+    private sealed class Dialog
     {
+        // Above this many characters two side-by-side buttons would squeeze their labels, so the
+        // button row stacks vertically instead (primary on top) — a label must never truncate.
+        private const int SideBySideMaxChars = 14;
+
         private readonly ContentPage _page;
-        private readonly Grid _root;
-        private readonly VerticalStackLayout _actions;
-        private readonly VerticalStackLayout _choices;
-        private readonly TaskCompletionSource<bool> _shown = new();
+        private readonly BottomSheet _sheet = new();
+        private readonly VerticalStackLayout _body = new() { Spacing = 0 };
+        private readonly VerticalStackLayout _choices = new() { Spacing = 2 };
+        private readonly TaskCompletionSource<object?> _result = new();
+        private Entry? _entry;
+        private bool _completed;
 
-        public System.Action? CancelResult;
-        public System.Action<object?>? Resolved;
+        public object? CancelResult;
 
-        public Overlay(ContentPage page, string title, string? message)
+        public Dialog(ContentPage page, string title, string? message, string? icon, bool destructive)
         {
             _page = page;
 
-            var card = new VerticalStackLayout { Spacing = 14 };
+            if (!string.IsNullOrEmpty(icon))
+            {
+                var badge = new Border
+                {
+                    WidthRequest = 48,
+                    HeightRequest = 48,
+                    StrokeThickness = 0,
+                    StrokeShape = new RoundRectangle { CornerRadius = 16 },
+                    HorizontalOptions = LayoutOptions.Start,
+                    Margin = new Thickness(0, 0, 0, 16),
+                    Content = Styled(new Label { Text = icon, FontSize = 24 }, "IconLabel"),
+                };
+                badge.SetDynamicResource(VisualElement.BackgroundColorProperty, destructive ? "DangerWash" : "LimeWash");
+                ((Label)badge.Content).SetDynamicResource(Label.TextColorProperty, destructive ? "Danger" : "Lime");
+                _body.Add(badge);
+            }
 
             if (!string.IsNullOrEmpty(title))
-            {
-                var titleLabel = new Label
-                {
-                    Text = title,
-                    FontSize = 18,
-                    FontAttributes = FontAttributes.Bold,
-                    LineBreakMode = LineBreakMode.WordWrap,
-                };
-                titleLabel.SetDynamicResource(Label.TextColorProperty, "Ink");
-                card.Add(titleLabel);
-            }
+                _body.Add(Styled(new Label { Text = title }, "SheetTitle"));
 
             if (!string.IsNullOrWhiteSpace(message))
-            {
-                var messageLabel = new Label
-                {
-                    Text = message,
-                    FontSize = 14,
-                    LineHeight = 1.3,
-                };
-                messageLabel.SetDynamicResource(Label.TextColorProperty, "Muted");
-                card.Add(messageLabel);
-            }
+                _body.Add(Styled(new Label { Text = message, Margin = new Thickness(0, 8, 0, 0) }, "SheetMessage"));
 
-            _choices = new VerticalStackLayout { Spacing = 8 };
-            card.Add(_choices);
+            _choices.Margin = new Thickness(-12, 12, -12, 0);
+            _body.Add(_choices);
 
-            _actions = new VerticalStackLayout { Spacing = 10 };
-            card.Add(_actions);
-
-            var border = new Border
-            {
-                Padding = 22,
-                StrokeThickness = 1,
-                StrokeShape = new RoundRectangle { CornerRadius = 22 },
-                MaximumWidthRequest = 440,
-                HorizontalOptions = LayoutOptions.Center,
-                VerticalOptions = LayoutOptions.Center,
-                Margin = new Thickness(22, 0),
-                Content = card,
-            };
-            border.SetDynamicResource(Border.BackgroundColorProperty, "Surface");
-            border.SetDynamicResource(Border.StrokeProperty, "Line");
-
-            var scrim = new BoxView { Color = Color.FromArgb("#99000000") };
-            scrim.GestureRecognizers.Add(new TapGestureRecognizer { Command = new Command(Cancel) });
-
-            _root = new Grid { InputTransparent = false };
-            _root.Add(scrim);
-            _root.Add(border);
+            _sheet.SheetContent = _body;
+            _sheet.Cancelled += (_, _) => Complete(CancelResult);
         }
 
         public Entry AddEntry(string? placeholder, string? initialValue, int maxLength, Keyboard? keyboard)
@@ -171,105 +144,152 @@ public static class AppDialog
                 Placeholder = placeholder,
                 Text = initialValue,
                 Keyboard = keyboard ?? Keyboard.Default,
+                FontSize = 16,
+                BackgroundColor = Colors.Transparent,
             };
             if (maxLength > 0)
                 entry.MaxLength = maxLength;
             entry.SetDynamicResource(Entry.TextColorProperty, "Ink");
-            entry.SetDynamicResource(Entry.PlaceholderColorProperty, "Muted");
-            entry.SetDynamicResource(Entry.BackgroundColorProperty, "BgElevated");
+            entry.SetDynamicResource(Entry.PlaceholderColorProperty, "Faint");
 
-            var wrap = new Border
-            {
-                Padding = new Thickness(12, 2),
-                StrokeThickness = 1,
-                StrokeShape = new RoundRectangle { CornerRadius = 12 },
-                Content = entry,
-            };
-            wrap.SetDynamicResource(Border.BackgroundColorProperty, "BgElevated");
-            wrap.SetDynamicResource(Border.StrokeProperty, "Line");
-            _choices.Add(wrap);
+            var field = Styled(new Border { Content = entry, Margin = new Thickness(0, 20, 0, 0) }, "SheetField");
+            _body.Insert(_body.IndexOf(_choices), field);
+            _entry = entry;
             return entry;
         }
 
-        public void AddChoice(string text, System.Action onTap)
+        public void AddChoice(DialogChoice choice, Action onTap)
         {
+            var row = new Grid
+            {
+                ColumnDefinitions = { new ColumnDefinition(GridLength.Auto), new ColumnDefinition(GridLength.Star) },
+                ColumnSpacing = 14,
+            };
+            var colour = choice.Destructive ? "Danger" : "Ink";
+
+            if (!string.IsNullOrEmpty(choice.Icon))
+            {
+                var icon = Styled(new Label { Text = choice.Icon, FontSize = 22 }, "IconLabel");
+                icon.SetDynamicResource(Label.TextColorProperty, choice.Destructive ? "Danger" : "Muted");
+                row.Add(icon, 0);
+            }
+
             var label = new Label
             {
-                Text = text,
-                FontSize = 15,
-                FontAttributes = FontAttributes.Bold,
+                Text = choice.Text,
+                FontSize = 16,
                 VerticalOptions = LayoutOptions.Center,
-                HorizontalOptions = LayoutOptions.Center,
+                LineBreakMode = LineBreakMode.WordWrap,
             };
-            label.SetDynamicResource(Label.TextColorProperty, "Ink");
+            label.SetDynamicResource(Label.TextColorProperty, colour);
+            row.Add(label, 1);
 
-            var row = new Border
+            var tile = new Border
             {
-                Padding = new Thickness(16, 14),
-                StrokeThickness = 1,
+                Padding = new Thickness(12, 12),
                 MinimumHeightRequest = 52,
+                StrokeThickness = 0,
                 StrokeShape = new RoundRectangle { CornerRadius = 14 },
-                Content = label,
+                BackgroundColor = Colors.Transparent,
+                Content = row,
             };
-            row.SetDynamicResource(Border.BackgroundColorProperty, "BgElevated");
-            row.SetDynamicResource(Border.StrokeProperty, "Line");
-            row.GestureRecognizers.Add(new TapGestureRecognizer { Command = new Command(onTap) });
-            _choices.Add(row);
+            AutomationProperties.SetIsInAccessibleTree(tile, true);
+            AutomationProperties.SetName(tile, choice.Text);
+            tile.GestureRecognizers.Add(new TapGestureRecognizer { Command = new Command(onTap) });
+            TapFeedback.SetIsEnabled(tile, true);
+            _choices.Add(tile);
         }
 
-        public void AddButton(string text, bool primary, System.Action onTap)
+        public void AddTextButton(string text, Action onTap)
         {
-            var button = new Button
+            var button = Styled(new Button { Text = text, BorderWidth = 0, Margin = new Thickness(0, 12, 0, 0) }, "SheetSecondaryButton");
+            button.SetDynamicResource(Button.TextColorProperty, "Muted");
+            button.Clicked += (_, _) => onTap();
+            _body.Add(button);
+        }
+
+        // One button → full width. Two → side by side, equal width, secondary left / primary right;
+        // stacked (primary first) when either label is too long to sit comfortably at half width.
+        public void SetButtons((string Text, Action OnTap)? secondary, (string Text, Action OnTap) primary, bool destructive)
+        {
+            var primaryButton = Styled(new Button { Text = primary.Text }, destructive ? "SheetDangerButton" : "SheetPrimaryButton");
+            primaryButton.Clicked += (_, _) => primary.OnTap();
+
+            View row;
+            if (secondary is not { } sec)
             {
-                Text = text,
-                FontAttributes = FontAttributes.Bold,
-                FontSize = 15,
-                HeightRequest = 52,
-                CornerRadius = 14,
-            };
-            if (primary)
-            {
-                button.SetDynamicResource(Button.BackgroundColorProperty, "Lime");
-                button.SetDynamicResource(Button.TextColorProperty, "LimeInk");
+                row = primaryButton;
             }
             else
             {
-                button.SetDynamicResource(Button.BackgroundColorProperty, "Surface");
-                button.SetDynamicResource(Button.TextColorProperty, "Muted");
-                button.SetDynamicResource(Button.BorderColorProperty, "Line");
-                button.BorderWidth = 1;
+                var secondaryButton = Styled(new Button { Text = sec.Text }, "SheetSecondaryButton");
+                secondaryButton.Clicked += (_, _) => sec.OnTap();
+
+                if (sec.Text.Length <= SideBySideMaxChars && primary.Text.Length <= SideBySideMaxChars)
+                {
+                    var grid = new Grid
+                    {
+                        ColumnDefinitions = { new ColumnDefinition(GridLength.Star), new ColumnDefinition(GridLength.Star) },
+                        ColumnSpacing = 12,
+                    };
+                    grid.Add(secondaryButton, 0);
+                    grid.Add(primaryButton, 1);
+                    row = grid;
+                }
+                else
+                {
+                    row = new VerticalStackLayout { Spacing = 10, Children = { primaryButton, secondaryButton } };
+                }
             }
-            button.Clicked += (_, _) => onTap();
-            _actions.Add(button);
+
+            row.Margin = new Thickness(0, 24, 0, 0);
+            _body.Add(row);
         }
 
-        public Task ShowAsync()
+        public async Task<object?> ShowAsync()
         {
             var host = _page.Content as Layout
-                ?? throw new System.InvalidOperationException("AppDialog requires the page's root to be a Layout.");
+                ?? throw new InvalidOperationException("AppDialog requires the page's root to be a Layout.");
 
             if (host is Grid grid)
             {
-                Grid.SetRow(_root, 0);
-                Grid.SetColumn(_root, 0);
-                Grid.SetRowSpan(_root, System.Math.Max(1, grid.RowDefinitions.Count));
-                Grid.SetColumnSpan(_root, System.Math.Max(1, grid.ColumnDefinitions.Count));
+                Grid.SetRow(_sheet, 0);
+                Grid.SetColumn(_sheet, 0);
+                Grid.SetRowSpan(_sheet, Math.Max(1, grid.RowDefinitions.Count));
+                Grid.SetColumnSpan(_sheet, Math.Max(1, grid.ColumnDefinitions.Count));
             }
 
-            host.Add(_root);
-            Open.Add(this);
-            return _shown.Task;
+            host.Add(_sheet);
+            await _sheet.ShowAsync();
+            // A prompt is for typing: focus the field so the keyboard comes up with the sheet.
+            _entry?.Focus();
+            return await _result.Task;
         }
 
-        public void Cancel() => CancelResult?.Invoke();
-
-        public void Complete(object? result)
+        public async void Complete(object? result)
         {
-            Open.Remove(this);
+            if (_completed)
+                return;
+            _completed = true;
+
+            // Unfocus alone leaves the Android keyboard up; hide it explicitly.
+            if (_entry is not null)
+            {
+                if (_entry.IsSoftInputShowing())
+                    await _entry.HideSoftInputAsync(CancellationToken.None);
+                _entry.Unfocus();
+            }
+            await _sheet.HideAsync();
             if (_page.Content is Layout host)
-                host.Remove(_root);
-            Resolved?.Invoke(result);
-            _shown.TrySetResult(true);
+                host.Remove(_sheet);
+            _result.TrySetResult(result);
+        }
+
+        private static T Styled<T>(T view, string styleKey) where T : VisualElement
+        {
+            if (Microsoft.Maui.Controls.Application.Current?.Resources.TryGetValue(styleKey, out var style) == true && style is Style s)
+                view.Style = s;
+            return view;
         }
     }
 }

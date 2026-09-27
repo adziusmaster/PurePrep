@@ -29,7 +29,29 @@ public static class AppResources
     public static string Get(string key) =>
         Manager.GetString(key, CultureInfo.CurrentUICulture) ?? key;
 
+    /// <summary>Looks up a localized string for an explicit culture, falling back to the key.</summary>
+    public static string Get(string key, CultureInfo culture) =>
+        Manager.GetString(key, culture) ?? key;
+
     /// <summary>Looks up and formats a localized string.</summary>
     public static string Format(string key, params object[] args) =>
         string.Format(CultureInfo.CurrentUICulture, Get(key), args);
+
+    /// <summary>
+    /// Formats a count with the plural form the UI language needs: <c>{key}One</c> for "1 step",
+    /// <c>{key}Few</c> for Polish "2–4 kroki", else <paramref name="key"/> itself. A key without
+    /// variants in the resx files simply uses <paramref name="key"/> for every count.
+    /// </summary>
+    public static string Plural(string key, int count)
+    {
+        var culture = CultureInfo.CurrentUICulture;
+        var suffix = Domain.PluralRules.For(culture.TwoLetterISOLanguageName, count) switch
+        {
+            Domain.PluralCategory.One => "One",
+            Domain.PluralCategory.Few => "Few",
+            _ => null,
+        };
+        var format = (suffix is null ? null : Manager.GetString(key + suffix, culture)) ?? Get(key);
+        return string.Format(culture, format, count);
+    }
 }

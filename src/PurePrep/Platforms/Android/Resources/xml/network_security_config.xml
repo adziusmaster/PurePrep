@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Opt-in only. Merged into the manifest solely when PurePrepLocalApi=true (see PurePrep.csproj's
+  AndroidManifestOverlay for LOCAL_API) so a Debug build can reach a local PurePrep.Server over
+  plain HTTP. Android blocks cleartext traffic by default (targetSdk 28+); this config re-opens
+  it for "localhost" only (see MauiProgram.BackendBaseUrl — reached via `adb reverse tcp:5299
+  tcp:5299`). No other host, and never Release, gets cleartext.
+-->
+<network-security-config>
+	<domain-config cleartextTrafficPermitted="true">
+		<domain includeSubdomains="false">localhost</domain>
+	</domain-config>
+</network-security-config>

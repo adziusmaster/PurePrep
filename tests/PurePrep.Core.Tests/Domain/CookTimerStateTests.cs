@@ -109,4 +109,129 @@ public sealed class CookTimerStateTests
         timer.TotalSeconds.Should().Be(1200);
         timer.Label.Should().Be("20 min");
     }
+
+    [Fact]
+    public void Extend_WhenRangeTimerFinishedAtMinimum_ShouldAddUpToMaximum()
+    {
+        // Arrange
+        var now = DateTimeOffset.UnixEpoch;
+        var timer = CookTimerState.Start("Fry onion", 600, 720, now);
+
+        // Act
+        var extended = timer.Extend(120);
+        var overExtended = extended.Extend(120);
+
+        // Assert
+        extended.EndsAt.Should().Be(now.AddSeconds(720));
+        extended.TotalSeconds.Should().Be(720);
+        extended.CanExtend.Should().BeFalse();
+        overExtended.EndsAt.Should().Be(now.AddSeconds(720));
+    }
+
+    [Fact]
+    public void Start_WhenSingleDuration_ShouldNotBeExtendable()
+    {
+        // Arrange
+        var now = DateTimeOffset.UnixEpoch;
+
+        // Act
+        var timer = CookTimerState.Start("Boil", 300, now);
+
+        // Assert
+        timer.MaxSeconds.Should().Be(300);
+        timer.CanExtend.Should().BeFalse();
+    }
+
+    [Fact]
+    public void IsAtCheckpoint_WhenRangeTimerReachesItsMinimum_ShouldBeTrue()
+    {
+        // Arrange
+        var now = DateTimeOffset.UnixEpoch;
+        var timer = CookTimerState.Start("Fry onion", 600, 720, now);
+
+        // Act & Assert
+        timer.IsAtCheckpoint(now.AddSeconds(600)).Should().BeTrue();
+    }
+
+    [Fact]
+    public void IsAtCheckpoint_BeforeTheMinimumIsReached_ShouldBeFalse()
+    {
+        // Arrange
+        var now = DateTimeOffset.UnixEpoch;
+        var timer = CookTimerState.Start("Fry onion", 600, 720, now);
+
+        // Act & Assert
+        timer.IsAtCheckpoint(now.AddSeconds(599)).Should().BeFalse();
+    }
+
+    [Fact]
+    public void IsAtCheckpoint_WhenSingleDurationTimerFinishes_ShouldBeFalse()
+    {
+        // Arrange — nothing to extend towards, so its deadline is a genuine finish, never a checkpoint.
+        var now = DateTimeOffset.UnixEpoch;
+        var timer = CookTimerState.Start("Boil", 300, now);
+
+        // Act & Assert
+        timer.IsAtCheckpoint(now.AddSeconds(300)).Should().BeFalse();
+    }
+
+    [Fact]
+    public void IsAtCheckpoint_WhenExtendedToItsMaximum_ShouldBeFalse()
+    {
+        // Arrange — extending a 600–720s range by 120s lands exactly on the maximum: no longer
+        // extendable, so reaching that new deadline is a genuine finish, not another checkpoint.
+        var now = DateTimeOffset.UnixEpoch;
+        var timer = CookTimerState.Start("Fry onion", 600, 720, now).Extend(120);
+
+        // Act & Assert
+        timer.IsAtCheckpoint(now.AddSeconds(720)).Should().BeFalse();
+        timer.HasFinished(now.AddSeconds(720)).Should().BeTrue();
+    }
+
+    [Fact]
+    public void ShouldRestore_WhenDeadlineNotYetReached_ShouldBeTrue()
+    {
+        // Arrange — still running, regardless of whether it's a range or a single duration.
+        var now = DateTimeOffset.UnixEpoch;
+        var endsAt = now.AddSeconds(1);
+
+        // Act & Assert
+        CookTimerState.ShouldRestore(totalSeconds: 300, maxSeconds: 300, endsAt, now).Should().BeTrue();
+    }
+
+    [Fact]
+    public void ShouldRestore_WhenSingleDurationTimerPastItsDeadline_ShouldBeFalse()
+    {
+        // Arrange — a genuinely finished timer already alerted via the platform notification while
+        // the app was away; restoring it would just resurrect a done timer.
+        var now = DateTimeOffset.UnixEpoch;
+        var endsAt = now.AddSeconds(-1);
+
+        // Act & Assert
+        CookTimerState.ShouldRestore(totalSeconds: 300, maxSeconds: 300, endsAt, now).Should().BeFalse();
+    }
+
+    [Fact]
+    public void ShouldRestore_WhenRangeTimerPastItsMinimumAndNotYetAtMaximum_ShouldBeTrue()
+    {
+        // Arrange — a range timer that reached its checkpoint while the app was away resumes right
+        // there, at "Check now", rather than vanishing.
+        var now = DateTimeOffset.UnixEpoch;
+        var endsAt = now.AddSeconds(-1);
+
+        // Act & Assert
+        CookTimerState.ShouldRestore(totalSeconds: 600, maxSeconds: 720, endsAt, now).Should().BeTrue();
+    }
+
+    [Fact]
+    public void ShouldRestore_WhenLegacyRecordHasNoMaxSeconds_PastDeadline_ShouldBeFalse()
+    {
+        // Arrange — pre-Task-18 JSON has no MaxSeconds (0 on deserialize); that must be treated as
+        // equal to TotalSeconds (not extendable), never as a bogus "always extendable" 0.
+        var now = DateTimeOffset.UnixEpoch;
+        var endsAt = now.AddSeconds(-1);
+
+        // Act & Assert
+        CookTimerState.ShouldRestore(totalSeconds: 300, maxSeconds: 0, endsAt, now).Should().BeFalse();
+    }
 }

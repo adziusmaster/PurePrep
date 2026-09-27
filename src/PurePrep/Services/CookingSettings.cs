@@ -19,4 +19,13 @@ public static class CookingSettings
         get => Preferences.Default.Get(ReadStepsAloudKey, false);
         set => Preferences.Default.Set(ReadStepsAloudKey, value);
     }
+
+    private const string FocusHintSeenKey = "focus_hint_seen";
+
+    /// <summary>Set once Focus Mode has shown its "Tap Next…" hint, which only the very first cook sees.</summary>
+    public static bool FocusHintSeen
+    {
+        get => Preferences.Default.Get(FocusHintSeenKey, false);
+        set => Preferences.Default.Set(FocusHintSeenKey, value);
+    }
 }

@@ -4,6 +4,8 @@
              xmlns:local="clr-namespace:PurePrep"
              xmlns:loc="clr-namespace:PurePrep.Localization"
              xmlns:controls="clr-namespace:PurePrep.Controls"
+             xmlns:icons="clr-namespace:PurePrep.Resources.Styles"
+             xmlns:domain="clr-namespace:PurePrep.Domain;assembly=PurePrep.Core"
              x:Class="PurePrep.MainPage"
              Shell.NavBarIsVisible="False"
              NavigationPage.HasNavigationBar="False"
@@ -14,8 +16,8 @@
         <Grid x:Name="ContentRoot" MaximumWidthRequest="760" HorizontalOptions="Center"
               Padding="20,12,20,0">
 
-            <!-- The whole page is one scrolling list: the header, import box and library heading
-                 live in the CollectionView's Header so they scroll away with the recipes. This is
+            <!-- The whole page is one scrolling list: the header, clipboard banner, search and filter
+                 chips live in the CollectionView's Header so they scroll away with the recipes. This is
                  what makes browsing work in landscape, where fixed top rows would otherwise squeeze
                  the list to nothing. -->
             <CollectionView ItemsSource="{Binding Recipes}" SelectionMode="None"
@@ -50,131 +52,42 @@
                             <Border.GestureRecognizers>
                                 <TapGestureRecognizer Tapped="OnSettingsTapped" />
                             </Border.GestureRecognizers>
-                            <Label Text="&#9881;" TextColor="{DynamicResource Muted}" FontSize="19"
-                                   HorizontalOptions="Center" VerticalOptions="Center" />
+                            <Label Style="{StaticResource IconLabel}" Text="{x:Static icons:Icons.Settings}"
+                                   TextColor="{DynamicResource Muted}" FontSize="19" />
                         </Border>
                     </HorizontalStackLayout>
                 </Grid>
-
-                <VerticalStackLayout Spacing="0">
-                    <Label Text="{loc:Translate AppTaglineLine1}" TextColor="{DynamicResource Ink}" FontSize="32"
-                           FontAttributes="Bold" LineHeight="1.05" />
-                    <Label Text="{loc:Translate AppTaglineLine2}" TextColor="{DynamicResource Lime}" FontSize="32"
-                           FontAttributes="Bold" LineHeight="1.05" />
-                </VerticalStackLayout>
-
-                <Label Text="{loc:Translate AppSubtitle}"
-                       TextColor="{DynamicResource Muted}" FontSize="14.5" LineHeight="1.25" />
             </VerticalStackLayout>
 
-            <!-- ===== Import ===== -->
-            <VerticalStackLayout Spacing="9">
-                <!-- Stroke brightens when a shared link has just landed, so the ready-to-import
-                     box is the first thing the eye goes to after coming in from the share sheet. -->
-                <Border BackgroundColor="{DynamicResource Surface}"
-                        Stroke="{Binding IsSharedUrlReady, Converter={StaticResource SharedLinkStrokeConverter}}"
-                        StrokeThickness="1" Padding="7" StrokeShape="RoundRectangle 20">
-                    <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="7">
-                        <Border Grid.Column="0" WidthRequest="48" HeightRequest="48"
-                                BackgroundColor="{DynamicResource BgElevated}" StrokeThickness="0"
-                                StrokeShape="RoundRectangle 14" VerticalOptions="Center" local:TapFeedback.IsEnabled="True"
-                                AutomationProperties.IsInAccessibleTree="True"
-                                AutomationProperties.Name="{loc:Translate PasteLink}">
-                            <Border.GestureRecognizers>
-                                <TapGestureRecognizer Tapped="OnPasteTapped" />
-                            </Border.GestureRecognizers>
-                            <Label Text="&#128203;" FontSize="16"
-                                   HorizontalOptions="Center" VerticalOptions="Center" />
-                        </Border>
-                        <Entry Grid.Column="1" Text="{Binding UrlInput}" Placeholder="{loc:Translate PasteUrlPlaceholder}"
-                               Margin="4,0,0,0" TextColor="{DynamicResource Ink}"
-                               PlaceholderColor="{DynamicResource Faint}" Keyboard="Url"
-                               ClearButtonVisibility="WhileEditing" VerticalOptions="Center"
-                               ReturnCommand="{Binding ImportCommand}" />
-
-                        <Button Grid.Column="2" Text="{loc:Translate Import}" Command="{Binding ImportCommand}"
-                                IsVisible="{Binding IsImporting, Converter={StaticResource InvertedBoolConverter}}"
-                                BackgroundColor="{DynamicResource Lime}" TextColor="{DynamicResource LimeInk}"
-                                FontAttributes="Bold" FontSize="15" Padding="22,12" CornerRadius="14" />
-
-                        <Border Grid.Column="2" IsVisible="{Binding IsImporting}"
-                                BackgroundColor="{DynamicResource LimeWash}" StrokeThickness="0"
-                                Padding="22,10" StrokeShape="RoundRectangle 14">
-                            <ActivityIndicator IsRunning="{Binding IsImporting}"
-                                               Color="{DynamicResource Lime}"
-                                               WidthRequest="22" HeightRequest="22" />
-                        </Border>
+            <!-- ===== Clipboard banner, errors and the library search (scroll with the page) ===== -->
+            <VerticalStackLayout Spacing="14">
+                <!-- Clipboard chip: offers a recipe link found on the clipboard on resume/return to
+                     Home. Tapping it opens the same Import sheet used for shares; the ✕ dismisses it
+                     for that one link without importing (it won't be offered again until a different
+                     link is copied). -->
+                <Border IsVisible="{Binding HasClipboardSuggestion}" BackgroundColor="{DynamicResource LimeWash}"
+                        Stroke="{DynamicResource LineSoft}" StrokeShape="RoundRectangle 16" Padding="14,10">
+                    <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="10">
+                        <Label Style="{StaticResource IconLabel}" Text="{x:Static icons:Icons.Link}" FontSize="20" />
+                        <Label Grid.Column="1" VerticalOptions="Center" LineBreakMode="MiddleTruncation"
+                               TextColor="{DynamicResource Ink}" FontSize="13.5"
+                               Text="{Binding ClipboardSuggestionText}" />
+                        <Label Grid.Column="2" Style="{StaticResource IconLabel}" Text="{x:Static icons:Icons.Close}" FontSize="20"
+                               TextColor="{DynamicResource Muted}"
+                               AutomationProperties.IsInAccessibleTree="True" AutomationProperties.Name="{loc:Translate Dismiss}">
+                            <Label.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding DismissClipboardSuggestionCommand}" />
+                            </Label.GestureRecognizers>
+                        </Label>
                     </Grid>
+                    <Border.GestureRecognizers>
+                        <TapGestureRecognizer Tapped="OnClipboardChipTapped" />
+                    </Border.GestureRecognizers>
                 </Border>
-
-                <!-- Import from beyond URLs: a photo of a page/screenshot, or pasted free text. -->
-                <Grid ColumnDefinitions="*,*" ColumnSpacing="9">
-                    <Button Grid.Column="0" Text="{loc:Translate ImportPhoto}" Clicked="OnImportPhotoTapped"
-                            IsEnabled="{Binding IsImporting, Converter={StaticResource InvertedBoolConverter}}"
-                            BackgroundColor="{DynamicResource BgElevated}" TextColor="{DynamicResource Ink}"
-                            FontAttributes="Bold" FontSize="14" Padding="0,11" CornerRadius="14" />
-                    <Button Grid.Column="1" Text="{loc:Translate ImportText}" Clicked="OnImportTextTapped"
-                            IsEnabled="{Binding IsImporting, Converter={StaticResource InvertedBoolConverter}}"
-                            BackgroundColor="{DynamicResource BgElevated}" TextColor="{DynamicResource Ink}"
-                            FontAttributes="Bold" FontSize="14" Padding="0,11" CornerRadius="14" />
-                </Grid>
 
                 <Label Text="{Binding ErrorMessage}" TextColor="{DynamicResource Danger}" FontSize="13"
                        Margin="4,0,0,0"
                        IsVisible="{Binding ErrorMessage, Converter={StaticResource StringNotNullOrEmptyConverter}}" />
-
-                <!-- One-time tip: recipes auto-translate into the chosen recipe language. -->
-                <Border IsVisible="{Binding IsRecipeLanguageHintVisible}" BackgroundColor="{DynamicResource BgElevated}"
-                        Stroke="{DynamicResource LineSoft}" StrokeThickness="1" Padding="14,12"
-                        StrokeShape="RoundRectangle 16" Margin="0,4,0,0">
-                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10">
-                        <VerticalStackLayout Spacing="6">
-                            <Label Text="{loc:Translate RecipeLangHintTitle}" TextColor="{DynamicResource Ink}"
-                                   FontSize="14" FontAttributes="Bold" />
-                            <Label Text="{loc:Translate RecipeLangHintBody}" TextColor="{DynamicResource Muted}"
-                                   FontSize="12.5" LineHeight="1.25" />
-                            <Label Text="{loc:Translate RecipeLangHintAction}" TextColor="{DynamicResource LimeBright}"
-                                   FontSize="13" FontAttributes="Bold" Margin="0,2,0,0">
-                                <Label.GestureRecognizers>
-                                    <TapGestureRecognizer Command="{Binding OpenRecipeLanguageSettingsCommand}" />
-                                </Label.GestureRecognizers>
-                            </Label>
-                        </VerticalStackLayout>
-                        <Border Grid.Column="1" WidthRequest="44" HeightRequest="44"
-                                BackgroundColor="{DynamicResource Surface}" Stroke="{DynamicResource Line}"
-                                StrokeThickness="1" StrokeShape="RoundRectangle 22"
-                                VerticalOptions="Start" HorizontalOptions="End"
-                                local:TapFeedback.IsEnabled="True" AutomationProperties.IsInAccessibleTree="True" AutomationProperties.Name="{loc:Translate Dismiss}">
-                            <Border.GestureRecognizers>
-                                <TapGestureRecognizer Command="{Binding DismissRecipeLanguageHintCommand}" />
-                            </Border.GestureRecognizers>
-                            <Label Text="&#10005;" TextColor="{DynamicResource Muted}" FontSize="12"
-                                   HorizontalOptions="Center" VerticalOptions="Center" />
-                        </Border>
-                    </Grid>
-                </Border>
-            </VerticalStackLayout>
-
-            <!-- ===== Library heading + search (scroll with the page) ===== -->
-            <VerticalStackLayout Spacing="14">
-                <Grid ColumnDefinitions="*,Auto" VerticalOptions="Center">
-                    <VerticalStackLayout Spacing="2">
-                        <Label Text="{loc:Translate YourRecipes}" TextColor="{DynamicResource Ink}" FontSize="20"
-                               FontAttributes="Bold" />
-                        <Label Text="{loc:Translate YourRecipesSubtitle}" TextColor="{DynamicResource Muted}"
-                               FontSize="13" />
-                    </VerticalStackLayout>
-                    <Border Grid.Column="1" BackgroundColor="{DynamicResource LimeWash}"
-                            Stroke="{DynamicResource LineSoft}" StrokeThickness="1"
-                            Padding="13,8" MinimumHeightRequest="48" StrokeShape="RoundRectangle 13"
-                            VerticalOptions="Center" local:TapFeedback.IsEnabled="True">
-                        <Border.GestureRecognizers>
-                            <TapGestureRecognizer Command="{Binding AddManuallyCommand}" />
-                        </Border.GestureRecognizers>
-                        <Label Text="{loc:Translate AddManually}" TextColor="{DynamicResource LimeBright}" FontSize="13.5"
-                               FontAttributes="Bold" VerticalOptions="Center" />
-                    </Border>
-                </Grid>
 
                 <!-- Search -->
                 <Border BackgroundColor="{DynamicResource Surface}"
@@ -182,14 +95,130 @@
                         Padding="14,2" StrokeShape="RoundRectangle 13"
                         IsVisible="{Binding HasRecipes}">
                     <Grid ColumnDefinitions="Auto,*" ColumnSpacing="8" VerticalOptions="Center">
-                        <Label Text="⌕" FontSize="18" TextColor="{DynamicResource Muted}"
-                               VerticalOptions="Center" />
+                        <Label Style="{StaticResource IconLabel}" Text="{x:Static icons:Icons.Search}" FontSize="18"
+                               TextColor="{DynamicResource Muted}" />
                         <Entry Grid.Column="1" Text="{Binding SearchText}" Placeholder="{loc:Translate SearchPlaceholder}"
                                PlaceholderColor="{DynamicResource Muted}" TextColor="{DynamicResource Ink}"
                                BackgroundColor="Transparent" ReturnType="Search"
                                ClearButtonVisibility="WhileEditing" />
                     </Grid>
                 </Border>
+
+                <!-- Filter chips (All / Want to cook / Cooked / Favourites) + sort button. A wrapping row
+                     rather than a horizontal ScrollView beside the sort button: inside the list header
+                     the ScrollView clipped the last chip (unreachable with long sort labels / languages).
+                     Wrapping keeps every chip and the sort button on screen at any width. The negative
+                     bottom margin cancels the last line's 8px chip gap. -->
+                <FlexLayout Wrap="Wrap" Direction="Row" AlignItems="Center" AlignContent="Start"
+                            Margin="0,0,0,-8" IsVisible="{Binding HasRecipes}">
+                    <Border Margin="0,0,8,8" Padding="14,9" StrokeThickness="1" StrokeShape="RoundRectangle 13"
+                            BackgroundColor="{DynamicResource Surface}" Stroke="{DynamicResource Line}"
+                            local:TapFeedback.IsEnabled="True">
+                        <Border.GestureRecognizers>
+                            <TapGestureRecognizer Command="{Binding SelectFilterCommand}"
+                                                   CommandParameter="{x:Static domain:LibraryFilter.All}" />
+                        </Border.GestureRecognizers>
+                        <Border.Triggers>
+                            <DataTrigger TargetType="Border" Binding="{Binding Filter}" Value="{x:Static domain:LibraryFilter.All}">
+                                <Setter Property="BackgroundColor" Value="{DynamicResource Lime}" />
+                                <Setter Property="Stroke" Value="{DynamicResource Lime}" />
+                            </DataTrigger>
+                        </Border.Triggers>
+                        <Label Text="{loc:Translate FilterAll}" FontSize="13" FontAttributes="Bold"
+                               TextColor="{DynamicResource Muted}" VerticalOptions="Center">
+                            <Label.Triggers>
+                                <DataTrigger TargetType="Label" Binding="{Binding Filter}" Value="{x:Static domain:LibraryFilter.All}">
+                                    <Setter Property="TextColor" Value="{DynamicResource LimeInk}" />
+                                </DataTrigger>
+                            </Label.Triggers>
+                        </Label>
+                    </Border>
+
+                    <Border Margin="0,0,8,8" Padding="14,9" StrokeThickness="1" StrokeShape="RoundRectangle 13"
+                            BackgroundColor="{DynamicResource Surface}" Stroke="{DynamicResource Line}"
+                            local:TapFeedback.IsEnabled="True">
+                        <Border.GestureRecognizers>
+                            <TapGestureRecognizer Command="{Binding SelectFilterCommand}"
+                                                   CommandParameter="{x:Static domain:LibraryFilter.WantToCook}" />
+                        </Border.GestureRecognizers>
+                        <Border.Triggers>
+                            <DataTrigger TargetType="Border" Binding="{Binding Filter}" Value="{x:Static domain:LibraryFilter.WantToCook}">
+                                <Setter Property="BackgroundColor" Value="{DynamicResource Lime}" />
+                                <Setter Property="Stroke" Value="{DynamicResource Lime}" />
+                            </DataTrigger>
+                        </Border.Triggers>
+                        <Label Text="{loc:Translate FilterWantToCook}" FontSize="13" FontAttributes="Bold"
+                               TextColor="{DynamicResource Muted}" VerticalOptions="Center">
+                            <Label.Triggers>
+                                <DataTrigger TargetType="Label" Binding="{Binding Filter}" Value="{x:Static domain:LibraryFilter.WantToCook}">
+                                    <Setter Property="TextColor" Value="{DynamicResource LimeInk}" />
+                                </DataTrigger>
+                            </Label.Triggers>
+                        </Label>
+                    </Border>
+
+                    <Border Margin="0,0,8,8" Padding="14,9" StrokeThickness="1" StrokeShape="RoundRectangle 13"
+                            BackgroundColor="{DynamicResource Surface}" Stroke="{DynamicResource Line}"
+                            local:TapFeedback.IsEnabled="True">
+                        <Border.GestureRecognizers>
+                            <TapGestureRecognizer Command="{Binding SelectFilterCommand}"
+                                                   CommandParameter="{x:Static domain:LibraryFilter.Cooked}" />
+                        </Border.GestureRecognizers>
+                        <Border.Triggers>
+                            <DataTrigger TargetType="Border" Binding="{Binding Filter}" Value="{x:Static domain:LibraryFilter.Cooked}">
+                                <Setter Property="BackgroundColor" Value="{DynamicResource Lime}" />
+                                <Setter Property="Stroke" Value="{DynamicResource Lime}" />
+                            </DataTrigger>
+                        </Border.Triggers>
+                        <Label Text="{loc:Translate FilterCooked}" FontSize="13" FontAttributes="Bold"
+                               TextColor="{DynamicResource Muted}" VerticalOptions="Center">
+                            <Label.Triggers>
+                                <DataTrigger TargetType="Label" Binding="{Binding Filter}" Value="{x:Static domain:LibraryFilter.Cooked}">
+                                    <Setter Property="TextColor" Value="{DynamicResource LimeInk}" />
+                                </DataTrigger>
+                            </Label.Triggers>
+                        </Label>
+                    </Border>
+
+                    <Border Margin="0,0,8,8" Padding="14,9" StrokeThickness="1" StrokeShape="RoundRectangle 13"
+                            BackgroundColor="{DynamicResource Surface}" Stroke="{DynamicResource Line}"
+                            local:TapFeedback.IsEnabled="True">
+                        <Border.GestureRecognizers>
+                            <TapGestureRecognizer Command="{Binding SelectFilterCommand}"
+                                                   CommandParameter="{x:Static domain:LibraryFilter.Favourites}" />
+                        </Border.GestureRecognizers>
+                        <Border.Triggers>
+                            <DataTrigger TargetType="Border" Binding="{Binding Filter}" Value="{x:Static domain:LibraryFilter.Favourites}">
+                                <Setter Property="BackgroundColor" Value="{DynamicResource Lime}" />
+                                <Setter Property="Stroke" Value="{DynamicResource Lime}" />
+                            </DataTrigger>
+                        </Border.Triggers>
+                        <Label Text="{loc:Translate FilterFavourites}" FontSize="13" FontAttributes="Bold"
+                               TextColor="{DynamicResource Muted}" VerticalOptions="Center">
+                            <Label.Triggers>
+                                <DataTrigger TargetType="Label" Binding="{Binding Filter}" Value="{x:Static domain:LibraryFilter.Favourites}">
+                                    <Setter Property="TextColor" Value="{DynamicResource LimeInk}" />
+                                </DataTrigger>
+                            </Label.Triggers>
+                        </Label>
+                    </Border>
+
+
+                    <Border Margin="0,0,0,8" Padding="10,9" StrokeThickness="1" StrokeShape="RoundRectangle 13"
+                            BackgroundColor="{DynamicResource Surface}" Stroke="{DynamicResource Line}"
+                            local:TapFeedback.IsEnabled="True" AutomationProperties.IsInAccessibleTree="True"
+                            AutomationProperties.Name="{loc:Translate SortBy}">
+                        <Border.GestureRecognizers>
+                            <TapGestureRecognizer Command="{Binding ChooseSortCommand}" />
+                        </Border.GestureRecognizers>
+                        <HorizontalStackLayout Spacing="4" VerticalOptions="Center">
+                            <Label Style="{StaticResource IconLabel}" Text="{x:Static icons:Icons.Tune}" FontSize="16"
+                                   TextColor="{DynamicResource Muted}" />
+                            <Label Text="{Binding SortLabel}" TextColor="{DynamicResource Muted}" FontSize="13"
+                                   FontAttributes="Bold" VerticalOptions="Center" />
+                        </HorizontalStackLayout>
+                    </Border>
+                </FlexLayout>
                 </VerticalStackLayout>
 
                     </VerticalStackLayout>
@@ -207,26 +236,34 @@
                                 </Border.GestureRecognizers>
                                 <Grid Padding="16" ColumnDefinitions="Auto,*,Auto" ColumnSpacing="14"
                                       RowDefinitions="Auto,Auto" RowSpacing="6">
-                                    <Border Grid.RowSpan="2" WidthRequest="48" HeightRequest="48"
-                                            BackgroundColor="{DynamicResource LimeWash}"
-                                            Stroke="{DynamicResource LineSoft}" StrokeThickness="1"
-                                            StrokeShape="RoundRectangle 15" VerticalOptions="Center">
-                                        <Label Text="{Binding StepCount}" TextColor="{DynamicResource Lime}"
-                                               FontSize="19" FontAttributes="Bold"
-                                               HorizontalOptions="Center" VerticalOptions="Center" />
-                                    </Border>
+                                    <Grid Grid.RowSpan="2" WidthRequest="64" HeightRequest="64" VerticalOptions="Center">
+                                        <!-- Placeholder tile: shown until/unless a photo loads. -->
+                                        <Border BackgroundColor="{DynamicResource LimeWash}"
+                                                Stroke="{DynamicResource LineSoft}" StrokeThickness="1"
+                                                StrokeShape="RoundRectangle 16">
+                                            <Label Text="{Binding Title, Converter={StaticResource FirstLetterConverter}}"
+                                                   TextColor="{DynamicResource Lime}" FontSize="24" FontAttributes="Bold"
+                                                   HorizontalOptions="Center" VerticalOptions="Center" />
+                                        </Border>
+                                        <Image Source="{Binding ., Converter={StaticResource RecipeImage}}"
+                                               Aspect="AspectFill" WidthRequest="64" HeightRequest="64">
+                                            <Image.Clip>
+                                                <RoundRectangleGeometry CornerRadius="16" Rect="0,0,64,64" />
+                                            </Image.Clip>
+                                        </Image>
+                                    </Grid>
 
-                                    <Label Grid.Column="1" Text="{Binding Title}" TextColor="{DynamicResource Ink}"
-                                           FontSize="17" FontAttributes="Bold" LineBreakMode="TailTruncation"
-                                           MaxLines="2" VerticalOptions="Center" />
+                                    <Grid Grid.Column="1" ColumnDefinitions="*,Auto" ColumnSpacing="6" VerticalOptions="Center">
+                                        <Label Text="{Binding Title}" TextColor="{DynamicResource Ink}"
+                                               FontSize="17" FontAttributes="Bold" LineBreakMode="TailTruncation"
+                                               MaxLines="2" VerticalOptions="Center" />
+                                        <Label Grid.Column="1" Style="{StaticResource IconLabel}" Text="{x:Static icons:Icons.Favourite}"
+                                               FontSize="15" TextColor="{DynamicResource Lime}"
+                                               IsVisible="{Binding IsFavourite}" VerticalOptions="Start" />
+                                    </Grid>
 
-                                    <HorizontalStackLayout Grid.Column="1" Grid.Row="1" Spacing="7">
-                                        <Label Text="{Binding StepCount, Converter={StaticResource ResourceFormatConverter}, ConverterParameter=StepsCountFormat}"
-                                               TextColor="{DynamicResource Muted}" FontSize="13" />
-                                        <Label Text="&#183;" TextColor="{DynamicResource Faint}" FontSize="13" />
-                                        <Label Text="{Binding IngredientCount, Converter={StaticResource ResourceFormatConverter}, ConverterParameter=IngredientsCountFormat}"
-                                               TextColor="{DynamicResource Muted}" FontSize="13" />
-                                    </HorizontalStackLayout>
+                                    <Label Grid.Column="1" Grid.Row="1" Text="{Binding ., Converter={StaticResource RecipeCardMeta}}"
+                                           TextColor="{DynamicResource Muted}" FontSize="13" />
 
                                     <Border Grid.Column="2" Grid.RowSpan="2" BackgroundColor="{DynamicResource LimeWash}"
                                             StrokeThickness="0" Padding="13,10" MinimumHeightRequest="48"
@@ -250,41 +287,39 @@
                         </DataTemplate>
                     </CollectionView.ItemTemplate>
 
-                    <CollectionView.EmptyView>
-                        <Grid Padding="24,40">
-                            <!-- No recipes at all -->
-                            <VerticalStackLayout Spacing="14" VerticalOptions="Start" HorizontalOptions="Center"
-                                                 IsVisible="{Binding IsSearching, Converter={StaticResource InvertedBoolConverter}}">
+                    <!-- Empty states live in the Footer, not EmptyView: when the list empties, MAUI Android
+                         swaps the RecyclerView to a separate empty-view adapter, which rebuilds the Header
+                         and throws keyboard focus out of the search box (into the URL Entry). The footer
+                         stays in the same adapter, so each state just toggles its own visibility. -->
+                    <CollectionView.Footer>
+                        <VerticalStackLayout Spacing="0">
+                        <Grid>
+                            <!-- No recipes at all: the Add button lives here instead of floating. -->
+                            <VerticalStackLayout Spacing="14" VerticalOptions="Start" HorizontalOptions="Center" Margin="24,40"
+                                                 IsVisible="{Binding HasRecipes, Converter={StaticResource InvertedBoolConverter}}">
                                 <Border WidthRequest="72" HeightRequest="72" HorizontalOptions="Center"
                                         BackgroundColor="{DynamicResource LimeWash}" Stroke="{DynamicResource LineSoft}"
                                         StrokeThickness="1" StrokeShape="RoundRectangle 22">
-                                    <Label Text="+" TextColor="{DynamicResource Lime}" FontSize="34"
-                                           FontAttributes="Bold" HorizontalOptions="Center" VerticalOptions="Center" />
+                                    <Label Style="{StaticResource IconLabel}" Text="{x:Static icons:Icons.Add}"
+                                           TextColor="{DynamicResource Lime}" FontSize="36" />
                                 </Border>
-                                <Label Text="{loc:Translate NoRecipesTitle}" TextColor="{DynamicResource Ink}" FontSize="17"
-                                       FontAttributes="Bold" HorizontalOptions="Center" />
-                                <Label Text="{loc:Translate NoRecipesBody}"
+                                <Label Text="{loc:Translate AddYourFirstRecipe}" TextColor="{DynamicResource Ink}" FontSize="17"
+                                       FontAttributes="Bold" HorizontalOptions="Center" HorizontalTextAlignment="Center" />
+                                <Label Text="{loc:Translate AddFirstRecipeBody}"
                                        TextColor="{DynamicResource Muted}" FontSize="14" HorizontalTextAlignment="Center"
                                        HorizontalOptions="Center" MaximumWidthRequest="280" />
-                                <Border BackgroundColor="{DynamicResource LimeWash}" Stroke="{DynamicResource LineSoft}"
-                                        StrokeThickness="1" Padding="16,10" StrokeShape="RoundRectangle 13"
-                                        HorizontalOptions="Center" Margin="0,4,0,0">
-                                    <Border.GestureRecognizers>
-                                        <TapGestureRecognizer Command="{Binding AddManuallyCommand}" />
-                                    </Border.GestureRecognizers>
-                                    <Label Text="{loc:Translate AddOneManually}" TextColor="{DynamicResource LimeBright}"
-                                           FontSize="14" FontAttributes="Bold" />
-                                </Border>
+                                <controls:AddRecipeButton HorizontalOptions="Center" Margin="0,6,0,0"
+                                                          Tapped="OnAddRecipeTapped" />
                             </VerticalStackLayout>
 
                             <!-- Search returned nothing -->
-                            <VerticalStackLayout Spacing="10" VerticalOptions="Start" HorizontalOptions="Center"
-                                                 IsVisible="{Binding IsSearching}">
+                            <VerticalStackLayout Spacing="10" VerticalOptions="Start" HorizontalOptions="Center" Margin="24,40"
+                                                 IsVisible="{Binding NoSearchMatches}">
                                 <Border WidthRequest="72" HeightRequest="72" HorizontalOptions="Center"
                                         BackgroundColor="{DynamicResource Surface}" Stroke="{DynamicResource LineSoft}"
                                         StrokeThickness="1" StrokeShape="RoundRectangle 22">
-                                    <Label Text="&#8981;" TextColor="{DynamicResource Muted}" FontSize="30"
-                                           HorizontalOptions="Center" VerticalOptions="Center" />
+                                    <Label Style="{StaticResource IconLabel}" Text="{x:Static icons:Icons.Search}"
+                                           TextColor="{DynamicResource Muted}" FontSize="30" />
                                 </Border>
                                 <Label Text="{loc:Translate NoMatchesTitle}" TextColor="{DynamicResource Ink}" FontSize="17"
                                        FontAttributes="Bold" HorizontalOptions="Center" />
@@ -292,9 +327,68 @@
                                        TextColor="{DynamicResource Muted}" FontSize="14" HorizontalTextAlignment="Center"
                                        HorizontalOptions="Center" MaximumWidthRequest="280" />
                             </VerticalStackLayout>
+
+                            <!-- Filter chip narrowed the library to nothing (no search text active) -->
+                            <VerticalStackLayout Spacing="10" VerticalOptions="Start" HorizontalOptions="Center" Margin="24,40"
+                                                 IsVisible="{Binding NoFilterMatches}">
+                                <Border WidthRequest="72" HeightRequest="72" HorizontalOptions="Center"
+                                        BackgroundColor="{DynamicResource Surface}" Stroke="{DynamicResource LineSoft}"
+                                        StrokeThickness="1" StrokeShape="RoundRectangle 22">
+                                    <Label Style="{StaticResource IconLabel}" Text="{x:Static icons:Icons.Tune}"
+                                           TextColor="{DynamicResource Muted}" FontSize="30" />
+                                </Border>
+                                <Label Text="{loc:Translate NoFilterMatchesTitle}" TextColor="{DynamicResource Ink}" FontSize="17"
+                                       FontAttributes="Bold" HorizontalOptions="Center" />
+                                <Label Text="{loc:Translate NoFilterMatchesBody}"
+                                       TextColor="{DynamicResource Muted}" FontSize="14" HorizontalTextAlignment="Center"
+                                       HorizontalOptions="Center" MaximumWidthRequest="280" />
+                                <Border BackgroundColor="{DynamicResource LimeWash}" Stroke="{DynamicResource LineSoft}"
+                                        StrokeThickness="1" Padding="16,10" StrokeShape="RoundRectangle 13"
+                                        HorizontalOptions="Center" Margin="0,4,0,0">
+                                    <Border.GestureRecognizers>
+                                        <TapGestureRecognizer Command="{Binding SelectFilterCommand}"
+                                                               CommandParameter="{x:Static domain:LibraryFilter.All}" />
+                                    </Border.GestureRecognizers>
+                                    <Label Text="{loc:Translate ShowAllFilter}" TextColor="{DynamicResource LimeBright}"
+                                           FontSize="14" FontAttributes="Bold" />
+                                </Border>
+                            </VerticalStackLayout>
                         </Grid>
-                    </CollectionView.EmptyView>
+                        <!-- Keeps the last card scrollable out from under the floating Add button / timers bar;
+                             sized in code to the bottom dock's height. -->
+                        <BoxView x:Name="BottomDockSpacer" HeightRequest="96" Color="Transparent" />
+                        </VerticalStackLayout>
+                    </CollectionView.Footer>
                 </CollectionView>
         </Grid>
+
+        <!-- Bottom dock: the floating "+ Add recipe" button sits above the app-wide running-timers
+             bar, both under the sheets' scrim. The dock itself lets taps through to the list; only its
+             children take them. Width is stamped in code (see OnPageSizeChanged). -->
+        <VerticalStackLayout x:Name="BottomDock" VerticalOptions="End" HorizontalOptions="Center"
+                             Padding="20,0,20,6" Spacing="4"
+                             InputTransparent="True" CascadeInputTransparent="False">
+            <controls:AddRecipeButton x:Name="AddButton" HorizontalOptions="End" Margin="0,0,0,10"
+                                      IsVisible="{Binding HasRecipes}" Tapped="OnAddRecipeTapped" />
+            <controls:TimersBar x:Name="TimersBarControl" />
+        </VerticalStackLayout>
+
+        <!-- Add sheet: every way to add a recipe, opened from the Add button. -->
+        <controls:AddRecipeSheet x:Name="AddSheet"
+                                  ImportLinkRequested="OnAddSheetImportLink"
+                                  PasteRequested="OnPasteTapped"
+                                  ClipboardSuggestionRequested="OnAddSheetClipboardSuggestion"
+                                  WebSearchRequested="OnAddSheetWebSearch"
+                                  PhotoRequested="OnAddSheetPhoto"
+                                  TextRequested="OnAddSheetText"
+                                  ManualRequested="OnAddSheetManual" />
+
+        <!-- Import sheet: last child of the outer grid so it overlays everything on Home, for a
+             share from another app, the clipboard banner or the Add sheet's link box. -->
+        <controls:ImportSheet x:Name="ImportSheet"
+                               ImportTapped="OnImportSheetImport"
+                               BuyCreditsTapped="OnImportSheetBuyCredits"
+                               OpenExistingTapped="OnImportSheetOpenExisting"
+                               CancelTapped="OnImportSheetCancel" />
     </Grid>
 </ContentPage>

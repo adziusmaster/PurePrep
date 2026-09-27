@@ -1,13 +1,17 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Adaptive-icon foreground: the steaming-bowl mark in the app's dark ink on the lime tile.
+     The 456 canvas is the 108dp adaptive layer; the mark (drawn on a 300 box, centred on
+     150,149, farthest point ~117 units out) is scaled 0.96 so it stays inside a ~27dp radius,
+     i.e. within the 66dp safe circle every launcher mask keeps. Keep in sync with
+     Platforms/Android/Resources/drawable/appicon_monochrome.xml and Resources/Splash/splash.svg. -->
 <svg width="456" height="456" viewBox="0 0 456 456" version="1.1" xmlns="http://www.w3.org/2000/svg">
-  <g transform="translate(105,105) scale(0.85)">
-    <g stroke="#A7D46F" stroke-width="15" stroke-linecap="round" fill="none">
+  <g transform="translate(84,85) scale(0.96)">
+    <g stroke="#0C100D" stroke-width="15" stroke-linecap="round" fill="none">
       <path d="M112 96 C 96 78, 128 66, 112 46"/>
       <path d="M150 100 C 134 78, 166 64, 150 40"/>
       <path d="M188 96 C 172 78, 204 66, 188 46"/>
     </g>
-    <rect x="70" y="150" width="160" height="26" rx="13" fill="#A7D46F"/>
-    <path d="M84 178 h132 a10 10 0 0 1 10 12 a76 76 0 0 1 -152 0 a10 10 0 0 1 10 -12 z" fill="#A7D46F"/>
-    <path d="M150 250 a76 76 0 0 0 66 -60 h-132 a76 76 0 0 0 66 60 z" fill="#172313" opacity="0.18"/>
+    <rect x="70" y="150" width="160" height="26" rx="13" fill="#0C100D"/>
+    <path d="M84 178 h132 a10 10 0 0 1 10 12 a76 76 0 0 1 -152 0 a10 10 0 0 1 10 -12 z" fill="#0C100D"/>
   </g>
 </svg>

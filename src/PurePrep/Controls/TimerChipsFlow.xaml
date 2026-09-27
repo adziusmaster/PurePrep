@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:local="clr-namespace:PurePrep"
+             xmlns:controls="clr-namespace:PurePrep.Controls"
+             x:Class="PurePrep.Controls.TimerChipsFlow">
+    <!-- The Leading view, then a step's timer chips, wrapped to at most two lines. Leading and the
+         chips are inserted in code before MoreChip, which LimitedWrapLayout treats as its overflow
+         chip: it only appears ("+N more") when the chips don't all fit. -->
+    <controls:LimitedWrapLayout x:Name="Flow" MaxLines="2" Spacing="6" HiddenCountChanged="OnHiddenCountChanged">
+        <Border x:Name="MoreChip" BackgroundColor="{DynamicResource BgElevated}" Stroke="{DynamicResource LineSoft}"
+                StrokeThickness="1" Padding="12,0" MinimumHeightRequest="40" StrokeShape="RoundRectangle 12"
+                local:TapFeedback.IsEnabled="True" AutomationProperties.IsInAccessibleTree="True">
+            <Border.GestureRecognizers>
+                <TapGestureRecognizer Tapped="OnMoreTapped" />
+            </Border.GestureRecognizers>
+            <Label x:Name="MoreLabel" TextColor="{DynamicResource LimeBright}" FontSize="13" FontAttributes="Bold"
+                   VerticalOptions="Center" />
+        </Border>
+    </controls:LimitedWrapLayout>
+</ContentView>

@@ -38,7 +38,7 @@ public sealed class CookTimerNotifier : ICookTimerNotifier
         return status == PermissionStatus.Granted;
     }
 
-    public Task ScheduleAsync(int id, string label, DateTimeOffset endsAt, CancellationToken cancellationToken = default)
+    public Task ScheduleAsync(int id, string label, DateTimeOffset endsAt, bool canExtend = false, CancellationToken cancellationToken = default)
     {
         CreateChannel();
 
@@ -47,7 +47,7 @@ public sealed class CookTimerNotifier : ICookTimerNotifier
             return Task.CompletedTask;
 
         var triggerAt = endsAt.ToUnixTimeMilliseconds();
-        var pending = BuildPendingIntent(id, label);
+        var pending = BuildPendingIntent(id, label, canExtend);
 
         // SetExactAndAllowWhileIdle needs the exact-alarm capability from Android 12 onward. Where
         // it is unavailable we still schedule, just inexactly: a cook timer that fires a little
@@ -63,18 +63,19 @@ public sealed class CookTimerNotifier : ICookTimerNotifier
     public Task CancelAsync(int id, CancellationToken cancellationToken = default)
     {
         var manager = (AlarmManager?)Context.GetSystemService(Context.AlarmService);
-        manager?.Cancel(BuildPendingIntent(id, label: string.Empty));
+        manager?.Cancel(BuildPendingIntent(id, label: string.Empty, canExtend: false));
 
         NotificationManagerCompat.From(Context).Cancel(NotificationBase + id);
         return Task.CompletedTask;
     }
 
-    private static PendingIntent BuildPendingIntent(int id, string label)
+    private static PendingIntent BuildPendingIntent(int id, string label, bool canExtend)
     {
         var intent = new Intent(Context, typeof(CookTimerAlarmReceiver));
         intent.SetAction($"pureprep.timer.{id}");
         intent.PutExtra(CookTimerAlarmReceiver.LabelExtra, label);
         intent.PutExtra(CookTimerAlarmReceiver.IdExtra, id);
+        intent.PutExtra(CookTimerAlarmReceiver.CanExtendExtra, canExtend);
 
         // Mutable pending intents are rejected from Android 12; Immutable is required here.
         var flags = PendingIntentFlags.UpdateCurrent | PendingIntentFlags.Immutable;
@@ -107,6 +108,7 @@ public sealed class CookTimerAlarmReceiver : BroadcastReceiver
 {
     internal const string LabelExtra = "pureprep.timer.label";
     internal const string IdExtra = "pureprep.timer.id";
+    internal const string CanExtendExtra = "pureprep.timer.canExtend";
 
     public override void OnReceive(Context? context, Intent? intent)
     {
@@ -117,9 +119,20 @@ public sealed class CookTimerAlarmReceiver : BroadcastReceiver
 
         var id = intent?.GetIntExtra(IdExtra, 0) ?? 0;
         var label = intent?.GetStringExtra(LabelExtra);
-        var body = string.IsNullOrWhiteSpace(label)
-            ? "Your cooking timer has finished."
-            : $"{label} is up.";
+        var canExtend = intent?.GetBooleanExtra(CanExtendExtra, false) ?? false;
+
+        // A range timer that just reached its minimum invites a check (it can still be pushed
+        // towards its maximum with "+2 min") rather than announcing the cook is simply done.
+        // The alarm can fire in a cold process where the app hasn't applied its language yet, so resolve
+        // the cook's chosen language (the persisted preference) rather than trusting CurrentUICulture.
+        var culture = PurePrep.Localization.LocalizationService.ResolveCulture();
+        string Text(string key) => PurePrep.Localization.AppResources.Get(key, culture);
+
+        var body = canExtend
+            ? $"{Text("CheckNow")} — {label}"
+            : string.IsNullOrWhiteSpace(label)
+                ? Text("TimerFinishedBody")
+                : string.Format(culture, Text("TimerUpFormat"), label);
 
         // Tapping the notification returns to PurePrep rather than dumping the user on the launcher.
         var launch = context.PackageManager?.GetLaunchIntentForPackage(context.PackageName!);
@@ -129,7 +142,7 @@ public sealed class CookTimerAlarmReceiver : BroadcastReceiver
                 PendingIntentFlags.UpdateCurrent | PendingIntentFlags.Immutable);
 
         var builder = new NotificationCompat.Builder(context, CookTimerNotifier.ChannelId)
-            .SetContentTitle("Timer finished")
+            .SetContentTitle(Text("TimerFinishedTitle"))
             .SetContentText(body)
             .SetSmallIcon(global::Android.Resource.Drawable.IcDialogInfo)
             .SetPriority((int)NotificationPriority.High)

@@ -18,15 +18,15 @@ public sealed class RecipeDetailViewModel : INotifyPropertyChanged
     private ParsedRecipe _recipe;
     private ParsedRecipe _active;
     private ParsedRecipe _display;
-    private int? _baseServings;
     private double _factor = 1.0;
+    private string? _notes;
 
     public RecipeDetailViewModel(ParsedRecipe recipe)
     {
         _recipe = recipe;
         _active = recipe.Displayed();
         _display = RecipeUnits.ForDisplay(_active);
-        _baseServings = ServingsDetector.Detect(_active.Title, _active.Ingredients, _active.Steps.Select(s => s.Instruction));
+        _notes = recipe.Notes;
 
         ScaleOptions = new ObservableCollection<ScaleOption>
         {
@@ -36,6 +36,23 @@ public sealed class RecipeDetailViewModel : INotifyPropertyChanged
             new(this, "3\u00D7", 3.0),
         };
         SelectScaleCommand = new Command<ScaleOption>(opt => { if (opt is not null) Factor = opt.Factor; });
+        IncreaseServingsCommand = new Command(() => SetServings(CurrentServings + 1));
+        DecreaseServingsCommand = new Command(() => SetServings(CurrentServings - 1));
+        ResetServingsCommand = new Command(() => SetServings(OriginalServings ?? 1));
+        ToggleFavouriteCommand = new Command(() => IsFavourite = !IsFavourite);
+        ToggleStatusCommand = new Command(() =>
+        {
+            _recipe = _recipe.Status == RecipeStatus.Cooked
+                ? _recipe.WithStatus(RecipeStatus.WantToCook)
+                : _recipe.MarkCooked(DateTimeOffset.UtcNow);
+            OnPropertyChanged(nameof(StatusText));
+            OnPropertyChanged(nameof(IsCooked));
+            Persist();
+        });
+
+        // Applies servings remembered from a previous visit so the ingredient list and method steps
+        // come up already scaled, instead of only scaling once the stepper is touched again.
+        _factor = ServingsScale.Factor(OriginalServings, CurrentServings);
         RebuildDisplay();
     }
 
@@ -45,12 +62,12 @@ public sealed class RecipeDetailViewModel : INotifyPropertyChanged
     public ParsedRecipe DisplayRecipe => _display;
 
     /// <summary>
-    /// The recipe as it should be cooked: units converted <b>and</b> the chosen serving multiplier
-    /// applied. Focus Mode previously received <see cref="DisplayRecipe"/>, which is only
-    /// unit-converted — so scaling to 2x and tapping Cook still showed the original quantities,
-    /// at exactly the moment the scaled ones are needed.
+    /// The recipe as it should be cooked: displayed translation, units converted <b>and</b> the chosen
+    /// servings applied — built by <see cref="CookingCopy.For"/>, the same helper the library card and the
+    /// timers bar use, so Focus Mode shows the same quantities whichever way it was opened. With an
+    /// unknown yield the ½×/2× <see cref="Factor"/> applies instead.
     /// </summary>
-    public ParsedRecipe CookRecipe => RecipeScaling.ScaleRecipe(_display, _factor);
+    public ParsedRecipe CookRecipe => CookingCopy.For(_recipe, UnitSettings.Target, _factor);
 
     /// <summary>
     /// The language the recipe's text is currently in, for reading aloud and voice commands: the
@@ -58,10 +75,7 @@ public sealed class RecipeDetailViewModel : INotifyPropertyChanged
     /// back to the app UI language when neither is known (legacy recipes).
     /// </summary>
     public string SpokenLanguageCode =>
-        FirstNonEmpty(_recipe.DisplayLanguage, _recipe.OriginalLanguage) ?? LocalizationService.EffectiveTwoLetterCode;
-
-    private static string? FirstNonEmpty(params string?[] values) =>
-        values.FirstOrDefault(v => !string.IsNullOrWhiteSpace(v));
+        CookingCopy.SpokenLanguage(_recipe) ?? LocalizationService.EffectiveTwoLetterCode;
 
     public string Title => _active.Title;
     public int StepCount => _active.StepCount;
@@ -106,24 +120,149 @@ public sealed class RecipeDetailViewModel : INotifyPropertyChanged
     public ObservableCollection<ScaleOption> ScaleOptions { get; }
     public ICommand SelectScaleCommand { get; }
 
+    /// <summary>The recipe's own servings count, detected from its text or set explicitly. Null when unknown.</summary>
+    public int? OriginalServings => ServingsScale.OriginalServings(_recipe);
+
+    /// <summary>True when a people-based yield is known, so the <c>ServingsStepper</c> can be shown.</summary>
+    public bool HasKnownServings => OriginalServings is not null;
+
+    /// <summary>The servings currently shown: the remembered choice, or the recipe's own yield, or 1.</summary>
+    public int CurrentServings => _recipe.ChosenServings ?? OriginalServings ?? 1;
+
+    /// <summary>True once the cook has scaled away from the recipe's own servings (shows the \u21BA reset).</summary>
+    public bool IsServingsChanged => HasKnownServings && CurrentServings != OriginalServings;
+
+    /// <summary>True when the servings were model-estimated rather than stated \u2014 shown as "~4".</summary>
+    public bool ServingsEstimated => _recipe.ServingsEstimated && !IsServingsChanged;
+
+    /// <summary>The noun shown after the number ("people" by default, or the recipe's own e.g. "pancakes").</summary>
+    public string ServingsNounText =>
+        string.IsNullOrWhiteSpace(_recipe.ServingsNoun) ? AppResources.Get("People") : _recipe.ServingsNoun!;
+
+    public ICommand IncreaseServingsCommand { get; }
+    public ICommand DecreaseServingsCommand { get; }
+    public ICommand ResetServingsCommand { get; }
+
+    /// <summary>Changes the servings the recipe is scaled to (clamped 1..99) and persists the choice.</summary>
+    public void SetServings(int value)
+    {
+        var clamped = Math.Clamp(value, 1, 99);
+        _recipe = _recipe.WithChosenServings(clamped == OriginalServings ? null : clamped);
+        Factor = ServingsScale.Factor(OriginalServings, CurrentServings);
+        RaiseServingsChanged();
+        Persist();
+    }
+
     /// <summary>
-    /// Caption that explains the scaler: shows the resulting servings when the recipe's yield
-    /// could be detected ("Serves 8"), otherwise the plain multiplier ("Scale 2x").
+    /// Sets the recipe's own servings count for the first time, via the "Set servings" link shown for
+    /// recipes whose yield couldn't be detected. Clears <see cref="ServingsEstimated"/> \u2014 a number the
+    /// cook typed in themselves is no longer an estimate.
     /// </summary>
-    public string ServingsCaption
+    public void SetInitialServings(int value)
+    {
+        _recipe = _recipe.WithServings(value);
+        Factor = ServingsScale.Factor(OriginalServings, CurrentServings);
+        RaiseServingsChanged();
+        Persist();
+    }
+
+    private void RaiseServingsChanged()
+    {
+        OnPropertyChanged(nameof(OriginalServings));
+        OnPropertyChanged(nameof(HasKnownServings));
+        OnPropertyChanged(nameof(CurrentServings));
+        OnPropertyChanged(nameof(IsServingsChanged));
+        OnPropertyChanged(nameof(ServingsEstimated));
+        OnPropertyChanged(nameof(ServingsNounText));
+    }
+
+    /// <summary>Whether the recipe is starred. Persists immediately when changed.</summary>
+    public bool IsFavourite
+    {
+        get => _recipe.IsFavourite;
+        set
+        {
+            if (_recipe.IsFavourite == value)
+                return;
+            _recipe = _recipe.WithFavourite(value);
+            OnPropertyChanged(nameof(IsFavourite));
+            Persist();
+        }
+    }
+
+    public ICommand ToggleFavouriteCommand { get; }
+
+    public bool IsCooked => _recipe.Status == RecipeStatus.Cooked;
+
+    /// <summary>"Want to cook" or "Cooked 24 Sep" for the status chip.</summary>
+    public string StatusText => IsCooked
+        ? AppResources.Format("StatusCookedFormat", _recipe.CookedAt?.LocalDateTime.ToString("d MMM") ?? string.Empty)
+        : AppResources.Get("StatusWantToCook");
+
+    /// <summary>Flips Want to cook \u21C4 Cooked (marking the cook count/date when moving to Cooked).</summary>
+    public ICommand ToggleStatusCommand { get; }
+
+    /// <summary>
+    /// The cook's own notes. Two-way bound to the notes editor; edits are kept locally as the cook
+    /// types and only persisted by <see cref="CommitNotes"/>, called on the editor losing focus.
+    /// </summary>
+    public string? Notes
+    {
+        get => _notes;
+        set
+        {
+            if (_notes == value)
+                return;
+            _notes = value;
+            OnPropertyChanged(nameof(Notes));
+        }
+    }
+
+    /// <summary>Persists the notes editor's current text. No-op when nothing changed since the last save.</summary>
+    public void CommitNotes()
+    {
+        if (string.Equals(_notes, _recipe.Notes, StringComparison.Ordinal))
+            return;
+        _recipe = _recipe.WithNotes(_notes);
+        _notes = _recipe.Notes;
+        OnPropertyChanged(nameof(Notes));
+        Persist();
+    }
+
+    /// <summary>"Prep 15 min \u00B7 Cook 30 min \u00B7 jamieoliver.com", omitting parts the recipe doesn't have.</summary>
+    public string MetaLine
     {
         get
         {
-            if (_baseServings is int baseServings)
-            {
-                var scaled = Math.Max(1, (int)Math.Round(baseServings * _factor, MidpointRounding.AwayFromZero));
-                return AppResources.Format("ServesFormat", scaled);
-            }
-
-            var label = ScaleOptions.FirstOrDefault(o => o.IsSelected)?.Label ?? "1\u00D7";
-            return AppResources.Format("ScaleCaptionFormat", label);
+            var parts = new List<string>();
+            if (_recipe.PrepMinutes is > 0)
+                parts.Add(AppResources.Format("PrepFormat", _recipe.PrepMinutes));
+            if (_recipe.CookMinutes is > 0)
+                parts.Add(AppResources.Format("CookFormat", _recipe.CookMinutes));
+            if (HasSource)
+                parts.Add(SourceHost);
+            return string.Join(" \u00B7 ", parts);
         }
     }
+
+    /// <summary>
+    /// True when the recipe's own units differ from the user's chosen display system, so the
+    /// "Ingredients not in your units?" discoverability row is worth showing. "As written" (no
+    /// preference set) never shows it \u2014 the cook explicitly asked not to convert.
+    /// </summary>
+    public bool ShowUnitHint
+    {
+        get
+        {
+            var target = UnitSettings.Target;
+            return target is not null && target != _recipe.SourceSystem;
+        }
+    }
+
+    /// <summary>Raised after every persisted change (servings, favourite, status, notes) with the new recipe.</summary>
+    public event EventHandler<ParsedRecipe>? RecipeChanged;
+
+    private void Persist() => RecipeChanged?.Invoke(this, _recipe);
 
     /// <summary>The active serving multiplier. 1.0 shows the original quantities.</summary>
     public double Factor
@@ -136,10 +275,21 @@ public sealed class RecipeDetailViewModel : INotifyPropertyChanged
             _factor = value;
             RebuildIngredients();
             RebuildSteps();
-            OnPropertyChanged(nameof(ServingsCaption));
             foreach (var option in ScaleOptions)
                 option.RaiseSelectedChanged();
         }
+    }
+
+    /// <summary>
+    /// Updates only the photo (attached after import) without touching anything else on screen — a
+    /// full <see cref="SetRecipe"/> would also reset notes the cook may be typing.
+    /// </summary>
+    public void SetImage(string? imagePath)
+    {
+        if (_recipe.ImagePath == imagePath)
+            return;
+        _recipe = _recipe.WithImage(imagePath);
+        OnPropertyChanged(nameof(Recipe));
     }
 
     /// <summary>Replaces the wrapped recipe (e.g. after an edit or a units change) and refreshes bindings.</summary>
@@ -148,8 +298,11 @@ public sealed class RecipeDetailViewModel : INotifyPropertyChanged
         _recipe = recipe;
         _active = recipe.Displayed();
         _display = RecipeUnits.ForDisplay(_active);
-        _baseServings = ServingsDetector.Detect(_active.Title, _active.Ingredients, _active.Steps.Select(s => s.Instruction));
+        _notes = recipe.Notes;
+        _factor = ServingsScale.Factor(OriginalServings, CurrentServings);
         RebuildDisplay();
+        // The photo header binds to Recipe itself (an edit can add, change or remove the photo).
+        OnPropertyChanged(nameof(Recipe));
         OnPropertyChanged(nameof(Title));
         OnPropertyChanged(nameof(StepCount));
         OnPropertyChanged(nameof(IngredientCount));
@@ -157,10 +310,16 @@ public sealed class RecipeDetailViewModel : INotifyPropertyChanged
         OnPropertyChanged(nameof(DisplayRecipe));
         OnPropertyChanged(nameof(SourceHost));
         OnPropertyChanged(nameof(HasSource));
-        OnPropertyChanged(nameof(ServingsCaption));
         OnPropertyChanged(nameof(IsTranslated));
         OnPropertyChanged(nameof(TranslatedLanguageName));
         OnPropertyChanged(nameof(TranslatedBadge));
+        OnPropertyChanged(nameof(MetaLine));
+        OnPropertyChanged(nameof(ShowUnitHint));
+        OnPropertyChanged(nameof(Notes));
+        OnPropertyChanged(nameof(IsFavourite));
+        OnPropertyChanged(nameof(StatusText));
+        OnPropertyChanged(nameof(IsCooked));
+        RaiseServingsChanged();
     }
 
     private void RebuildDisplay()
@@ -176,7 +335,7 @@ public sealed class RecipeDetailViewModel : INotifyPropertyChanged
         foreach (var step in _display.Steps)
             DisplaySteps.Add(atOriginal
                 ? step
-                : new RecipeStep { Order = step.Order, Instruction = RecipeScaling.ScaleText(step.Instruction, _factor) });
+                : step with { Instruction = RecipeScaling.ScaleText(step.Instruction, _factor) });
     }
 
     private void RebuildIngredients()

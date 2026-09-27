@@ -13,4 +13,8 @@
     <ProjectReference Include="..\PurePrep.Core\PurePrep.Core.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <InternalsVisibleTo Include="PurePrep.Server.Tests" />
+  </ItemGroup>
+
 </Project>

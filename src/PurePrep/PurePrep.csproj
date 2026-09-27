@@ -34,8 +34,8 @@
 		<ApplicationId>com.adziusmaster.pureprep</ApplicationId>
 
 		<!-- Versions -->
-		<ApplicationDisplayVersion>1.3.3</ApplicationDisplayVersion>
-		<ApplicationVersion>24</ApplicationVersion>
+		<ApplicationDisplayVersion>1.4.0</ApplicationDisplayVersion>
+		<ApplicationVersion>25</ApplicationVersion>
 
 		<!-- To develop, package, and publish an app to the Microsoft Store, see: https://aka.ms/MauiTemplateUnpackaged -->
 		<WindowsPackageType>None</WindowsPackageType>
@@ -46,6 +46,32 @@
 		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">10.0.17763.0</SupportedOSPlatformVersion>
 		<TargetPlatformMinVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">10.0.17763.0</TargetPlatformMinVersion>
 	</PropertyGroup>
+
+	<!--
+		Opt-in local backend for Debug builds. By default (PurePrepLocalApi unset/false) Debug
+		builds target the deployed production API, identically to Release, so a plain Debug build
+		+ install works on any device without a local PurePrep.Server running. Pass
+		-p:PurePrepLocalApi=true (Debug configuration only — Release always ignores it, see below)
+		to switch Debug builds to http://localhost:5299/ instead (see MauiProgram.BackendBaseUrl for
+		the adb-reverse setup this requires on a physical device).
+	-->
+	<PropertyGroup>
+		<PurePrepLocalApi Condition="'$(PurePrepLocalApi)' == ''">false</PurePrepLocalApi>
+	</PropertyGroup>
+	<PropertyGroup Condition="'$(Configuration)' == 'Debug' And '$(PurePrepLocalApi)' == 'true'">
+		<DefineConstants>$(DefineConstants);LOCAL_API</DefineConstants>
+	</PropertyGroup>
+
+	<!--
+		Cleartext HTTP to localhost only, merged in only for a Debug build with PurePrepLocalApi=true
+		(see above). Android blocks cleartext traffic by default; without this overlay, LOCAL_API's
+		http://localhost:5299/ would fail even with adb reverse in place. The Configuration=='Debug'
+		guard is deliberate and load-bearing: PurePrepLocalApi=true must never enable cleartext (or
+		LOCAL_API, above) in a Release build, even if someone passes it by mistake.
+	-->
+	<ItemGroup Condition="'$(Configuration)' == 'Debug' And '$(PurePrepLocalApi)' == 'true' And $([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">
+		<AndroidManifestOverlay Include="Platforms\Android\ManifestOverlay.LocalApi.xml" />
+	</ItemGroup>
 
 	<!--
 		Play Console crash/ANR analysis + size. Applies to all Release Android builds.
@@ -81,7 +107,7 @@
 
 	<ItemGroup>
 		<!-- App Icon -->
-		<MauiIcon Include="Resources\AppIcon\appicon.svg" ForegroundFile="Resources\AppIcon\appiconfg.svg" Color="#0C100D" />
+		<MauiIcon Include="Resources\AppIcon\appicon.svg" ForegroundFile="Resources\AppIcon\appiconfg.svg" Color="#A7D46F" />
 
 		<!-- Splash Screen -->
 		<MauiSplashScreen Include="Resources\Splash\splash.svg" Color="#0C100D" BaseSize="128,128" />

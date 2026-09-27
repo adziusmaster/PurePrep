@@ -58,15 +58,6 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="AppTaglineLine1" xml:space="preserve">
-    <value>Votre cuisine,</value>
-  </data>
-  <data name="AppTaglineLine2" xml:space="preserve">
-    <value>en focus.</value>
-  </data>
-  <data name="AppSubtitle" xml:space="preserve">
-    <value>Collez un lien. Gardez les ingrédients et les étapes. Oubliez le bruit.</value>
-  </data>
   <data name="Import" xml:space="preserve">
     <value>Importer</value>
   </data>
@@ -75,24 +66,6 @@
   </data>
   <data name="SearchPlaceholder" xml:space="preserve">
     <value>Rechercher des recettes</value>
-  </data>
-  <data name="YourRecipes" xml:space="preserve">
-    <value>Vos recettes</value>
-  </data>
-  <data name="YourRecipesSubtitle" xml:space="preserve">
-    <value>Touchez une recette pour cuisiner en mode Focus.</value>
-  </data>
-  <data name="AddManually" xml:space="preserve">
-    <value>+ Ajouter manuellement</value>
-  </data>
-  <data name="AddOneManually" xml:space="preserve">
-    <value>+ En ajouter une manuellement</value>
-  </data>
-  <data name="NoRecipesTitle" xml:space="preserve">
-    <value>Aucune recette</value>
-  </data>
-  <data name="NoRecipesBody" xml:space="preserve">
-    <value>Collez un lien de recette ci-dessus pour importer la première.</value>
   </data>
   <data name="NoMatchesTitle" xml:space="preserve">
     <value>Aucun résultat</value>
@@ -115,7 +88,19 @@
   <data name="StepsCountFormat" xml:space="preserve">
     <value>{0} étapes</value>
   </data>
+  <data name="StepsCountFormatOne" xml:space="preserve">
+    <value>{0} étape</value>
+  </data>
+  <data name="StepsCountFormatFew" xml:space="preserve">
+    <value>{0} étapes</value>
+  </data>
   <data name="IngredientsCountFormat" xml:space="preserve">
+    <value>{0} ingrédients</value>
+  </data>
+  <data name="IngredientsCountFormatOne" xml:space="preserve">
+    <value>{0} ingrédient</value>
+  </data>
+  <data name="IngredientsCountFormatFew" xml:space="preserve">
     <value>{0} ingrédients</value>
   </data>
   <data name="SectionIngredients" xml:space="preserve">
@@ -154,6 +139,9 @@
   <data name="SectionTimers" xml:space="preserve">
     <value>MINUTEURS</value>
   </data>
+  <data name="YoullNeed" xml:space="preserve">
+    <value>IL VOUS FAUT</value>
+  </data>
   <data name="Stop" xml:space="preserve">
     <value>Arrêter</value>
   </data>
@@ -168,6 +156,12 @@
   </data>
   <data name="Finish" xml:space="preserve">
     <value>Terminer</value>
+  </data>
+  <data name="DoneTitle" xml:space="preserve">
+    <value>Terminé ?</value>
+  </data>
+  <data name="MarkAsCooked" xml:space="preserve">
+    <value>Marquer cette recette comme cuisinée ?</value>
   </data>
   <data name="StepOfFormat" xml:space="preserve">
     <value>ÉTAPE {0} SUR {1}</value>
@@ -192,22 +186,6 @@
   </data>
   <data name="TitlePlaceholder" xml:space="preserve">
     <value>ex. Risotto aux champignons</value>
-  </data>
-  <data name="OnePerLine" xml:space="preserve">
-    <value>Un par ligne.</value>
-  </data>
-  <data name="OneStepPerLine" xml:space="preserve">
-    <value>Une étape par ligne.</value>
-  </data>
-  <data name="IngredientsPlaceholder" xml:space="preserve">
-    <value>250 g de riz arborio
-1 oignon, finement haché
-1 l de bouillon de légumes</value>
-  </data>
-  <data name="StepsPlaceholder" xml:space="preserve">
-    <value>Faites revenir l’oignon dans l’huile.
-Faites nacrer le riz une minute.
-Ajoutez le bouillon louche par louche en remuant.</value>
   </data>
   <data name="SaveRecipe" xml:space="preserve">
     <value>Enregistrer la recette</value>
@@ -238,9 +216,6 @@ Ajoutez le bouillon louche par louche en remuant.</value>
   </data>
   <data name="ThemeDark" xml:space="preserve">
     <value>Sombre</value>
-  </data>
-  <data name="AppearanceDesc" xml:space="preserve">
-    <value>PurePrep est conçu pour le sombre. Le clair suit votre recette tout aussi proprement.</value>
   </data>
   <data name="SectionCooking" xml:space="preserve">
     <value>CUISINE</value>
@@ -338,11 +313,11 @@ Ajoutez le bouillon louche par louche en remuant.</value>
   <data name="UnitsDesc" xml:space="preserve">
     <value>Convertit les quantités des ingrédients et des étapes dans votre système préféré.</value>
   </data>
+  <data name="MinutesFormat" xml:space="preserve">
+    <value>{0} min</value>
+  </data>
   <data name="ServesFormat" xml:space="preserve">
     <value>Pour {0} personnes</value>
-  </data>
-  <data name="ScaleCaptionFormat" xml:space="preserve">
-    <value>Quantité {0}</value>
   </data>
   <data name="Ok" xml:space="preserve">
     <value>OK</value>
@@ -551,11 +526,44 @@ Ajoutez le bouillon louche par louche en remuant.</value>
   <data name="DuplicateKeepBoth" xml:space="preserve">
     <value>Garder les deux</value>
   </data>
+  <data name="ImportSheetTitle" xml:space="preserve">
+    <value>Importer cette recette ?</value>
+  </data>
+  <data name="ImportSheetCostFormat" xml:space="preserve">
+    <value>Coûte 1 crédit Smart · il vous en reste {0}</value>
+  </data>
+  <data name="ImportSheetCost" xml:space="preserve">
+    <value>Coûte 1 crédit Smart</value>
+  </data>
+  <data name="ImportSheetNoCredits" xml:space="preserve">
+    <value>Vous n'avez plus de Smart Credits — importer une recette en utilise 1.</value>
+  </data>
+  <data name="ImportSheetAlreadySaved" xml:space="preserve">
+    <value>Déjà enregistrée dans votre bibliothèque</value>
+  </data>
+  <data name="OpenIt" xml:space="preserve">
+    <value>Ouvrir</value>
+  </data>
+  <data name="ImportAgain" xml:space="preserve">
+    <value>Importer à nouveau</value>
+  </data>
+  <data name="ClipboardSuggestFormat" xml:space="preserve">
+    <value>{0} · Importer ?</value>
+  </data>
   <data name="SourceOpen" xml:space="preserve">
     <value>Ouvrir le lien</value>
   </data>
   <data name="SourceCopy" xml:space="preserve">
     <value>Copier le lien</value>
+  </data>
+  <data name="More" xml:space="preserve">
+    <value>Plus</value>
+  </data>
+  <data name="ShareRecipe" xml:space="preserve">
+    <value>Partager la recette</value>
+  </data>
+  <data name="OpenOriginal" xml:space="preserve">
+    <value>Ouvrir l’original</value>
   </data>
   <data name="ExportSaveToDevice" xml:space="preserve">
     <value>Enregistrer sur l’appareil</value>
@@ -569,11 +577,62 @@ Ajoutez le bouillon louche par louche en remuant.</value>
   <data name="ExportSavedFormat" xml:space="preserve">
     <value>Enregistré dans {0} sous {1}.</value>
   </data>
+  <data name="ImportPhotoTitle" xml:space="preserve">
+    <value>Importer depuis une photo</value>
+  </data>
+  <data name="ImportPhotoTake" xml:space="preserve">
+    <value>Prendre une photo</value>
+  </data>
+  <data name="ImportPhotoChoose" xml:space="preserve">
+    <value>Choisir dans la galerie</value>
+  </data>
+  <data name="ImportPhotoUnavailable" xml:space="preserve">
+    <value>L’appareil photo n’est pas disponible sur cet appareil.</value>
+  </data>
+  <data name="ImportPhotoHint" xml:space="preserve">
+    <value>Prenez en photo une page de livre de cuisine ou une capture d’écran — coûte 2 crédits.</value>
+  </data>
+  <data name="ImportTextTitle" xml:space="preserve">
+    <value>Coller le texte de la recette</value>
+  </data>
+  <data name="ImportTextBody" xml:space="preserve">
+    <value>Collez une recette venue de n’importe où — notes, message, PDF — et on la transforme en étapes.</value>
+  </data>
+  <data name="ImportTextPlaceholder" xml:space="preserve">
+    <value>Collez la recette complète ici…</value>
+  </data>
+  <data name="ErrPasteText" xml:space="preserve">
+    <value>Collez d’abord une recette, puis appuyez sur Importer.</value>
+  </data>
+  <data name="Start" xml:space="preserve">
+    <value>Démarrer</value>
+  </data>
   <data name="PackCreditsFormat" xml:space="preserve">
     <value>{0} crédits</value>
   </data>
+  <data name="CookingOptions" xml:space="preserve">
+    <value>Options de cuisine</value>
+  </data>
+  <data name="ReadAloud" xml:space="preserve">
+    <value>Lire à voix haute</value>
+  </data>
+  <data name="ReadEachStepAloud" xml:space="preserve">
+    <value>Lire chaque étape à voix haute</value>
+  </data>
+  <data name="ReadStep" xml:space="preserve">
+    <value>Lire l’étape</value>
+  </data>
+  <data name="StopReading" xml:space="preserve">
+    <value>Arrêter la lecture</value>
+  </data>
+  <data name="VoiceControl" xml:space="preserve">
+    <value>Voix</value>
+  </data>
+  <data name="VoiceListening" xml:space="preserve">
+    <value>Écoute…</value>
+  </data>
   <data name="VoiceCommandsHintFormat" xml:space="preserve">
-    <value>Dites « {0} », « {1} » ou « {2} ».</value>
+    <value>Dites « {0} », « {1} », « {2} » ou « {3} ».</value>
   </data>
   <data name="SectionReadingVoice" xml:space="preserve">
     <value>LECTURE ET VOIX</value>
@@ -604,5 +663,218 @@ Ajoutez le bouillon louche par louche en remuant.</value>
   </data>
   <data name="CreditsBalanceZero" xml:space="preserve">
     <value>Vous n'avez plus de crédits intelligents.</value>
+  </data>
+  <data name="FilterAll" xml:space="preserve">
+    <value>Toutes</value>
+  </data>
+  <data name="FilterWantToCook" xml:space="preserve">
+    <value>À cuisiner</value>
+  </data>
+  <data name="FilterCooked" xml:space="preserve">
+    <value>Cuisinées</value>
+  </data>
+  <data name="FilterFavourites" xml:space="preserve">
+    <value>Favorites</value>
+  </data>
+  <data name="SortBy" xml:space="preserve">
+    <value>Trier par</value>
+  </data>
+  <data name="SortRecentlyAdded" xml:space="preserve">
+    <value>Ajoutées récemment</value>
+  </data>
+  <data name="SortRecentlyCooked" xml:space="preserve">
+    <value>Cuisinées récemment</value>
+  </data>
+  <data name="SortAlphabetical" xml:space="preserve">
+    <value>A-Z</value>
+  </data>
+  <data name="NoFilterMatchesTitle" xml:space="preserve">
+    <value>Aucune recette ne correspond à ce filtre</value>
+  </data>
+  <data name="NoFilterMatchesBody" xml:space="preserve">
+    <value>Essayez un autre filtre, ou revenez à Toutes.</value>
+  </data>
+  <data name="ShowAllFilter" xml:space="preserve">
+    <value>Tout afficher</value>
+  </data>
+  <data name="Serves" xml:space="preserve">
+    <value>Pour</value>
+  </data>
+  <data name="People" xml:space="preserve">
+    <value>personnes</value>
+  </data>
+  <data name="ServesUnknown" xml:space="preserve">
+    <value>Portions inconnues</value>
+  </data>
+  <data name="SetServings" xml:space="preserve">
+    <value>Définir les portions</value>
+  </data>
+  <data name="YourNotes" xml:space="preserve">
+    <value>Vos notes</value>
+  </data>
+  <data name="NotesPlaceholder" xml:space="preserve">
+    <value>Ajoutez vos notes, ajustements ou rappels…</value>
+  </data>
+  <data name="StatusWantToCook" xml:space="preserve">
+    <value>À cuisiner</value>
+  </data>
+  <data name="StatusCookedFormat" xml:space="preserve">
+    <value>Cuisiné le {0}</value>
+  </data>
+  <data name="Favourite" xml:space="preserve">
+    <value>Favori</value>
+  </data>
+  <data name="PrepFormat" xml:space="preserve">
+    <value>Préparation {0} min</value>
+  </data>
+  <data name="CookFormat" xml:space="preserve">
+    <value>Cuisson {0} min</value>
+  </data>
+  <data name="DecreaseServings" xml:space="preserve">
+    <value>Diminuer les portions</value>
+  </data>
+  <data name="IncreaseServings" xml:space="preserve">
+    <value>Augmenter les portions</value>
+  </data>
+  <data name="ResetServings" xml:space="preserve">
+    <value>Réinitialiser les portions</value>
+  </data>
+  <data name="CheckNow" xml:space="preserve">
+    <value>Vérifier maintenant</value>
+  </data>
+  <data name="AddTwoMinutes" xml:space="preserve">
+    <value>+2 min</value>
+  </data>
+  <data name="EditTimer" xml:space="preserve">
+    <value>Modifier le minuteur</value>
+  </data>
+  <data name="TimerLabel" xml:space="preserve">
+    <value>Nom</value>
+  </data>
+  <data name="TimerMinutes" xml:space="preserve">
+    <value>Minutes</value>
+  </data>
+  <data name="DurationSecondsFormat" xml:space="preserve">
+    <value>{0} s</value>
+  </data>
+  <data name="DurationMinutesFormat" xml:space="preserve">
+    <value>{0} min</value>
+  </data>
+  <data name="DurationMinutesSecondsFormat" xml:space="preserve">
+    <value>{0} min {1} s</value>
+  </data>
+  <data name="DurationHoursFormat" xml:space="preserve">
+    <value>{0} h</value>
+  </data>
+  <data name="DurationHoursMinutesFormat" xml:space="preserve">
+    <value>{0} h {1} min</value>
+  </data>
+  <data name="DurationRangeMinutesFormat" xml:space="preserve">
+    <value>{0}–{1} min</value>
+  </data>
+  <data name="AddIngredient" xml:space="preserve">
+    <value>+ Ajouter un ingrédient</value>
+  </data>
+  <data name="AddStep" xml:space="preserve">
+    <value>+ Ajouter une étape</value>
+  </data>
+  <data name="IngredientPlaceholder" xml:space="preserve">
+    <value>ex. 200 g d’épinards</value>
+  </data>
+  <data name="StepPlaceholder" xml:space="preserve">
+    <value>Décrivez cette étape…</value>
+  </data>
+  <data name="PrepMinutes" xml:space="preserve">
+    <value>Prépa (min)</value>
+  </data>
+  <data name="CookMinutes" xml:space="preserve">
+    <value>Cuisson (min)</value>
+  </data>
+  <data name="StepNumberFormat" xml:space="preserve">
+    <value>Étape {0}</value>
+  </data>
+  <data name="Servings" xml:space="preserve">
+    <value>Portions</value>
+  </data>
+  <data name="MoreTimersFormat" xml:space="preserve">
+    <value>+{0} de plus</value>
+  </data>
+  <data name="StepTimersTitle" xml:space="preserve">
+    <value>Minuteurs de cette étape</value>
+  </data>
+  <data name="AddPhoto" xml:space="preserve">
+    <value>Ajouter une photo</value>
+  </data>
+  <data name="ChangePhoto" xml:space="preserve">
+    <value>Changer la photo</value>
+  </data>
+  <data name="RemovePhoto" xml:space="preserve">
+    <value>Supprimer la photo</value>
+  </data>
+  <data name="CameraPermissionDenied" xml:space="preserve">
+    <value>PurePrep a besoin d’accéder à l’appareil photo pour prendre une photo. Vous pouvez l’autoriser dans les Réglages.</value>
+  </data>
+  <data name="SearchTheWeb" xml:space="preserve">
+    <value>Chercher une recette sur le web</value>
+  </data>
+  <data name="AddToPurePrep" xml:space="preserve">
+    <value>Ajouter à PurePrep</value>
+  </data>
+  <data name="OpenInBrowser" xml:space="preserve">
+    <value>Ouvrir dans le navigateur</value>
+  </data>
+  <data name="TryImportAnyway" xml:space="preserve">
+    <value>Essayer d'importer cette page quand même</value>
+  </data>
+  <data name="RecipeSearchWord" xml:space="preserve">
+    <value>recette</value>
+  </data>
+  <data name="TryAddingThisPage" xml:space="preserve">
+    <value>Essayer d'ajouter cette page</value>
+  </data>
+  <data name="AddRecipe" xml:space="preserve">
+    <value>Ajouter une recette</value>
+  </data>
+  <data name="PasteALink" xml:space="preserve">
+    <value>Coller un lien</value>
+  </data>
+  <data name="SearchTheWebRow" xml:space="preserve">
+    <value>Chercher sur le web</value>
+  </data>
+  <data name="FromAPhoto" xml:space="preserve">
+    <value>À partir d’une photo</value>
+  </data>
+  <data name="FromText" xml:space="preserve">
+    <value>À partir d’un texte</value>
+  </data>
+  <data name="TypeItYourself" xml:space="preserve">
+    <value>La saisir vous-même</value>
+  </data>
+  <data name="AddSheetCost" xml:space="preserve">
+    <value>Les imports par lien, photo ou texte utilisent des Smart Credits</value>
+  </data>
+  <data name="AddSheetCostFormat" xml:space="preserve">
+    <value>Les imports par lien, photo ou texte utilisent des Smart Credits · il vous en reste {0}</value>
+  </data>
+  <data name="AddYourFirstRecipe" xml:space="preserve">
+    <value>Ajoutez votre première recette</value>
+  </data>
+  <data name="AddFirstRecipeBody" xml:space="preserve">
+    <value>Importez-en une depuis un lien, une photo ou un texte — ou saisissez-la vous-même.</value>
+  </data>
+  <data name="ImportingRecipe" xml:space="preserve">
+    <value>Import en cours…</value>
+  </data>
+  <data name="ErrGeneric" xml:space="preserve">
+    <value>Un problème est survenu. Veuillez réessayer.</value>
+  </data>
+  <data name="TimerUpFormat" xml:space="preserve">
+    <value>{0} : c’est prêt.</value>
+  </data>
+  <data name="TimerFinishedTitle" xml:space="preserve">
+    <value>Minuteur terminé</value>
+  </data>
+  <data name="TimerFinishedBody" xml:space="preserve">
+    <value>Votre minuteur de cuisine est terminé.</value>
   </data>
 </root>

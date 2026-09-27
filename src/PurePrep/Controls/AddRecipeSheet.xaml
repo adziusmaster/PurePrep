@@ -1,0 +1,183 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:local="clr-namespace:PurePrep"
+             xmlns:controls="clr-namespace:PurePrep.Controls"
+             xmlns:loc="clr-namespace:PurePrep.Localization"
+             xmlns:icons="clr-namespace:PurePrep.Resources.Styles"
+             x:Class="PurePrep.Controls.AddRecipeSheet"
+             x:Name="Root"
+             IsVisible="False"
+             InputTransparent="False">
+
+    <!-- "Add a recipe": every way to get a recipe into the library, opened from Home's floating
+         button. Hosted in the shared BottomSheet; inherits Home's BindingContext
+         (RecipeLibraryViewModel) for the link box, clipboard suggestion, errors and translate tip.
+         The body scrolls (its height is capped in code) so it still fits above the keyboard. -->
+    <controls:BottomSheet x:Name="Sheet" Cancelled="OnSheetCancelled">
+        <ScrollView x:Name="Scroller" VerticalScrollBarVisibility="Never">
+            <VerticalStackLayout Spacing="0">
+
+                <Grid ColumnDefinitions="*,Auto" Margin="0,0,0,6">
+                    <Label Text="{loc:Translate AddRecipeTitle}" Style="{StaticResource SheetTitle}"
+                           VerticalOptions="Center" />
+                    <Border Grid.Column="1" WidthRequest="40" HeightRequest="40"
+                            BackgroundColor="{DynamicResource Bg}" StrokeThickness="0" StrokeShape="RoundRectangle 20"
+                            local:TapFeedback.IsEnabled="True" AutomationProperties.IsInAccessibleTree="True"
+                            AutomationProperties.Name="{loc:Translate Close}">
+                        <Border.GestureRecognizers>
+                            <TapGestureRecognizer Tapped="OnCloseTapped" />
+                        </Border.GestureRecognizers>
+                        <Label Style="{StaticResource IconLabel}" Text="{x:Static icons:Icons.Close}"
+                               TextColor="{DynamicResource Muted}" FontSize="18" />
+                    </Border>
+                </Grid>
+
+                <!-- A recipe link found on the clipboard: one tap straight to the Import sheet. -->
+                <Border IsVisible="{Binding HasClipboardSuggestion}" BackgroundColor="{DynamicResource LimeWash}"
+                        Stroke="{DynamicResource LineSoft}" StrokeShape="RoundRectangle 16" Padding="14,12"
+                        Margin="0,10,0,0" local:TapFeedback.IsEnabled="True">
+                    <Border.GestureRecognizers>
+                        <TapGestureRecognizer Tapped="OnClipboardSuggestionTapped" />
+                    </Border.GestureRecognizers>
+                    <Grid ColumnDefinitions="Auto,*" ColumnSpacing="10">
+                        <Label Style="{StaticResource IconLabel}" Text="{x:Static icons:Icons.Link}" FontSize="20"
+                               TextColor="{DynamicResource LimeBright}" />
+                        <Label Grid.Column="1" VerticalOptions="Center" LineBreakMode="MiddleTruncation"
+                               TextColor="{DynamicResource Ink}" FontSize="13.5"
+                               Text="{Binding ClipboardSuggestionText}" />
+                    </Grid>
+                </Border>
+
+                <!-- 1. Paste a link: goes through the Import sheet (cost, duplicate and credit checks). -->
+                <Label Text="{loc:Translate PasteALink}" Style="{StaticResource SheetFieldLabel}" Margin="2,16,0,8" />
+                <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10">
+                    <Border Style="{StaticResource SheetField}" Padding="14,2,4,2">
+                        <Grid ColumnDefinitions="*,Auto" ColumnSpacing="4">
+                            <Entry x:Name="UrlEntry" Text="{Binding UrlInput}" Placeholder="{loc:Translate PasteUrlPlaceholder}"
+                                   TextColor="{DynamicResource Ink}" PlaceholderColor="{DynamicResource Faint}"
+                                   BackgroundColor="Transparent" Keyboard="Url" ReturnType="Go"
+                                   ClearButtonVisibility="WhileEditing" VerticalOptions="Center"
+                                   Completed="OnImportLinkTapped" />
+                            <Border Grid.Column="1" WidthRequest="44" HeightRequest="44" StrokeThickness="0"
+                                    BackgroundColor="Transparent" StrokeShape="RoundRectangle 14" VerticalOptions="Center"
+                                    local:TapFeedback.IsEnabled="True" AutomationProperties.IsInAccessibleTree="True"
+                                    AutomationProperties.Name="{loc:Translate PasteLink}">
+                                <Border.GestureRecognizers>
+                                    <TapGestureRecognizer Tapped="OnPasteTapped" />
+                                </Border.GestureRecognizers>
+                                <Label Style="{StaticResource IconLabel}" Text="{x:Static icons:Icons.Paste}"
+                                       TextColor="{DynamicResource Muted}" FontSize="18" />
+                            </Border>
+                        </Grid>
+                    </Border>
+                    <Button Grid.Column="1" Text="{loc:Translate Import}" Clicked="OnImportLinkTapped"
+                            Style="{StaticResource SheetPrimaryButton}" Padding="20,12" VerticalOptions="Center" />
+                </Grid>
+
+                <Label Text="{Binding ErrorMessage}" TextColor="{DynamicResource Danger}" FontSize="13"
+                       Margin="4,8,0,0"
+                       IsVisible="{Binding ErrorMessage, Converter={StaticResource StringNotNullOrEmptyConverter}}" />
+
+                <!-- 2. Search the web: the in-app browser on a recipe search. Deliberately unbound. -->
+                <Label Text="{loc:Translate SearchTheWebRow}" Style="{StaticResource SheetFieldLabel}" Margin="2,16,0,8" />
+                <Border Style="{StaticResource SheetField}">
+                    <Grid ColumnDefinitions="Auto,*" ColumnSpacing="8">
+                        <Label Style="{StaticResource IconLabel}" Text="{x:Static icons:Icons.Search}" FontSize="18"
+                               TextColor="{DynamicResource Muted}" />
+                        <Entry x:Name="WebSearchEntry" Grid.Column="1" Placeholder="{loc:Translate SearchTheWeb}"
+                               PlaceholderColor="{DynamicResource Faint}" TextColor="{DynamicResource Ink}"
+                               BackgroundColor="Transparent" ReturnType="Search" VerticalOptions="Center"
+                               ClearButtonVisibility="WhileEditing" Completed="OnWebSearchCompleted" />
+                    </Grid>
+                </Border>
+
+                <!-- 3–5. Other sources: a photo, pasted text, or typing it in. -->
+                <VerticalStackLayout Spacing="0" Margin="0,12,0,0">
+                    <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="14" MinimumHeightRequest="56"
+                          local:TapFeedback.IsEnabled="True" AutomationProperties.IsInAccessibleTree="True"
+                          AutomationProperties.Name="{loc:Translate FromAPhoto}">
+                        <Grid.GestureRecognizers>
+                            <TapGestureRecognizer Tapped="OnPhotoTapped" />
+                        </Grid.GestureRecognizers>
+                        <Border WidthRequest="40" HeightRequest="40" BackgroundColor="{DynamicResource LimeWash}"
+                                StrokeThickness="0" StrokeShape="RoundRectangle 13" VerticalOptions="Center">
+                            <Label Style="{StaticResource IconLabel}" Text="{x:Static icons:Icons.Photo}"
+                                   TextColor="{DynamicResource LimeBright}" FontSize="20" />
+                        </Border>
+                        <Label Grid.Column="1" Text="{loc:Translate FromAPhoto}" TextColor="{DynamicResource Ink}"
+                               FontSize="16" VerticalOptions="Center" />
+                        <Label Grid.Column="2" Text="&#8250;" TextColor="{DynamicResource Muted}" FontSize="22"
+                               VerticalOptions="Center" />
+                    </Grid>
+                    <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="14" MinimumHeightRequest="56"
+                          local:TapFeedback.IsEnabled="True" AutomationProperties.IsInAccessibleTree="True"
+                          AutomationProperties.Name="{loc:Translate FromText}">
+                        <Grid.GestureRecognizers>
+                            <TapGestureRecognizer Tapped="OnTextTapped" />
+                        </Grid.GestureRecognizers>
+                        <Border WidthRequest="40" HeightRequest="40" BackgroundColor="{DynamicResource LimeWash}"
+                                StrokeThickness="0" StrokeShape="RoundRectangle 13" VerticalOptions="Center">
+                            <Label Style="{StaticResource IconLabel}" Text="{x:Static icons:Icons.Text}"
+                                   TextColor="{DynamicResource LimeBright}" FontSize="20" />
+                        </Border>
+                        <Label Grid.Column="1" Text="{loc:Translate FromText}" TextColor="{DynamicResource Ink}"
+                               FontSize="16" VerticalOptions="Center" />
+                        <Label Grid.Column="2" Text="&#8250;" TextColor="{DynamicResource Muted}" FontSize="22"
+                               VerticalOptions="Center" />
+                    </Grid>
+                    <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="14" MinimumHeightRequest="56"
+                          local:TapFeedback.IsEnabled="True" AutomationProperties.IsInAccessibleTree="True"
+                          AutomationProperties.Name="{loc:Translate TypeItYourself}">
+                        <Grid.GestureRecognizers>
+                            <TapGestureRecognizer Tapped="OnManualTapped" />
+                        </Grid.GestureRecognizers>
+                        <Border WidthRequest="40" HeightRequest="40" BackgroundColor="{DynamicResource LimeWash}"
+                                StrokeThickness="0" StrokeShape="RoundRectangle 13" VerticalOptions="Center">
+                            <Label Style="{StaticResource IconLabel}" Text="{x:Static icons:Icons.Edit}"
+                                   TextColor="{DynamicResource LimeBright}" FontSize="20" />
+                        </Border>
+                        <Label Grid.Column="1" Text="{loc:Translate TypeItYourself}" TextColor="{DynamicResource Ink}"
+                               FontSize="16" VerticalOptions="Center" />
+                        <Label Grid.Column="2" Text="&#8250;" TextColor="{DynamicResource Muted}" FontSize="22"
+                               VerticalOptions="Center" />
+                    </Grid>
+                </VerticalStackLayout>
+
+                <!-- One-time tip (moved here from Home): link imports auto-translate into the recipe language. -->
+                <Border IsVisible="{Binding IsRecipeLanguageHintVisible}" BackgroundColor="{DynamicResource Bg}"
+                        Stroke="{DynamicResource LineSoft}" StrokeThickness="1" Padding="14,12"
+                        StrokeShape="RoundRectangle 16" Margin="0,12,0,0">
+                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10">
+                        <VerticalStackLayout Spacing="6">
+                            <Label Text="{loc:Translate RecipeLangHintTitle}" TextColor="{DynamicResource Ink}"
+                                   FontSize="14" FontAttributes="Bold" />
+                            <Label Text="{loc:Translate RecipeLangHintBody}" TextColor="{DynamicResource Muted}"
+                                   FontSize="12.5" LineHeight="1.25" />
+                            <Label Text="{loc:Translate RecipeLangHintAction}" TextColor="{DynamicResource LimeBright}"
+                                   FontSize="13" FontAttributes="Bold" Margin="0,2,0,0">
+                                <Label.GestureRecognizers>
+                                    <TapGestureRecognizer Command="{Binding OpenRecipeLanguageSettingsCommand}" />
+                                </Label.GestureRecognizers>
+                            </Label>
+                        </VerticalStackLayout>
+                        <Border Grid.Column="1" WidthRequest="44" HeightRequest="44"
+                                BackgroundColor="{DynamicResource Surface}" Stroke="{DynamicResource Line}"
+                                StrokeThickness="1" StrokeShape="RoundRectangle 22"
+                                VerticalOptions="Start" HorizontalOptions="End"
+                                local:TapFeedback.IsEnabled="True" AutomationProperties.IsInAccessibleTree="True" AutomationProperties.Name="{loc:Translate Dismiss}">
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding DismissRecipeLanguageHintCommand}" />
+                            </Border.GestureRecognizers>
+                            <Label Style="{StaticResource IconLabel}" Text="{x:Static icons:Icons.Close}"
+                                   TextColor="{DynamicResource Muted}" FontSize="12" />
+                        </Border>
+                    </Grid>
+                </Border>
+
+                <Label Text="{Binding CostText, Source={x:Reference Root}}" Style="{StaticResource SheetMessage}"
+                       FontSize="12.5" HorizontalTextAlignment="Center" Margin="0,14,0,0" />
+            </VerticalStackLayout>
+        </ScrollView>
+    </controls:BottomSheet>
+</ContentView>

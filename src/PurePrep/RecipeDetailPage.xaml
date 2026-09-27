@@ -3,6 +3,8 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:local="clr-namespace:PurePrep"
              xmlns:loc="clr-namespace:PurePrep.Localization"
+             xmlns:controls="clr-namespace:PurePrep.Controls"
+             xmlns:icons="clr-namespace:PurePrep.Resources.Styles"
              x:Class="PurePrep.RecipeDetailPage"
              x:Name="PageRoot"
              Shell.NavBarIsVisible="False"
@@ -12,53 +14,90 @@
     <Grid RowDefinitions="Auto,*,Auto">
 
         <!-- Top bar -->
-        <Grid Padding="20,12,20,0" ColumnDefinitions="Auto,*,Auto,Auto,Auto" ColumnSpacing="8"
-              MaximumWidthRequest="760" HorizontalOptions="Center">
-            <Border WidthRequest="48" HeightRequest="48" BackgroundColor="{DynamicResource Surface}"
-                    Stroke="{DynamicResource Line}" StrokeThickness="1" StrokeShape="RoundRectangle 14"
-                    local:TapFeedback.IsEnabled="True" AutomationProperties.IsInAccessibleTree="True" AutomationProperties.Name="{loc:Translate Back}">
-                <Border.GestureRecognizers>
-                    <TapGestureRecognizer Tapped="OnBackTapped" />
-                </Border.GestureRecognizers>
-                <Label Text="&#8249;" TextColor="{DynamicResource Ink}" FontSize="26"
-                       HorizontalOptions="Center" VerticalOptions="Center" />
-            </Border>
-            <Border Grid.Column="2" WidthRequest="48" HeightRequest="48" BackgroundColor="{DynamicResource Surface}"
-                    Stroke="{DynamicResource Line}" StrokeThickness="1" StrokeShape="RoundRectangle 14"
-                    local:TapFeedback.IsEnabled="True" AutomationProperties.IsInAccessibleTree="True" AutomationProperties.Name="{loc:Translate Translate}">
-                <Border.GestureRecognizers>
-                    <TapGestureRecognizer Tapped="OnTranslateTapped" />
-                </Border.GestureRecognizers>
-                <Label Text="&#127760;" FontSize="18"
-                       HorizontalOptions="Center" VerticalOptions="Center" />
-            </Border>
-            <Border Grid.Column="3" WidthRequest="48" HeightRequest="48" BackgroundColor="{DynamicResource Surface}"
-                    Stroke="{DynamicResource Line}" StrokeThickness="1" StrokeShape="RoundRectangle 14"
-                    local:TapFeedback.IsEnabled="True" AutomationProperties.IsInAccessibleTree="True" AutomationProperties.Name="{loc:Translate Edit}">
-                <Border.GestureRecognizers>
-                    <TapGestureRecognizer Tapped="OnEditTapped" />
-                </Border.GestureRecognizers>
-                <Label Text="&#9998;" TextColor="{DynamicResource Ink}" FontSize="17"
-                       HorizontalOptions="Center" VerticalOptions="Center" />
-            </Border>
-            <Border Grid.Column="4" WidthRequest="48" HeightRequest="48" BackgroundColor="{DynamicResource Surface}"
-                    Stroke="{DynamicResource Line}" StrokeThickness="1" StrokeShape="RoundRectangle 14"
-                    local:TapFeedback.IsEnabled="True" AutomationProperties.IsInAccessibleTree="True" AutomationProperties.Name="{loc:Translate Delete}">
-                <Border.GestureRecognizers>
-                    <TapGestureRecognizer Tapped="OnDeleteTapped" />
-                </Border.GestureRecognizers>
-                <Label Text="&#128465;" TextColor="{DynamicResource Danger}" FontSize="17"
-                       HorizontalOptions="Center" VerticalOptions="Center" />
-            </Border>
-        </Grid>
+        <controls:TopBar>
+            <controls:TopBar.Actions>
+                <HorizontalStackLayout Spacing="6">
+                    <Border Style="{StaticResource IconButton}" AutomationProperties.Name="{loc:Translate Translate}">
+                        <Border.GestureRecognizers>
+                            <TapGestureRecognizer Tapped="OnTranslateTapped" />
+                        </Border.GestureRecognizers>
+                        <Label Style="{StaticResource IconLabel}" Text="{x:Static icons:Icons.Translate}" />
+                    </Border>
+                    <Border Style="{StaticResource IconButton}" AutomationProperties.Name="{loc:Translate Edit}">
+                        <Border.GestureRecognizers>
+                            <TapGestureRecognizer Tapped="OnEditTapped" />
+                        </Border.GestureRecognizers>
+                        <Label Style="{StaticResource IconLabel}" Text="{x:Static icons:Icons.Edit}" />
+                    </Border>
+                    <Border Style="{StaticResource IconButton}" AutomationProperties.Name="{loc:Translate More}">
+                        <Border.GestureRecognizers>
+                            <TapGestureRecognizer Tapped="OnMoreTapped" />
+                        </Border.GestureRecognizers>
+                        <Label Style="{StaticResource IconLabel}" Text="{x:Static icons:Icons.More}" />
+                    </Border>
+                </HorizontalStackLayout>
+            </controls:TopBar.Actions>
+        </controls:TopBar>
 
         <!-- Body -->
         <ScrollView Grid.Row="1" Padding="20,14,20,10">
             <VerticalStackLayout Spacing="22" MaximumWidthRequest="760" HorizontalOptions="Center">
 
+                <!-- Photo header: placeholder tile (first letter) shown until/unless a photo loads. -->
+                <Border HeightRequest="200" BackgroundColor="{DynamicResource LimeWash}"
+                        Stroke="{DynamicResource Line}" StrokeThickness="1" StrokeShape="RoundRectangle 20">
+                    <Grid>
+                        <Label Text="{Binding Title, Converter={StaticResource FirstLetterConverter}}"
+                               TextColor="{DynamicResource Lime}" FontSize="72" FontAttributes="Bold"
+                               HorizontalOptions="Center" VerticalOptions="Center" />
+                        <Image Source="{Binding Recipe, Converter={StaticResource RecipeImage}}"
+                               Aspect="AspectFill" />
+                    </Grid>
+                </Border>
+
                 <VerticalStackLayout Spacing="8">
                     <Label Text="{Binding Title}" TextColor="{DynamicResource Ink}" FontSize="28"
                            FontAttributes="Bold" LineHeight="1.1" />
+                    <Label Text="{Binding MetaLine}" TextColor="{DynamicResource Muted}" FontSize="13.5"
+                           IsVisible="{Binding MetaLine, Converter={StaticResource StringNotNullOrEmptyConverter}}" />
+                    <HorizontalStackLayout Spacing="10" Margin="0,2,0,0">
+                        <Border WidthRequest="40" HeightRequest="40" BackgroundColor="{DynamicResource Surface}"
+                                Stroke="{DynamicResource Line}" StrokeThickness="1" StrokeShape="RoundRectangle 13"
+                                local:TapFeedback.IsEnabled="True" AutomationProperties.IsInAccessibleTree="True"
+                                AutomationProperties.Name="{loc:Translate Favourite}">
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding ToggleFavouriteCommand}" />
+                            </Border.GestureRecognizers>
+                            <Label Style="{StaticResource IconLabel}" Text="{x:Static icons:Icons.Favourite}" FontSize="18">
+                                <Label.Triggers>
+                                    <DataTrigger TargetType="Label" Binding="{Binding IsFavourite}" Value="True">
+                                        <Setter Property="TextColor" Value="{DynamicResource Lime}" />
+                                    </DataTrigger>
+                                    <DataTrigger TargetType="Label" Binding="{Binding IsFavourite}" Value="False">
+                                        <Setter Property="TextColor" Value="{DynamicResource Muted}" />
+                                    </DataTrigger>
+                                </Label.Triggers>
+                            </Label>
+                        </Border>
+                        <Border BackgroundColor="{DynamicResource LimeWash}" Stroke="{DynamicResource LineSoft}"
+                                StrokeThickness="1" Padding="14,9" StrokeShape="RoundRectangle 13" VerticalOptions="Center"
+                                local:TapFeedback.IsEnabled="True" AutomationProperties.IsInAccessibleTree="True"
+                                AutomationProperties.Name="{Binding StatusText}">
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding ToggleStatusCommand}" />
+                            </Border.GestureRecognizers>
+                            <Label Text="{Binding StatusText}" FontSize="13" FontAttributes="Bold" VerticalOptions="Center">
+                                <Label.Triggers>
+                                    <DataTrigger TargetType="Label" Binding="{Binding IsCooked}" Value="True">
+                                        <Setter Property="TextColor" Value="{DynamicResource LimeBright}" />
+                                    </DataTrigger>
+                                    <DataTrigger TargetType="Label" Binding="{Binding IsCooked}" Value="False">
+                                        <Setter Property="TextColor" Value="{DynamicResource Muted}" />
+                                    </DataTrigger>
+                                </Label.Triggers>
+                            </Label>
+                        </Border>
+                    </HorizontalStackLayout>
                     <HorizontalStackLayout Spacing="7">
                         <Label Text="{Binding StepCount, Converter={StaticResource ResourceFormatConverter}, ConverterParameter=StepsCountFormat}"
                                TextColor="{DynamicResource Muted}" FontSize="13.5" />
@@ -70,15 +109,16 @@
                         <HorizontalStackLayout.GestureRecognizers>
                             <TapGestureRecognizer Tapped="OnSourceTapped" />
                         </HorizontalStackLayout.GestureRecognizers>
-                        <Label Text="&#128279;" FontSize="12" TextColor="{DynamicResource Faint}"
-                               VerticalOptions="Center" />
+                        <Label Style="{StaticResource IconLabel}" Text="{x:Static icons:Icons.Link}" FontSize="12"
+                               TextColor="{DynamicResource Faint}" VerticalOptions="Center" />
                         <Label Text="{Binding SourceHost}" TextColor="{DynamicResource Primary}"
                                FontSize="12.5" VerticalOptions="Center" TextDecorations="Underline" />
                     </HorizontalStackLayout>
                     <!-- Translation badge: shown only when a cached translation is on screen. Tapping
                          "Show original" is always free and instant (original text is kept pristine). -->
                     <HorizontalStackLayout Spacing="8" IsVisible="{Binding IsTranslated}" Margin="0,2,0,0">
-                        <Label Text="&#127760;" FontSize="12" VerticalOptions="Center" />
+                        <Label Style="{StaticResource IconLabel}" Text="{x:Static icons:Icons.Translate}" FontSize="12"
+                               VerticalOptions="Center" />
                         <Label Text="{Binding TranslatedBadge}" TextColor="{DynamicResource Muted}"
                                FontSize="12.5" VerticalOptions="Center" />
                         <Label Text="{loc:Translate ShowOriginal}" TextColor="{DynamicResource Lime}"
@@ -95,10 +135,12 @@
                     <Grid ColumnDefinitions="*,Auto" VerticalOptions="Center">
                         <Label Text="{loc:Translate SectionIngredients}" TextColor="{DynamicResource Lime}" FontSize="12"
                                CharacterSpacing="1.8" FontAttributes="Bold" VerticalOptions="Center" />
-                        <!-- Serving scaler -->
+                        <!-- Serving scaler: only for recipes whose people-based yield couldn't be detected
+                             (see the ServingsStepper below for known-yield recipes). -->
                         <Border Grid.Column="1" BackgroundColor="{DynamicResource Surface}"
                                 Stroke="{DynamicResource Line}" StrokeThickness="1"
-                                Padding="3" StrokeShape="RoundRectangle 12">
+                                Padding="3" StrokeShape="RoundRectangle 12"
+                                IsVisible="{Binding HasKnownServings, Converter={StaticResource InvertedBoolConverter}}">
                             <HorizontalStackLayout Spacing="2" BindableLayout.ItemsSource="{Binding ScaleOptions}">
                                 <BindableLayout.ItemTemplate>
                                     <DataTemplate>
@@ -133,12 +175,35 @@
                             </HorizontalStackLayout>
                         </Border>
                     </Grid>
-                    <Label Text="{Binding ServingsCaption}" TextColor="{DynamicResource Muted}" FontSize="12.5"
-                           HorizontalOptions="End" Margin="0,-6,2,0" />
+
+                    <!-- Known yield: people-based stepper. Unknown yield: the ½×–3× chips above, plus a
+                         link to set the servings once (after which the stepper takes over). -->
+                    <controls:ServingsStepper IsVisible="{Binding HasKnownServings}" HorizontalOptions="Start"
+                                               CurrentServings="{Binding CurrentServings}"
+                                               Noun="{Binding ServingsNounText}"
+                                               IsEstimated="{Binding ServingsEstimated}"
+                                               IsChanged="{Binding IsServingsChanged}"
+                                               IncreaseCommand="{Binding IncreaseServingsCommand}"
+                                               DecreaseCommand="{Binding DecreaseServingsCommand}"
+                                               ResetCommand="{Binding ResetServingsCommand}"
+                                               NumberTapped="OnServingsNumberTapped" />
+                    <HorizontalStackLayout Spacing="6" Margin="2,-6,0,0"
+                                            IsVisible="{Binding HasKnownServings, Converter={StaticResource InvertedBoolConverter}}">
+                        <Label Text="{loc:Translate ServesUnknown}" TextColor="{DynamicResource Muted}"
+                               FontSize="12.5" VerticalOptions="Center" />
+                        <Label Text="{loc:Translate SetServings}" TextColor="{DynamicResource Lime}"
+                               FontSize="12.5" TextDecorations="Underline" VerticalOptions="Center">
+                            <Label.GestureRecognizers>
+                                <TapGestureRecognizer Tapped="OnSetServingsTapped" />
+                            </Label.GestureRecognizers>
+                        </Label>
+                    </HorizontalStackLayout>
+
                     <!-- Discoverability: testers didn't realise metric/US units are switchable. This
-                         subtle hint jumps straight to the Units setting. -->
+                         subtle hint jumps straight to the Units setting. Hidden once the recipe's units
+                         already match the chosen display system (or "As written" is selected). -->
                     <Label TextColor="{DynamicResource Muted}" FontSize="12.5"
-                           HorizontalOptions="Start" Margin="2,-6,0,0">
+                           HorizontalOptions="Start" Margin="2,-6,0,0" IsVisible="{Binding ShowUnitHint}">
                         <Label.GestureRecognizers>
                             <TapGestureRecognizer Tapped="OnUnitsHintTapped" />
                         </Label.GestureRecognizers>
@@ -165,6 +230,19 @@
                                 </DataTemplate>
                             </BindableLayout.ItemTemplate>
                         </VerticalStackLayout>
+                    </Border>
+                </VerticalStackLayout>
+
+                <!-- Your notes -->
+                <VerticalStackLayout Spacing="12">
+                    <Label Text="{loc:Translate YourNotes}" TextColor="{DynamicResource Lime}" FontSize="12"
+                           CharacterSpacing="1.8" FontAttributes="Bold" />
+                    <Border BackgroundColor="{DynamicResource Surface}" Stroke="{DynamicResource Line}"
+                            StrokeThickness="1" Padding="14,8" StrokeShape="RoundRectangle 15">
+                        <Editor Text="{Binding Notes}" AutoSize="TextChanges" MinimumHeightRequest="70"
+                                Placeholder="{loc:Translate NotesPlaceholder}"
+                                TextColor="{DynamicResource Ink}" PlaceholderColor="{DynamicResource Faint}"
+                                Unfocused="OnNotesUnfocused" />
                     </Border>
                 </VerticalStackLayout>
 
@@ -196,13 +274,14 @@
             </VerticalStackLayout>
         </ScrollView>
 
-        <!-- Cook CTA -->
-        <Border Grid.Row="2" BackgroundColor="{DynamicResource Bg}" Padding="20,10,20,16">
+        <!-- Running-timers bar (if any) + Cook CTA -->
+        <VerticalStackLayout Grid.Row="2" BackgroundColor="{DynamicResource Bg}" Padding="20,10,20,16" Spacing="10">
+            <controls:TimersBar x:Name="TimersBarControl" MaximumWidthRequest="760" HorizontalOptions="Fill" />
             <Button Text="{loc:Translate StartCooking}" Clicked="OnCookClicked"
                     BackgroundColor="{DynamicResource Lime}" TextColor="{DynamicResource LimeInk}"
                     FontAttributes="Bold" FontSize="16" HeightRequest="54" CornerRadius="16"
                     MaximumWidthRequest="760" HorizontalOptions="Fill" />
-        </Border>
+        </VerticalStackLayout>
 
         <!-- Busy overlay (translation / model download) -->
         <Grid x:Name="BusyOverlay" Grid.RowSpan="3" IsVisible="False"

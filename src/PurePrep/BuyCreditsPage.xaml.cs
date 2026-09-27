@@ -27,6 +27,18 @@ public partial class BuyCreditsPage : ContentPage
         UpdateBalance();
     }
 
+    /// <summary>
+    /// Opens this page from any host (Home, the in-app browser) — e.g. when an Import sheet offers
+    /// Buy Smart Credits or an import comes back out of credits — so every entry point lands here.
+    /// </summary>
+    public static Task OpenAsync(INavigation navigation, int balance)
+    {
+        var services = IPlatformApplication.Current?.Services;
+        var billing = services?.GetService<IBillingService>();
+        var credits = services?.GetService<ISmartCreditsClient>();
+        return navigation.PushAsync(new BuyCreditsPage(billing, credits, balance));
+    }
+
     protected override async void OnAppearing()
     {
         base.OnAppearing();

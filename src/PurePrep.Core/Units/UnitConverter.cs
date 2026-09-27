@@ -40,15 +40,29 @@ public static class UnitConverter
         // Length
         new("cm", Dimension.Length, MeasurementSystem.Metric, 10, ["cm", "centimetre", "centimetres", "centimeter", "centimeters"]),
         new("mm", Dimension.Length, MeasurementSystem.Metric, 1, ["mm", "millimetre", "millimetres", "millimeter", "millimeters"]),
-        new("inch", Dimension.Length, MeasurementSystem.Imperial, 25.4, ["inch", "inches", "\""]),
+        new("inch", Dimension.Length, MeasurementSystem.Imperial, 25.4, ["inch", "inches", "\"", ShortInch]),
 
         // Temperature (ToBase unused; handled by formulas)
         new("C", Dimension.Temperature, MeasurementSystem.Metric, 0, ["°c", "℃", "celsius", "centigrade", "degrees c", "deg c", "c"]),
         new("F", Dimension.Temperature, MeasurementSystem.Imperial, 0, ["°f", "℉", "fahrenheit", "degrees f", "deg f", "f"]),
     ];
 
+    // "in" is an inch only straight after a number ("8in", "9-in"); spaced out it is the word "in"
+    // ("5 in each"), so the token pattern handles it separately from the other aliases.
+    private const string ShortInch = "in";
+
     private static readonly Dictionary<string, Unit> AliasToUnit = BuildAliasLookup();
-    private static readonly Regex Token = BuildTokenRegex();
+    private static readonly Regex Token = new(BuildTokenPattern(string.Empty), RegexOptions.IgnoreCase | RegexOptions.Compiled);
+    private static readonly Regex DualToken = BuildDualTokenRegex();
+    private static readonly Regex SlashDualToken = BuildSlashDualTokenRegex();
+
+    // Range separators between two quantities: "1-2", "1–2", "1 to 2".
+    private const string RangeSeparator = @"\s*(?:-|–|—|to)\s*";
+    private const string FractionChars = "¼½¾⅓⅔⅛⅜⅝⅞⅕⅖";
+
+    // Units kept as written are shown with their standard abbreviation ("lbs." -> "lb", "grams" -> "g");
+    // other units (cups, pints, inches) keep the recipe's own word.
+    private static readonly HashSet<string> AbbreviatedKeys = ["kg", "g", "mg", "lb", "oz", "l", "ml", "cm", "mm"];
 
     // Ingredients named here are liquids that cooks measure in *fluid* ounces even when the recipe
     // just writes "ounces" (spirits, wine, and other pourable liquids). Without this, "2 ounces
@@ -104,67 +118,140 @@ public static class UnitConverter
     /// Rewrites every measurement token found in <paramref name="text"/> into the target system.
     /// The <paramref name="from"/> hint is advisory only: conversion is idempotent (tokens already in
     /// <paramref name="to"/> are left untouched), so mixed-unit recipes are fully normalised to the
-    /// display system even when it matches the detected source system.
+    /// display system even when it matches the detected source system. Teaspoons and tablespoons are
+    /// used in both systems and are never rewritten. A measurement followed by its equivalent in
+    /// brackets ("1½ lbs. (700 grams)") collapses to a single value in the target system.
     /// </summary>
     public static string ConvertText(string text, MeasurementSystem from, MeasurementSystem to)
     {
         if (string.IsNullOrWhiteSpace(text)) return text;
         text = Normalize(text);
         var liquidContext = IsLiquidContext(text);
+        text = DualToken.Replace(text, match => ResolveDual(match, to, liquidContext));
+        text = SlashDualToken.Replace(text, match => ResolveSlashDual(match, to, liquidContext));
         return Token.Replace(text, match =>
         {
-            if (!TryResolveUnit(match.Groups["unit"].Value, out var unit))
-                return match.Value;
-            if (IsAmbiguousBareTemperature(match.Groups["unit"].Value, match.Groups["qty"].Value))
+            if (!TryReadToken(match, string.Empty, liquidContext, out var unit, out var quantityText))
                 return match.Value;
 
-            // A weight-ounce in a line naming a pourable liquid is really a fluid ounce, so it
-            // converts by volume (ml) rather than mass (g).
-            if (unit.Dimension == Dimension.Mass && unit.Key == "oz" && liquidContext
-                && TryResolveUnit("floz", out var fluid))
-                unit = fluid;
-
-            if (unit.System == to) // already in the target system for this dimension
+            // Already in the target system for this dimension, or a spoon measure valid in both.
+            if (unit.System == to || unit.System is null)
                 return match.Value;
 
-            var quantityText = match.Groups["qty"].Value;
-            return unit.Dimension == Dimension.Temperature
-                ? ConvertRange(quantityText, value => ConvertTemperature(value, unit, to))
-                : ConvertRange(quantityText, value => ConvertLinear(value, unit, to));
+            return ConvertQuantity(quantityText, unit, to) ?? match.Value;
         });
     }
 
-    private static string ConvertRange(string quantityText, Func<double, string> convert)
+    // Keeps exactly one of "primary (equivalent)": whichever is already in the target system (the
+    // primary first), else a spoon measure, else the primary converted once. Never both.
+    private static string ResolveDual(Match match, MeasurementSystem to, bool liquidContext)
     {
-        var parts = Regex.Split(quantityText, @"\s*(?:-|–|—|to)\s*", RegexOptions.IgnoreCase)
-            .Where(p => p.Trim().Length > 0).ToArray();
-        if (parts.Length == 0) return quantityText;
+        if (!TryReadToken(match, "a", liquidContext, out var primary, out var primaryQty)
+            || !TryReadToken(match, "b", liquidContext, out var equivalent, out var equivalentQty))
+            return match.Value;
+        if ((primary.Dimension == Dimension.Temperature) != (equivalent.Dimension == Dimension.Temperature))
+            return match.Value; // not an equivalent of the same measurement
 
-        var converted = new List<string>();
+        var primaryUnit = match.Groups["aunit"].Value;
+        var equivalentUnit = match.Groups["bunit"].Value;
+        if (primary.System == to) return AsWritten(primaryQty, primaryUnit, primary);
+        if (equivalent.System == to) return AsWritten(equivalentQty, equivalentUnit, equivalent);
+        if (primary.System is null) return AsWritten(primaryQty, primaryUnit, primary);
+        if (equivalent.System is null) return AsWritten(equivalentQty, equivalentUnit, equivalent);
+        return ConvertQuantity(primaryQty, primary, to) ?? match.Value;
+    }
+
+    // "375°F/190°C", "200g/7oz" or "1 tsp/5ml": the same measurement given twice, joined by a slash.
+    // Only a pair from two different systems counts, or a spoon (valid in both) with a volume; two
+    // spoons ("1 tbsp/1 tsp") are two measures and are left alone. It keeps one value the way the
+    // bracketed form does, so converting each half on its own cannot print it twice. A slash after the
+    // pair ("…/Gas Mark 5") is spaced out, as it now joins just two items.
+    private static string ResolveSlashDual(Match match, MeasurementSystem to, bool liquidContext)
+    {
+        if (!TryReadToken(match, "a", liquidContext, out var first, out _)
+            || !TryReadToken(match, "b", liquidContext, out var second, out _)
+            || !IsSlashEquivalent(first, second))
+            return match.Value;
+
+        var resolved = ResolveDual(match, to, liquidContext);
+        return match.Groups["tail"].Success ? resolved + " / " : resolved;
+    }
+
+    private static bool IsSlashEquivalent(Unit first, Unit second)
+    {
+        if ((first.Dimension == Dimension.Temperature) != (second.Dimension == Dimension.Temperature))
+            return false;
+        if (first.System is null && second.System is null)
+            return false;
+        if (first.System is null || second.System is null)
+            return first.Dimension == Dimension.Volume && second.Dimension == Dimension.Volume;
+        return first.System != second.System;
+    }
+
+    private static string AsWritten(string quantityText, string unitText, Unit unit)
+    {
+        var quantity = quantityText.Trim();
+        if (unit.Dimension == Dimension.Temperature)
+            return $"{quantity}{(unit.System == MeasurementSystem.Metric ? "°C" : "°F")}";
+        var written = unitText.Trim().TrimEnd('.');
+        // The short "in" reads as the word "in" once spaced out, so it is shown as "inch".
+        var display = AbbreviatedKeys.Contains(unit.Key) ? unit.Key
+            : unit.Key == "inch" && written.Equals("in", StringComparison.OrdinalIgnoreCase) ? "inch"
+            : written;
+        return $"{quantity} {display}";
+    }
+
+    private static bool TryReadToken(Match match, string prefix, bool liquidContext, out Unit unit, out string quantityText)
+    {
+        var unitText = match.Groups[prefix + "unit"].Value;
+        quantityText = match.Groups[prefix + "qty"].Value;
+        if (!TryResolveUnit(unitText, out unit) || IsAmbiguousBareTemperature(unitText, quantityText))
+            return false;
+
+        // A weight-ounce in a line naming a pourable liquid is really a fluid ounce, so it
+        // converts by volume (ml) rather than mass (g).
+        if (unit.Dimension == Dimension.Mass && unit.Key == "oz" && liquidContext
+            && TryResolveUnit("floz", out var fluid))
+            unit = fluid;
+        return true;
+    }
+
+    // Converts a single quantity or a range ("½ to 1") into the target system. Both ends of a range
+    // share one unit, chosen from the first value, so "½ to 1 cup" reads "120–235 ml". Returns null
+    // when any part fails to parse, so the caller leaves the original text untouched.
+    private static string? ConvertQuantity(string quantityText, Unit source, MeasurementSystem to)
+    {
+        // "1-1/2" is a hyphenated mixed number, not a range from 1 down to ½.
+        quantityText = RecipeScaling.NormalizeMixedNumbers(quantityText);
+        var parts = Regex.Split(quantityText, RangeSeparator, RegexOptions.IgnoreCase)
+            .Where(p => p.Trim().Length > 0).ToArray();
+        if (parts.Length == 0) return null;
+
+        var values = new List<double>();
         foreach (var part in parts)
         {
-            if (!TryParseQuantity(part, out var value)) return quantityText; // bail: leave original untouched
-            converted.Add(convert(value));
+            if (!TryParseQuantity(part, out var value)) return null;
+            values.Add(value);
         }
-        return string.Join("–", converted);
+
+        if (source.Dimension == Dimension.Temperature)
+        {
+            var suffix = to == MeasurementSystem.Metric ? "°C" : "°F";
+            return string.Join("–", values.Select(v => Trim(ConvertTemperature(v, source)))) + suffix;
+        }
+
+        var bases = values.Select(v => v * source.ToBase).ToArray();
+        var target = SelectTarget(source.Dimension, to, bases[0]);
+        return $"{string.Join("–", bases.Select(b => target.format(b / target.factor)))} {target.suffix}";
     }
 
-    private static string ConvertLinear(double value, Unit source, MeasurementSystem to)
-    {
-        var baseValue = value * source.ToBase;
-        var target = SelectTarget(source.Dimension, to, baseValue);
-        var amount = baseValue / target.factor;
-        return $"{target.format(amount)} {target.suffix}";
-    }
-
-    private static string ConvertTemperature(double value, Unit source, MeasurementSystem to)
+    // Converts one temperature between scales, rounded to the nearest 5°.
+    private static double ConvertTemperature(double value, Unit source)
     {
         double converted = source.System == MeasurementSystem.Metric
             ? value * 9 / 5 + 32   // C -> F
             : (value - 32) * 5 / 9; // F -> C
-        var rounded = Math.Round(converted / 5, MidpointRounding.AwayFromZero) * 5; // nearest 5°
-        var suffix = to == MeasurementSystem.Metric ? "°C" : "°F";
-        return $"{Trim(rounded)}{suffix}";
+        return Math.Round(converted / 5, MidpointRounding.AwayFromZero) * 5;
     }
 
     private static (double factor, string suffix, Func<double, string> format) SelectTarget(Dimension dimension, MeasurementSystem to, double baseValue) =>
@@ -297,7 +384,7 @@ public static class UnitConverter
             return false;
 
         // Take the first number of a range: "180-200 C" is still an oven temperature.
-        var firstPart = Regex.Split(quantityText, @"\s*(?:-|–|—|to)\s*")
+        var firstPart = Regex.Split(quantityText, RangeSeparator, RegexOptions.IgnoreCase)
             .FirstOrDefault(p => p.Trim().Length > 0) ?? quantityText;
 
         if (!TryParseQuantity(firstPart, out var value))
@@ -316,18 +403,42 @@ public static class UnitConverter
         return map;
     }
 
-    private static Regex BuildTokenRegex()
+    // A "quantity + unit" token whose groups are named with <paramref name="prefix"/>, so two tokens
+    // can live in one pattern. A period straight after the unit ("lb.", "oz.") belongs to the
+    // abbreviation when the line carries on in lower case or with a bracket or comma; before a capital
+    // or at the end it is a full stop and is left alone.
+    private static string BuildTokenPattern(string prefix)
     {
         // Longest aliases first so e.g. "cup" wins over "c", "tbsp" over "tsp".
         var aliases = Units.SelectMany(u => u.Aliases)
+            .Where(a => a != ShortInch)
             .OrderByDescending(a => a.Length)
             .Select(Regex.Escape);
-        var unitGroup = string.Join("|", aliases);
+        var unitGroup = string.Join("|", aliases) + $@"|(?<=\d-?){ShortInch}";
 
-        const string number = @"(?:\d+\s+\d+\s*/\s*\d+|\d+\s*/\s*\d+|\d+(?:[.,]\d+)?|[¼½¾⅓⅔⅛⅜⅝⅞⅕⅖])";
-        var qty = $@"(?<qty>{number}(?:\s*(?:-|–|—|to)\s*{number})?)";
-        // Optional space; require a non-letter boundary after the unit so "c" won't match inside "clove".
-        var pattern = $@"{qty}\s*(?<unit>{unitGroup})(?![A-Za-z])";
+        // "1½" / "1 ½" (a whole number before a unicode fraction) comes first so the whole number is
+        // not dropped from the quantity.
+        const string number = @"(?:\d+\s?[" + FractionChars + @"]|\d+\s+\d+\s*/\s*\d+|\d+\s*/\s*\d+|\d+(?:[.,]\d+)?|[" + FractionChars + "])";
+        var qty = $@"(?<{prefix}qty>{number}(?:{RangeSeparator}{number})?)";
+        // Optional space, or a hyphen for sizes like "9-inch"; require a non-letter boundary after the
+        // unit so "c" won't match inside "clove".
+        return $@"{qty}(?:\s*|-)(?<{prefix}unit>{unitGroup})(?![A-Za-z])(?:\.(?-i:(?=\s*[\p{{Ll}}(),;])))?";
+    }
+
+    // "1½ lbs. (700 grams)" / "350°F (175°C)" / "1 lb (about 450 g)": a measurement followed by its
+    // equivalent in brackets.
+    private static Regex BuildDualTokenRegex()
+    {
+        const string hedge = @"(?:(?:about|approx\.?|approximately|roughly|around|~)\s*)?";
+        var pattern = $@"{BuildTokenPattern("a")}\s*\(\s*{hedge}{BuildTokenPattern("b")}\s*\)";
+        return new Regex(pattern, RegexOptions.IgnoreCase | RegexOptions.Compiled);
+    }
+
+    // "375°F/190°C/Gas Mark 5" / "200g/7oz": a measurement and its equivalent joined by a slash,
+    // plus the slash that may follow the pair.
+    private static Regex BuildSlashDualTokenRegex()
+    {
+        var pattern = $@"{BuildTokenPattern("a")}\s*/\s*{BuildTokenPattern("b")}(?<tail>\s*/\s*)?";
         return new Regex(pattern, RegexOptions.IgnoreCase | RegexOptions.Compiled);
     }
 }

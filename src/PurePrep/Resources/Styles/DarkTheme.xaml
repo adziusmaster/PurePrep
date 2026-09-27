@@ -18,5 +18,15 @@
     <Color x:Key="Muted">#909C88</Color>
     <Color x:Key="Faint">#66725E</Color>
     <Color x:Key="Danger">#FFB4A9</Color>
+    <Color x:Key="DangerInk">#690005</Color>
+    <Color x:Key="DangerWash">#3A1B17</Color>
+    <!-- Bottom-sheet backdrop: a translucent, theme-tinted dim so the page behind stays visible. -->
+    <Color x:Key="Scrim">#99000000</Color>
     <Color x:Key="Warm">#EAA46A</Color>
+
+    <!-- Switch colours (applied natively by the Android Switch mapping in MauiProgram). -->
+    <Color x:Key="SwitchTrackOn">#A7D46F</Color>
+    <Color x:Key="SwitchThumbOn">#FFFFFF</Color>
+    <Color x:Key="SwitchTrackOff">#4A5741</Color>
+    <Color x:Key="SwitchThumbOff">#C9CFC2</Color>
 </ResourceDictionary>

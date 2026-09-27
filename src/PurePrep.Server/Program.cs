@@ -21,6 +21,8 @@ builder.Services.AddScoped<ICreditStore, SqliteCreditStore>();
 builder.Services.AddScoped<IPromoStore, SqlitePromoStore>();
 builder.Services.AddScoped<IWaitlistStore, SqliteWaitlistStore>();
 builder.Services.AddSingleton<IUrlGuard, UrlGuard>();
+builder.Services.AddSingleton(TimeProvider.System);
+builder.Services.AddSingleton<IImageTicketStore, ImageTicketStore>();
 
 // ---- Origin hashing -------------------------------------------------------------------------
 // The seed cap needs to recognise a repeat origin without retaining IP addresses. A configured
@@ -136,6 +138,7 @@ app.MapPost("/api/ai/parse", ParseEndpoint.Parse).RequireRateLimiting(RateLimitP
 app.MapPost("/api/ai/parse-image", ParseEndpoint.ParseImage).RequireRateLimiting(RateLimitPolicies.Parse);
 app.MapPost("/api/ai/parse-text", ParseEndpoint.ParseText).RequireRateLimiting(RateLimitPolicies.Parse);
 app.MapPost("/api/ai/translate", TranslateEndpoint.Translate).RequireRateLimiting(RateLimitPolicies.Parse);
+app.MapPost("/api/ai/image", ImageEndpoint.Generate).RequireRateLimiting(RateLimitPolicies.Parse);
 app.MapPost("/api/billing/redeem", BillingEndpoint.Redeem).RequireRateLimiting(RateLimitPolicies.Billing);
 
 // Read-only balance. Kept for app builds already in the field; new clients call /ensure.

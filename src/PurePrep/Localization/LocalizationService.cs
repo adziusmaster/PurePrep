@@ -51,24 +51,27 @@ public static class LocalizationService
     /// <summary>Applies the stored (or given) language to the current + default thread cultures.</summary>
     public static void Apply(string? code = null)
     {
-        code ??= CurrentCode;
-
-        CultureInfo culture;
-        if (string.IsNullOrEmpty(code))
-        {
-            // Follow the OS, but only if it is one we translate; otherwise fall back to English.
-            var os = TryGetOsCulture();
-            culture = IsSupportedCode(os?.TwoLetterISOLanguageName) ? os! : new CultureInfo("en");
-        }
-        else
-        {
-            culture = new CultureInfo(code);
-        }
+        var culture = ResolveCulture(code);
 
         CultureInfo.CurrentUICulture = culture;
         CultureInfo.CurrentCulture = culture;
         CultureInfo.DefaultThreadCurrentUICulture = culture;
         CultureInfo.DefaultThreadCurrentCulture = culture;
+    }
+
+    /// <summary>
+    /// The UI culture for the stored (or given) language without applying it — for code that can run
+    /// before the app has applied it, such as a timer alarm firing in a cold process.
+    /// </summary>
+    public static CultureInfo ResolveCulture(string? code = null)
+    {
+        code ??= CurrentCode;
+        if (!string.IsNullOrEmpty(code))
+            return new CultureInfo(code);
+
+        // Follow the OS, but only if it is one we translate; otherwise fall back to English.
+        var os = TryGetOsCulture();
+        return IsSupportedCode(os?.TwoLetterISOLanguageName) ? os! : new CultureInfo("en");
     }
 
     /// <summary>Persists the selected language code and applies it.</summary>

@@ -14,6 +14,11 @@
 
     <Color x:Key="White">White</Color>
     <Color x:Key="Black">Black</Color>
+    <!-- Same value in every theme (never swapped): lets segmented-control "unselected" pills go
+         through SetDynamicResource like their "selected" siblings, so no property ever mixes a
+         manual SetValue with a DynamicResource registration on the same element (see SettingsPage,
+         ApplyPillSelection) — that mix is what let a stale colour survive a theme switch. -->
+    <Color x:Key="Transparent">Transparent</Color>
     <Color x:Key="Magenta">#D600AA</Color>
     <Color x:Key="MidnightBlue">#190649</Color>
     <Color x:Key="OffBlack">#1f1f1f</Color>

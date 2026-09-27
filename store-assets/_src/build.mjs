@@ -5,6 +5,21 @@ import { dirname, join } from 'node:path';
 import { doc, T } from './theme.js';
 import { iconHtml } from './icon.js';
 import { unitToggle, creditPill, importBar, card, caption } from './parts.js';
+import { featureNew, iconOptions, iconComparison, dataUri } from './v14.js';
+
+// Targets:
+//   node store-assets/_src/build.mjs          → 1.4 proposals only (safe: never overwrites the
+//                                              live feature-1024x500.png / icon-512.png / phone/)
+//   node store-assets/_src/build.mjs icon     → the live icon-512.png: 1.4 option B, "Lime tile"
+//                                              (the shipped app icon since 1.4)
+//   node store-assets/_src/build.mjs legacy   → the pre-1.4 set (feature, mock screens; the pre-1.4
+//                                              icon is kept in icon.js but no longer rendered)
+//   node store-assets/_src/build.mjs all      → all of the above
+const TARGET = process.argv[2] ?? 'v14';
+if (!['v14', 'icon', 'legacy', 'all'].includes(TARGET)) {
+  console.error(`unknown target "${TARGET}" — use v14 (default), icon, legacy or all`);
+  process.exit(2);
+}
 
 const __dir = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(__dir, '..');            // store-assets/
@@ -151,9 +166,29 @@ const tabletDetail = (w, h) => doc(w, h, `
   </div>
 </div>`);
 
-// ---------- Render everything ----------
-const jobs = [
-  ['icon.html', iconHtml, 512, 512, join(ROOT, 'icon-512.png')],
+// ---------- Render ----------
+const render = (name, html, w, h, out) => {
+  const f = join(HTML, name);
+  writeFileSync(f, html);
+  const r = spawnSync(CHROME, [
+    '--headless=new', '--disable-gpu', '--hide-scrollbars', '--no-sandbox',
+    '--force-device-scale-factor=1', `--window-size=${w},${h}`,
+    '--virtual-time-budget=6000', `--screenshot=${out}`, `file://${f}`,
+  ], { encoding: 'utf8' });
+  console.log(`${r.status === 0 ? 'OK ' : 'ERR'} ${out} (${w}x${h})`);
+  if (r.status !== 0) { console.error(r.stderr?.slice(-400)); process.exitCode = 1; }
+};
+
+// Chrome writes 24-bit RGB; Play wants the app icon as 32-bit RGBA. Re-flatten in the build so a
+// rebuild can never hand over the wrong depth.
+const toRgba = (file) => {
+  const r = spawnSync('python3', ['-c',
+    `from PIL import Image; Image.open(${JSON.stringify(file)}).convert('RGBA').save(${JSON.stringify(file)})`],
+    { encoding: 'utf8' });
+  if (r.status !== 0) { console.error(`ERR re-flatten ${file} (needs Pillow)`, r.stderr?.slice(-300)); process.exitCode = 1; }
+};
+
+const legacyJobs = [
   ['feature.html', feature, 1024, 500, join(ROOT, 'feature-1024x500.png')],
   ['p1.html', p1, PW, PH, join(ROOT, 'phone', 'phone-1-home.png')],
   ['p2.html', p2, PW, PH, join(ROOT, 'phone', 'phone-2-library.png')],
@@ -166,15 +201,41 @@ const jobs = [
   ['t10b.html', tabletDetail(1600, 2560), 1600, 2560, join(ROOT, 'tablet10', 'tablet10-2-recipe.png')],
 ];
 
-for (const [name, html, w, h, out] of jobs) {
-  const f = join(HTML, name);
-  writeFileSync(f, html);
-  const r = spawnSync(CHROME, [
-    '--headless=new', '--disable-gpu', '--hide-scrollbars', '--no-sandbox',
-    '--force-device-scale-factor=1', `--window-size=${w},${h}`,
-    '--virtual-time-budget=6000', `--screenshot=${out}`, `file://${f}`,
-  ], { encoding: 'utf8' });
-  console.log(`${r.status === 0 ? 'OK ' : 'ERR'} ${out} (${w}x${h})`);
-  if (r.status !== 0) console.error(r.stderr?.slice(-400));
-}
+
+// ---------- 1.4 proposals ----------
+const runV14 = () => {
+  // The food cutout is derived from the app's bundled photo; regenerate it every build.
+  const cut = spawnSync('python3', [join(__dir, 'cutout.py')], { encoding: 'utf8' });
+  process.stdout.write(cut.stdout ?? '');
+  if (cut.status !== 0) { console.error('ERR cutout.py (needs numpy + Pillow)', cut.stderr?.slice(-400)); process.exit(1); }
+
+  render('feature-new.html', featureNew(), 1024, 500, join(ROOT, 'feature-1024x500.new.png'));
+
+  const OPT = join(ROOT, 'icon-options');
+  mkdirSync(OPT, { recursive: true });
+  const opts = iconOptions();
+  const files = opts.map((o) => {
+    const out = join(OPT, `icon-option-${o.key}.png`);
+    render(`icon-option-${o.key}.html`, o.html, 512, 512, out);
+    toRgba(out);
+    return out;
+  });
+  render('icon-options-compare.html',
+    iconComparison(opts, files.map((f) => dataUri(f, 'image/png'))), 1680, 680,
+    join(OPT, 'icon-options-compare.png'));
+};
+
+// ---------- Live store icon (1.4: option B) ----------
+// Full-bleed 512 square, no mask of its own: Play applies the rounded-square mask. Same mark as the
+// app's adaptive icon (src/PurePrep/Resources/AppIcon/appicon*.svg).
+const runIcon = () => {
+  const b = iconOptions().find((o) => o.key === 'b-lime-tile');
+  const out = join(ROOT, 'icon-512.png');
+  render('icon-512.html', b.html, 512, 512, out);
+  toRgba(out);
+};
+
+if (TARGET === 'legacy' || TARGET === 'all') for (const job of legacyJobs) render(...job);
+if (TARGET === 'icon' || TARGET === 'all') runIcon();
+if (TARGET === 'v14' || TARGET === 'all') runV14();
 console.log('done');

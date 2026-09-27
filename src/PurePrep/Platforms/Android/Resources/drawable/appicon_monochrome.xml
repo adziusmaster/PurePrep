@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Android 13+ themed-icon layer: the steaming-bowl silhouette on the same 108dp adaptive
+     canvas and at the same size/position as Resources/AppIcon/appiconfg.svg (456 px canvas,
+     translate(84,85) scale(0.96) → 108/456 dp per px). Only the alpha is used; the launcher
+     tints it with the wallpaper colours. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <group
+        android:translateX="19.895"
+        android:translateY="20.132"
+        android:scaleX="0.22737"
+        android:scaleY="0.22737">
+        <path
+            android:pathData="M112,96 C96,78 128,66 112,46 M150,100 C134,78 166,64 150,40 M188,96 C172,78 204,66 188,46"
+            android:strokeColor="#FF000000"
+            android:strokeWidth="15"
+            android:strokeLineCap="round"
+            android:fillColor="#00000000" />
+        <path
+            android:pathData="M83,150 h134 a13,13 0 0 1 0,26 h-134 a13,13 0 0 1 0,-26 z"
+            android:fillColor="#FF000000" />
+        <path
+            android:pathData="M84,178 h132 a10,10 0 0 1 10,12 a76,76 0 0 1 -152,0 a10,10 0 0 1 10,-12 z"
+            android:fillColor="#FF000000" />
+    </group>
+</vector>

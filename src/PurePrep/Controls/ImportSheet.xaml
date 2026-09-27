@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:controls="clr-namespace:PurePrep.Controls"
+             xmlns:loc="clr-namespace:PurePrep.Localization"
+             xmlns:icons="clr-namespace:PurePrep.Resources.Styles"
+             x:Class="PurePrep.Controls.ImportSheet"
+             x:Name="Root"
+             IsVisible="False"
+             InputTransparent="False">
+
+    <!-- Shown over Home for every "here's a link" moment: a share from another app (warm start or
+         cold start) and a tap on the clipboard chip. Hosted in the shared BottomSheet so it looks and
+         behaves exactly like every other dialog and sheet in the app. -->
+    <controls:BottomSheet x:Name="Sheet" Cancelled="OnSheetCancelled">
+        <VerticalStackLayout Spacing="0">
+
+            <Label Text="{loc:Translate ImportSheetTitle}" Style="{StaticResource SheetTitle}" />
+
+            <!-- Recipe preview (in-app search only): photo + title from the page's JSON-LD or Recipe
+                 microdata, or just the page title when no recipe was detected. Hidden for shares and the
+                 clipboard chip, which only know the link. -->
+            <Border HeightRequest="150" Margin="0,18,0,0" StrokeThickness="0" StrokeShape="RoundRectangle 16"
+                    BackgroundColor="{DynamicResource LimeWash}"
+                    IsVisible="{Binding HasPreviewImage, Source={x:Reference Root}}">
+                <Image Source="{Binding PreviewImage, Source={x:Reference Root}}" Aspect="AspectFill" />
+            </Border>
+            <Label Text="{Binding PreviewTitle, Source={x:Reference Root}}" TextColor="{DynamicResource Ink}"
+                   FontSize="17" FontFamily="OpenSansSemibold" MaxLines="2" LineBreakMode="TailTruncation"
+                   Margin="0,16,0,0"
+                   IsVisible="{Binding PreviewTitle, Source={x:Reference Root}, Converter={StaticResource StringNotNullOrEmptyConverter}}" />
+
+            <!-- Link preview: icon + host (bold) + full URL (muted, middle-truncated). -->
+            <Grid ColumnDefinitions="Auto,*" ColumnSpacing="14" Margin="0,18,0,0">
+                <Border WidthRequest="48" HeightRequest="48" BackgroundColor="{DynamicResource LimeWash}"
+                        StrokeThickness="0" StrokeShape="RoundRectangle 16" VerticalOptions="Center">
+                    <Label Style="{StaticResource IconLabel}" Text="{x:Static icons:Icons.Link}"
+                           TextColor="{DynamicResource Lime}" FontSize="22" />
+                </Border>
+                <VerticalStackLayout Grid.Column="1" Spacing="2" VerticalOptions="Center">
+                    <Label Text="{Binding Host, Source={x:Reference Root}}" TextColor="{DynamicResource Ink}"
+                           FontSize="15.5" FontFamily="OpenSansSemibold" LineBreakMode="TailTruncation" />
+                    <Label Text="{Binding Url, Source={x:Reference Root}}" TextColor="{DynamicResource Muted}"
+                           FontSize="12.5" LineBreakMode="MiddleTruncation" />
+                </VerticalStackLayout>
+            </Grid>
+
+            <!-- New link: cost line. -->
+            <Label Text="{Binding CostText, Source={x:Reference Root}}" Style="{StaticResource SheetMessage}"
+                   Margin="0,16,0,0"
+                   IsVisible="{Binding IsDuplicate, Source={x:Reference Root}, Converter={StaticResource InvertedBoolConverter}}" />
+
+            <!-- Already-saved link. -->
+            <Label Text="{loc:Translate ImportSheetAlreadySaved}" Style="{StaticResource SheetMessage}"
+                   Margin="0,16,0,0"
+                   IsVisible="{Binding IsDuplicate, Source={x:Reference Root}}" />
+
+            <Grid ColumnDefinitions="*,*" ColumnSpacing="12" Margin="0,24,0,0">
+                <!-- New link: Cancel / Import, or Cancel / Buy Smart Credits when the balance is zero. -->
+                <Button Grid.Column="0" Text="{loc:Translate Cancel}" Clicked="OnCancelClicked"
+                        Style="{StaticResource SheetSecondaryButton}"
+                        IsVisible="{Binding IsDuplicate, Source={x:Reference Root}, Converter={StaticResource InvertedBoolConverter}}" />
+                <Button Grid.Column="1" Text="{loc:Translate Import}" Clicked="OnImportClicked"
+                        Style="{StaticResource SheetPrimaryButton}"
+                        IsVisible="{Binding ShowsImport, Source={x:Reference Root}}" />
+                <Button Grid.Column="1" Text="{loc:Translate BuyCredits}" Clicked="OnBuyCreditsClicked"
+                        Style="{StaticResource SheetPrimaryButton}" LineBreakMode="TailTruncation"
+                        IsVisible="{Binding ShowsBuyCredits, Source={x:Reference Root}}" />
+
+                <!-- Already saved: Import again / Open it. -->
+                <Button Grid.Column="0" Text="{loc:Translate ImportAgain}" Clicked="OnImportClicked"
+                        Style="{StaticResource SheetSecondaryButton}"
+                        IsVisible="{Binding IsDuplicate, Source={x:Reference Root}}" />
+                <Button Grid.Column="1" Text="{loc:Translate OpenIt}" Clicked="OnOpenExistingClicked"
+                        Style="{StaticResource SheetPrimaryButton}"
+                        IsVisible="{Binding IsDuplicate, Source={x:Reference Root}}" />
+            </Grid>
+        </VerticalStackLayout>
+    </controls:BottomSheet>
+</ContentView>

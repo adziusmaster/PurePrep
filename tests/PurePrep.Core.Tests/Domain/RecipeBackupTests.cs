@@ -175,4 +175,90 @@ public sealed class RecipeBackupTests
         text.Should().Contain("Nan's Scones");
         text.Should().NotContain("http");
     }
+
+    [Fact]
+    public void ImportWithImages_WhenExportedWithV2Fields_ShouldRoundTripEverything()
+    {
+        // Arrange
+        var recipe = new ParsedRecipe
+        {
+            Title = "Pasta",
+            Ingredients = ["200 g pasta"],
+            Steps = [new RecipeStep { Order = 1, Instruction = "Boil.", Timers = [new RecipeTimer("Boil", 600, 720)], IngredientRefs = [0] }],
+            Servings = 4, ServingsNoun = "people", PrepMinutes = 5, CookMinutes = 12,
+            Notes = "Less salt", IsFavourite = true, ImagePath = "p.jpg",
+        }.MarkCooked(DateTimeOffset.UnixEpoch);
+        var images = new Dictionary<Guid, byte[]> { [recipe.Id] = [1, 2, 3] };
+
+        // Act
+        var contents = RecipeBackup.ImportWithImages(RecipeBackup.Export([recipe], images));
+
+        // Assert
+        var restored = contents.Recipes.Should().ContainSingle().Subject;
+        restored.Steps[0].Timers.Should().Equal(new RecipeTimer("Boil", 600, 720));
+        restored.Steps[0].IngredientRefs.Should().Equal(0);
+        restored.Notes.Should().Be("Less salt");
+        restored.Status.Should().Be(RecipeStatus.Cooked);
+        restored.CookCount.Should().Be(1);
+        restored.ImagePath.Should().BeNull("the image path is re-assigned when the restored bytes are saved");
+        contents.Images[recipe.Id].Should().Equal(1, 2, 3);
+    }
+
+    [Fact]
+    public void Import_WhenFileIsV1_ShouldStillRestoreWithDefaults()
+    {
+        // Arrange
+        const string v1 = """
+            {"version":1,"exportedAt":"2026-01-01T00:00:00Z","recipes":[
+              {"id":"7d1f2a3b-0000-0000-0000-000000000001","title":"Old","sourceSystem":"Metric",
+               "savedAt":"2026-01-01T00:00:00Z","ingredients":["1 egg"],"steps":["Boil 5 min."]}]}
+            """;
+
+        // Act
+        var recipes = RecipeBackup.Import(v1);
+
+        // Assert
+        var old = recipes.Should().ContainSingle().Subject;
+        old.Status.Should().Be(RecipeStatus.WantToCook);
+        old.Steps[0].Instruction.Should().Be("Boil 5 min.");
+        old.Steps[0].Timers.Should().BeEmpty();
+    }
+
+    [Fact]
+    public void ImportWithImages_WhenImageBase64IsCorrupt_ShouldSkipOnlyTheImage()
+    {
+        // Arrange
+        const string json = """
+            {"version":2,"exportedAt":"2026-01-01T00:00:00Z","recipes":[
+              {"id":"7d1f2a3b-0000-0000-0000-000000000001","title":"X","sourceSystem":"Metric",
+               "savedAt":"2026-01-01T00:00:00Z","ingredients":["1 egg"],"steps":["Boil."],"imageBase64":"%%%"}]}
+            """;
+
+        // Act
+        var contents = RecipeBackup.ImportWithImages(json);
+
+        // Assert
+        contents.Recipes.Should().ContainSingle();
+        contents.Images.Should().BeEmpty();
+    }
+
+    [Fact]
+    public void ImportWithImages_WhenRecipeHasNoId_ShouldKeyTheImageToTheSameGeneratedId()
+    {
+        // Arrange — a hand-edited backup can omit (or zero out) the id; the restored recipe and its
+        // image must still end up sharing one generated id rather than two different ones.
+        const string json = """
+            {"version":2,"exportedAt":"2026-01-01T00:00:00Z","recipes":[
+              {"id":"00000000-0000-0000-0000-000000000000","title":"No Id","sourceSystem":"Metric",
+               "savedAt":"2026-01-01T00:00:00Z","ingredients":["1 egg"],"steps":["Boil."],"imageBase64":"AQID"}]}
+            """;
+
+        // Act
+        var contents = RecipeBackup.ImportWithImages(json);
+
+        // Assert
+        var restored = contents.Recipes.Should().ContainSingle().Subject;
+        contents.Images.Should().ContainKey(restored.Id);
+        contents.Images[restored.Id].Should().Equal(1, 2, 3);
+    }
 }

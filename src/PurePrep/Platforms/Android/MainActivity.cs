@@ -19,6 +19,12 @@ public class MainActivity : MauiAppCompatActivity
 {
     protected override void OnCreate(Bundle? savedInstanceState)
     {
+        // Edge-to-edge on every API level (Android 15+ enforces it at targetSdk 35 anyway): the
+        // system bars become transparent and the window draws behind them. This is AndroidX's
+        // supported path — no deprecated Window.SetStatusBarColor / SetNavigationBarColor /
+        // SetDecorFitsSystemWindows calls of our own. Content insets are applied below.
+        EdgeToEdge.Enable(this);
+
         base.OnCreate(savedInstanceState);
 
         // base.OnCreate builds the MAUI app, so services are available from here on.
@@ -33,23 +39,53 @@ public class MainActivity : MauiAppCompatActivity
         if (Window is null)
             return;
 
-        // Android 15+ (SDK 35) enforces edge-to-edge: draw behind the now-transparent
-        // system bars using the modern WindowCompat API (not the deprecated
-        // Window.SetStatusBarColor / SetNavigationBarColor).
-        WindowCompat.SetDecorFitsSystemWindows(Window, false);
+        // EdgeToEdge picks bar-icon colours from the OS dark mode, but PurePrep has its own
+        // appearance setting; the shared ThemeService re-applies them from the app theme and
+        // paints the decor background that shows through the transparent bars.
+        ApplyNativeBars();
 
-        // The window/decor background and bar-icon colours are theme-dependent; let the
-        // shared ThemeService paint them so they match whichever appearance is active
-        // (this is what removes the white status/navigation bands in light OS mode).
-        IPlatformApplication.Current?.Services.GetService<PurePrep.Services.ThemeService>()?.ApplyNativeBars();
-
-        // Handle insets ourselves: pad the content view by the system-bar + cutout
+        // The one place insets are handled: pad the content view by the system-bar + cutout
         // insets so no page content sits under the status or navigation bars, then
         // consume them so MAUI's own views don't apply the padding a second time.
         var content = Window.DecorView.FindViewById(Android.Resource.Id.Content);
         if (content is not null)
             ViewCompat.SetOnApplyWindowInsetsListener(content, new SystemBarsInsetsListener());
     }
+
+    // Something else (the photo picker, the camera, the share sheet) may have repainted the bar
+    // icons while PurePrep was in the background.
+    protected override void OnResume()
+    {
+        base.OnResume();
+        ApplyNativeBars();
+    }
+
+    // Copying a link in another app and switching back should offer it on Home. This runs on window
+    // focus rather than on resume: Android 10+ denies clipboard reads ("application is not in focus")
+    // until the window is focused, which happens after OnResume. Focus also returns when a system
+    // overlay closes; ClipboardChange's per-clip timestamp keeps that to one read per clip.
+    public override void OnWindowFocusChanged(bool hasFocus)
+    {
+        base.OnWindowFocusChanged(hasFocus);
+        if (hasFocus)
+            _ = CheckClipboardOnFocusAsync();
+    }
+
+    private static async Task CheckClipboardOnFocusAsync()
+    {
+        try
+        {
+            if (IPlatformApplication.Current?.Services.GetService<PurePrep.Services.ImportCoordinator>() is { } coordinator)
+                await coordinator.OnWindowFocusedAsync();
+        }
+        catch
+        {
+            // Best-effort convenience: the chip simply isn't offered.
+        }
+    }
+
+    private static void ApplyNativeBars() =>
+        IPlatformApplication.Current?.Services.GetService<PurePrep.Services.ThemeService>()?.ApplyNativeBars();
 
     // LaunchMode is SingleTop, so a share arriving while PurePrep is already open is delivered
     // here rather than creating a second activity.
@@ -85,7 +121,13 @@ public class MainActivity : MauiAppCompatActivity
                 return insets ?? WindowInsetsCompat.Consumed;
 
             var bars = insets.GetInsets(WindowInsetsCompat.Type.SystemBars() | WindowInsetsCompat.Type.DisplayCutout());
-            v.SetPadding(bars.Left, bars.Top, bars.Right, bars.Bottom);
+            // While the window resizes for the keyboard (SheetKeyboard: a bottom sheet is open or a form
+            // page asked for it), the keyboard's inset (which already includes the navigation bar) wins
+            // so the sheet or the page's sticky button sits above it.
+            var bottom = bars.Bottom;
+            if (SheetKeyboard.ResizeActive)
+                bottom = System.Math.Max(bottom, insets.GetInsets(WindowInsetsCompat.Type.Ime()).Bottom);
+            v.SetPadding(bars.Left, bars.Top, bars.Right, bottom);
             return WindowInsetsCompat.Consumed;
         }
     }

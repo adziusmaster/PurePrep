@@ -48,15 +48,33 @@ public static class TranslateEndpoint
 
         try
         {
-            var source = new AiRecipe(request.Title ?? string.Empty, ingredients, steps);
+            var source = new AiRecipe(request.Title ?? string.Empty, ingredients, steps)
+            {
+                TimerLabels = (request.TimerLabels ?? []).Where(x => !string.IsNullOrWhiteSpace(x)).ToArray(),
+                Meta = AiRecipeMeta.Empty with { ServingsNoun = request.ServingsNoun },
+            };
             var translated = await gemini.TranslateAsync(source, request.Language, ct);
+
+            // A translation that changes the step or ingredient count breaks the index mapping the client
+            // uses to re-attach timers and ingredient refs (steps point at ingredients by index). Retry
+            // once here, inside the same request, so a flaky model response costs the device at most the
+            // one credit already charged above — never two.
+            if (!SameShape(translated, ingredients, steps))
+                translated = await gemini.TranslateAsync(source, request.Language, ct);
+
+            if (!SameShape(translated, ingredients, steps))
+                throw new InvalidOperationException("Translation changed the recipe's structure.");
 
             if (string.IsNullOrWhiteSpace(translated.Title) && !translated.Ingredients.Any() && !translated.Steps.Any())
                 throw new InvalidOperationException("Translation returned no content.");
 
             var system = UnitConverter.Detect(translated.Ingredients.Concat(translated.Steps));
             var recipe = new RecipeResponse(
-                translated.Title, null, system.ToString(), translated.Ingredients, translated.Steps);
+                translated.Title, null, system.ToString(), translated.Ingredients, translated.Steps)
+            {
+                TimerLabels = translated.TimerLabels,
+                ServingsNoun = translated.Meta.ServingsNoun,
+            };
 
             var remaining = await credits.GetBalanceAsync(request.DeviceId, ct);
             return Results.Ok(new TranslateResponse(recipe, remaining));
@@ -80,6 +98,9 @@ public static class TranslateEndpoint
             };
         }
     }
+
+    private static bool SameShape(AiRecipe translated, string[] ingredients, string[] steps) =>
+        translated.Steps.Length == steps.Length && translated.Ingredients.Length == ingredients.Length;
 
     private static IResult Fail(int statusCode, string code, string message) =>
         Results.Json(new ImportError(code, message), statusCode: statusCode);

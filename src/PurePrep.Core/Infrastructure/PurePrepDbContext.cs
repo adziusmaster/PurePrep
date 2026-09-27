@@ -23,4 +23,18 @@ public sealed class RecipeRecord
     public string? OriginalLanguage { get; set; }
     public string? DisplayLanguage { get; set; }
     public string TranslationsJson { get; set; } = "{}";
+
+    // 1.4 metadata. Nullable or defaulted so upgraded rows load unchanged.
+    public int? Servings { get; set; }
+    public string? ServingsNoun { get; set; }
+    public bool ServingsEstimated { get; set; }
+    public int? PrepMinutes { get; set; }
+    public int? CookMinutes { get; set; }
+    public string? ImagePath { get; set; }
+    public string? Notes { get; set; }
+    public string Status { get; set; } = nameof(RecipeStatus.WantToCook);
+    public DateTimeOffset? CookedAt { get; set; }
+    public int CookCount { get; set; }
+    public bool IsFavourite { get; set; }
+    public int? ChosenServings { get; set; }
 }

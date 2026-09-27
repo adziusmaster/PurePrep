@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:loc="clr-namespace:PurePrep.Localization"
+             xmlns:icons="clr-namespace:PurePrep.Resources.Styles"
+             x:Class="PurePrep.Controls.StepInstructionView">
+    <!-- A step's instruction that always shows in full: the text shrinks from 34 down to 22 until it
+         fits the card, and only if it still doesn't fit does it scroll — with a bottom fade and a
+         "More" cue that disappears at the end, so nothing is ever clipped silently. -->
+    <Grid>
+        <ScrollView x:Name="Scroller" VerticalScrollBarVisibility="Never" Scrolled="OnScrolled" SizeChanged="OnViewportSizeChanged">
+            <Label x:Name="TextLabel" TextColor="{DynamicResource Ink}" FontAttributes="Bold" LineHeight="1.18"
+                   VerticalOptions="Center" />
+        </ScrollView>
+
+        <Grid x:Name="OverflowCue" VerticalOptions="End" HeightRequest="64" IsVisible="False" InputTransparent="False">
+            <BoxView x:Name="Fade" InputTransparent="True" />
+            <HorizontalStackLayout HorizontalOptions="Center" VerticalOptions="End" Spacing="2" Padding="12,4"
+                                   AutomationProperties.IsInAccessibleTree="True" AutomationProperties.Name="{loc:Translate More}">
+                <HorizontalStackLayout.GestureRecognizers>
+                    <TapGestureRecognizer Tapped="OnCueTapped" />
+                </HorizontalStackLayout.GestureRecognizers>
+                <Label Text="{loc:Translate More}" TextColor="{DynamicResource Muted}" FontSize="12.5" FontAttributes="Bold"
+                       VerticalOptions="Center" />
+                <!-- chevron_left turned to point down: the icon font is subset, so no separate glyph. -->
+                <Label Style="{StaticResource IconLabel}" Text="{x:Static icons:Icons.Back}" FontSize="18" Rotation="-90"
+                       TextColor="{DynamicResource Muted}" />
+            </HorizontalStackLayout>
+        </Grid>
+    </Grid>
+</ContentView>

@@ -2,6 +2,10 @@
 export const T = {
   bg: '#0c100d', ink: '#f4f1e8', muted: '#8e9a8b', line: '#30402d',
   panel: '#182018', panel2: '#202b1e', lime: '#b7df78', limeDark: '#172313', orange: '#ee9b5a',
+  // 1.4 assets use the app's own tokens (src/PurePrep/Resources/Styles/Colors.xaml,
+  // Platforms/Android/Resources/values/colors.xml, AppIcon/appicon.svg) rather than the
+  // store-only lime above, so the listing matches the installed app exactly.
+  appBg: '#0C100D', primary: '#A7D46F', appInk: '#172313', inkSoft: '#c9d2c4',
 };
 
 export const BASE_CSS = `

@@ -28,6 +28,7 @@ public static class ParseEndpoint
         IClientIpHasher ipHasher,
         IPageFetcher fetcher,
         IGeminiClient gemini,
+        IImageTicketStore tickets,
         IOptions<CreditOptions> creditOptions,
         IOptions<GeminiOptions> geminiOptions,
         IDbContextFactory<ServerDbContext> dbFactory,
@@ -56,9 +57,10 @@ public static class ParseEndpoint
                 var structured = StructuredRecipeExtractor.TryExtract(html);
                 var input = RecipeExtractionInput.Build(structured, PageText.Extract(html), geminiOptions.Value.MaxInputChars);
 
-                return await gemini.ExtractAsync(input, request.Language, token);
+                var recipe = await gemini.ExtractAsync(input, request.Language, token);
+                return (recipe, PageImageLocator.Find(html, url));
             },
-            http, credits, freeCredits, ipHasher, dbFactory, log, ct);
+            http, credits, freeCredits, ipHasher, tickets, dbFactory, log, ct);
     }
 
     public static async Task<IResult> ParseImage(
@@ -68,6 +70,7 @@ public static class ParseEndpoint
         IFreeCreditPolicy freeCredits,
         IClientIpHasher ipHasher,
         IGeminiClient gemini,
+        IImageTicketStore tickets,
         IOptions<CreditOptions> creditOptions,
         IDbContextFactory<ServerDbContext> dbFactory,
         ILoggerFactory loggerFactory,
@@ -106,8 +109,8 @@ public static class ParseEndpoint
             creditOptions.Value.CostPerImageParse,
             logHost: "image",
             sourceUrl: null,
-            extract: token => gemini.ExtractFromImageAsync(bytes, mime, request.Language, token),
-            http, credits, freeCredits, ipHasher, dbFactory, log, ct);
+            extract: async token => (await gemini.ExtractFromImageAsync(bytes, mime, request.Language, token), null),
+            http, credits, freeCredits, ipHasher, tickets, dbFactory, log, ct);
     }
 
     public static async Task<IResult> ParseText(
@@ -117,6 +120,7 @@ public static class ParseEndpoint
         IFreeCreditPolicy freeCredits,
         IClientIpHasher ipHasher,
         IGeminiClient gemini,
+        IImageTicketStore tickets,
         IOptions<CreditOptions> creditOptions,
         IOptions<GeminiOptions> geminiOptions,
         IDbContextFactory<ServerDbContext> dbFactory,
@@ -141,8 +145,8 @@ public static class ParseEndpoint
             creditOptions.Value.CostPerParse,
             logHost: "text",
             sourceUrl: null,
-            extract: token => gemini.ExtractAsync(text, request.Language, token),
-            http, credits, freeCredits, ipHasher, dbFactory, log, ct);
+            extract: async token => (await gemini.ExtractAsync(text, request.Language, token), null),
+            http, credits, freeCredits, ipHasher, tickets, dbFactory, log, ct);
     }
 
     /// <summary>
@@ -155,11 +159,12 @@ public static class ParseEndpoint
         int cost,
         string logHost,
         string? sourceUrl,
-        Func<CancellationToken, Task<AiRecipe>> extract,
+        Func<CancellationToken, Task<(AiRecipe Recipe, Uri? Image)>> extract,
         HttpContext http,
         ICreditStore credits,
         IFreeCreditPolicy freeCredits,
         IClientIpHasher ipHasher,
+        IImageTicketStore tickets,
         IDbContextFactory<ServerDbContext> dbFactory,
         ILogger log,
         CancellationToken ct)
@@ -174,7 +179,7 @@ public static class ParseEndpoint
 
         try
         {
-            var ai = await extract(ct);
+            var (ai, image) = await extract(ct);
 
             // A source that yielded nothing usable is a distinct outcome from a fetch or service
             // failure: refund and tell the user there was simply no recipe to read.
@@ -182,7 +187,12 @@ public static class ParseEndpoint
                 throw new NoRecipeExtractedException($"No recipe extracted from '{logHost}'.");
 
             var system = UnitConverter.Detect(ai.Ingredients.Concat(ai.Steps));
-            var recipe = new RecipeResponse(ai.Title, sourceUrl, system.ToString(), ai.Ingredients, ai.Steps);
+            // Always hand the client a one-time ticket for a generated photo, included in this credit.
+            // A 1.4 client redeems it only when there is no page image or that image fails to download
+            // (hotlink-protected, too big, not an image); an unused ticket simply expires. 1.3 clients
+            // ignore the field.
+            var ticket = tickets.Issue(deviceId);
+            var recipe = ToResponse(ai, sourceUrl, system.ToString(), image, ticket);
 
             await LogAsync(dbFactory, deviceHash, logHost, success: true, ct);
             var remaining = await credits.GetBalanceAsync(deviceId, ct);
@@ -223,6 +233,22 @@ public static class ParseEndpoint
             };
         }
     }
+
+    /// <summary>Maps the model's structured recipe plus a located page image into the wire response.</summary>
+    internal static RecipeResponse ToResponse(AiRecipe ai, string? sourceUrl, string system, Uri? image, string? ticket) =>
+        new(ai.Title, sourceUrl, system, ai.Ingredients, ai.Steps)
+        {
+            Servings = ai.Meta.Servings,
+            ServingsNoun = ai.Meta.ServingsNoun,
+            ServingsEstimated = ai.Meta.ServingsEstimated,
+            PrepMinutes = ai.Meta.PrepMinutes,
+            CookMinutes = ai.Meta.CookMinutes,
+            ImageUrl = image?.ToString(),
+            ImageTicket = ticket,
+            StepDetails = ai.StepDetails
+                .Select(s => new StepDto(s.Text, s.IngredientRefs, s.Timers.Select(t => new TimerDto(t.Label, t.MinSeconds, t.MaxSeconds)).ToArray()))
+                .ToArray(),
+        };
 
     private static IResult Fail(int statusCode, string code, string message) =>
         Results.Json(new ImportError(code, message), statusCode: statusCode);

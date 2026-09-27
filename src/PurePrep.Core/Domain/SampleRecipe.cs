@@ -3,46 +3,113 @@ namespace PurePrep.Domain;
 /// <summary>
 /// The recipe seeded into a brand-new library on first launch, so the app is never an empty box.
 ///
-/// It is a Polish classic — pierogi ruskie — as a nod to where PurePrep comes from, but it is shown
-/// in English by default so it reads for everyone. A Polish translation is pre-cached, so switching
-/// the recipe to Polish from the translate menu is instant and free (no credit, no network) — a
-/// small showcase of the translation feature on content we already trust.
+/// It is a Polish classic — pierogi ruskie (potato &amp; cheese dumplings), based on Ania Gotuje's
+/// recipe (no egg in the dough) — as a nod to where PurePrep comes from, but it is shown in English
+/// by default so it reads for everyone. A Polish translation is pre-cached, so switching the recipe
+/// to Polish from the translate menu is instant and free (no credit, no network). It carries a full
+/// set of 1.4 features (servings, prep/cook time, named step timers, ingredient references, a note)
+/// so it doubles as a showcase of what an imported recipe looks like once PurePrep has parsed it.
 /// </summary>
 public static class SampleRecipe
 {
     public static ParsedRecipe Create()
     {
+        var ingredients = new[]
+        {
+            "650 g potatoes (about 500 g once cooked)",
+            "½ tsp salt (for the filling)",
+            "½ tsp pepper",
+            "300 g onion",
+            "2 tbsp clarified butter",
+            "300 g semi-fat cottage cheese (twaróg)",
+            "500 g plain flour",
+            "½ tsp salt (for the dough)",
+            "50 ml oil",
+            "250 ml hot water",
+            "2 tbsp butter, for frying (optional)",
+        };
+
         var steps = new[]
         {
-            "Make the dough: mix the flour with the warm water, egg and salt, then knead for about 8 minutes until smooth and elastic. Cover and rest for 30 minutes.",
-            "Meanwhile, boil the peeled potatoes in salted water until tender, about 20 minutes, then drain well and mash until smooth.",
-            "Gently fry the finely chopped onion in butter over low heat until soft and golden, about 10 minutes.",
-            "Stir the fried onion and the twaróg (farmer's cheese) into the mashed potato. Season generously with salt and pepper and let the filling cool.",
-            "Roll the dough out thinly and cut out circles with a glass. Place a spoon of filling on each, fold over and pinch the edges firmly to seal.",
-            "Cook the pierogi in batches in a large pot of gently boiling salted water. They are ready about 2 minutes after they float to the top.",
-            "Serve hot, topped with a little more butter or with onions fried until golden. Smacznego!",
+            new RecipeStep
+            {
+                Order = 1,
+                Instruction = "This makes about 60 pierogi. Peel the potatoes and boil them until tender, " +
+                    "then drain, let the steam escape and mash them. Season with salt and pepper and leave " +
+                    "to cool.",
+                IngredientRefs = [0, 1, 2],
+                Timers = [new RecipeTimer("Boil potatoes", 1200, 1500)],
+            },
+            new RecipeStep
+            {
+                Order = 2,
+                Instruction = "Chop the onion finely and fry it gently in the clarified butter until soft " +
+                    "and golden.",
+                IngredientRefs = [3, 4],
+                Timers = [new RecipeTimer("Fry onion", 600, 600)],
+            },
+            new RecipeStep
+            {
+                Order = 3,
+                Instruction = "Press the cottage cheese through a sieve or potato ricer, then mix it with " +
+                    "the cooled potatoes and half of the fried onion. Taste and adjust the seasoning.",
+                IngredientRefs = [5, 0, 3],
+            },
+            new RecipeStep
+            {
+                Order = 4,
+                Instruction = "Mix the flour and salt in a large bowl, add the oil and the hot water, stir " +
+                    "with a spoon, then knead into a smooth, elastic dough (no egg needed).",
+                IngredientRefs = [6, 7, 8, 9],
+                Timers = [new RecipeTimer("Knead dough", 480, 480)],
+            },
+            new RecipeStep
+            {
+                Order = 5,
+                Instruction = "Wrap the dough and let it rest so it rolls out without shrinking back.",
+                Timers = [new RecipeTimer("Rest dough", 1800, 1800)],
+            },
+            new RecipeStep
+            {
+                Order = 6,
+                Instruction = "Roll the dough out thinly in batches, cut out 8 cm circles, put a teaspoon " +
+                    "of filling on each, fold and pinch the edges firmly shut. Keep finished pierogi under " +
+                    "a damp cloth.",
+                IngredientRefs = [6],
+            },
+            new RecipeStep
+            {
+                Order = 7,
+                Instruction = "Boil the pierogi in batches in salted water; once they float, cook them a " +
+                    "little longer, then lift them out.",
+                Timers = [new RecipeTimer("Boil pierogi", 180, 240)],
+            },
+            new RecipeStep
+            {
+                Order = 8,
+                Instruction = "Serve with the remaining fried onion, or for extra crunch fry the boiled " +
+                    "pierogi in butter until golden on both sides.",
+                IngredientRefs = [3, 10],
+                Timers = [new RecipeTimer("Fry pierogi", 180, 240)],
+            },
         };
 
         var recipe = new ParsedRecipe
         {
-            Title = "Polish Pierogi Ruskie (Potato & Cheese Dumplings)",
-            Ingredients = new[]
-            {
-                "300 g plain flour, plus extra for rolling",
-                "150 ml warm water",
-                "1 egg",
-                "1 tsp salt",
-                "500 g floury potatoes, peeled",
-                "250 g twaróg (Polish farmer's cheese) or ricotta",
-                "1 large onion, finely chopped",
-                "2 tbsp butter",
-                "Salt and black pepper, to taste",
-            },
-            Steps = steps
-                .Select((instruction, index) => new RecipeStep { Order = index + 1, Instruction = instruction })
-                .ToArray(),
+            Title = "Pierogi ruskie (potato & cheese dumplings)",
+            SourceUrl = "https://aniagotuje.pl/przepis/pierogi-ruskie",
+            Ingredients = ingredients,
+            Steps = steps,
             SourceSystem = MeasurementSystem.Metric,
             OriginalLanguage = "en",
+            Servings = 6,
+            ServingsEstimated = false,
+            PrepMinutes = 60,
+            CookMinutes = 30,
+            Status = RecipeStatus.WantToCook,
+            ImagePath = null,
+            Notes = "Tip: freeze uncooked pierogi on a tray for about 90 minutes, then bag them — boil " +
+                "straight from frozen.",
         };
 
         return recipe.WithTranslation("pl", PolishTranslation(), originalLanguage: "en")
@@ -52,30 +119,84 @@ public static class SampleRecipe
 
     private static RecipeTranslation PolishTranslation() => new()
     {
-        Title = "Pierogi ruskie (z ziemniakami i twarogiem)",
+        Title = "Pierogi ruskie",
         Ingredients = new[]
         {
-            "300 g mąki pszennej, plus trochę do podsypywania",
-            "150 ml ciepłej wody",
-            "1 jajko",
-            "1 łyżeczka soli",
-            "500 g ziemniaków (mączystych), obranych",
-            "250 g twarogu",
-            "1 duża cebula, drobno posiekana",
-            "2 łyżki masła",
-            "Sól i pieprz do smaku",
+            "650 g ziemniaków (ok. 500 g po ugotowaniu)",
+            "½ łyżeczki soli (do farszu)",
+            "½ łyżeczki pieprzu",
+            "300 g cebuli",
+            "2 łyżki masła klarowanego",
+            "300 g twarogu półtłustego",
+            "500 g mąki pszennej",
+            "½ łyżeczki soli (do ciasta)",
+            "50 ml oleju",
+            "250 ml gorącej wody",
+            "2 łyżki masła do smażenia (opcjonalnie)",
         },
         Steps = new[]
         {
-            "Zagnieć ciasto: wymieszaj mąkę z ciepłą wodą, jajkiem i solą, a następnie wyrabiaj przez około 8 minut, aż będzie gładkie i elastyczne. Przykryj i odstaw na 30 minut.",
-            "W międzyczasie ugotuj obrane ziemniaki w osolonej wodzie do miękkości, około 20 minut, odcedź i dokładnie utłucz na gładką masę.",
-            "Delikatnie podsmaż drobno posiekaną cebulę na maśle na małym ogniu, aż zmięknie i się zezłoci, około 10 minut.",
-            "Wmieszaj podsmażoną cebulę i twaróg do ziemniaków. Dopraw obficie solą i pieprzem, a następnie ostudź farsz.",
-            "Rozwałkuj ciasto cienko i wykrawaj krążki szklanką. Na każdy nałóż łyżkę farszu, złóż na pół i mocno zlep brzegi.",
-            "Gotuj pierogi partiami w dużym garnku delikatnie wrzącej, osolonej wody. Są gotowe około 2 minuty po tym, jak wypłyną na powierzchnię.",
-            "Podawaj na gorąco, polane odrobiną masła lub ze zrumienioną cebulką. Smacznego!",
-        }
-        .Select((instruction, index) => new RecipeStep { Order = index + 1, Instruction = instruction })
-        .ToArray(),
+            new RecipeStep
+            {
+                Order = 1,
+                Instruction = "Wychodzi około 60 pierogów. Obierz ziemniaki i ugotuj do miękkości, odcedź, " +
+                    "odparuj i utłucz na gładko. Dopraw solą i pieprzem i odstaw do wystygnięcia.",
+                IngredientRefs = [0, 1, 2],
+                Timers = [new RecipeTimer("Gotowanie ziemniaków", 1200, 1500)],
+            },
+            new RecipeStep
+            {
+                Order = 2,
+                Instruction = "Cebulę drobno posiekaj i podsmaż delikatnie na maśle klarowanym, aż zmięknie " +
+                    "i się zezłoci.",
+                IngredientRefs = [3, 4],
+                Timers = [new RecipeTimer("Smażenie cebuli", 600, 600)],
+            },
+            new RecipeStep
+            {
+                Order = 3,
+                Instruction = "Przeciśnij twaróg przez sitko lub praskę do ziemniaków, wymieszaj z " +
+                    "wystudzonymi ziemniakami i połową usmażonej cebuli. Dopraw do smaku.",
+                IngredientRefs = [5, 0, 3],
+            },
+            new RecipeStep
+            {
+                Order = 4,
+                Instruction = "Wymieszaj mąkę z solą, dodaj olej i gorącą wodę, wymieszaj łyżką, a " +
+                    "następnie zagnieć na gładkie, elastyczne ciasto (bez jajka).",
+                IngredientRefs = [6, 7, 8, 9],
+                Timers = [new RecipeTimer("Zagniatanie ciasta", 480, 480)],
+            },
+            new RecipeStep
+            {
+                Order = 5,
+                Instruction = "Zawiń ciasto i odstaw, żeby odpoczęło — dzięki temu rozwałkuje się bez " +
+                    "kurczenia.",
+                Timers = [new RecipeTimer("Odpoczynek ciasta", 1800, 1800)],
+            },
+            new RecipeStep
+            {
+                Order = 6,
+                Instruction = "Rozwałkuj ciasto cienko partiami, wykrawaj krążki o średnicy 8 cm, na każdy " +
+                    "nałóż łyżeczkę farszu, złóż i mocno zlep brzegi. Gotowe pierogi trzymaj pod wilgotną " +
+                    "ściereczką.",
+                IngredientRefs = [6],
+            },
+            new RecipeStep
+            {
+                Order = 7,
+                Instruction = "Gotuj pierogi partiami w osolonej wodzie; gdy wypłyną, gotuj je jeszcze " +
+                    "chwilę, a potem wyjmij.",
+                Timers = [new RecipeTimer("Gotowanie pierogów", 180, 240)],
+            },
+            new RecipeStep
+            {
+                Order = 8,
+                Instruction = "Podawaj z pozostałą cebulką, a dla większego chrupania usmaż ugotowane " +
+                    "pierogi na maśle na złoto z obu stron.",
+                IngredientRefs = [3, 10],
+                Timers = [new RecipeTimer("Smażenie pierogów", 180, 240)],
+            },
+        },
     };
 }

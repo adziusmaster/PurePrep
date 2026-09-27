@@ -1,7 +1,7 @@
 namespace PurePrep.Application;
 
 /// <summary>One representative spoken word for each navigation command, in a given language.</summary>
-public sealed record VoicePhrases(string Next, string Previous, string Repeat);
+public sealed record VoicePhrases(string Next, string Previous, string Repeat, string Stop);
 
 /// <summary>
 /// The words PurePrep listens for during hands-free cooking, and the languages it understands them
@@ -17,13 +17,13 @@ public static class VoiceCommandVocabulary
     // UI languages, which are exactly the languages we have keyword coverage for below.
     private static readonly Dictionary<string, VoicePhrases> ExamplesByLanguage = new(StringComparer.OrdinalIgnoreCase)
     {
-        ["en"] = new("next", "back", "repeat"),
-        ["de"] = new("weiter", "zurück", "wiederholen"),
-        ["fr"] = new("suivant", "précédent", "répète"),
-        ["es"] = new("siguiente", "atrás", "repite"),
-        ["it"] = new("avanti", "indietro", "ripeti"),
-        ["pl"] = new("dalej", "wstecz", "powtórz"),
-        ["nl"] = new("volgende", "terug", "herhaal"),
+        ["en"] = new("next", "back", "repeat", "stop"),
+        ["de"] = new("weiter", "zurück", "wiederholen", "stopp"),
+        ["fr"] = new("suivant", "précédent", "répète", "stop"),
+        ["es"] = new("siguiente", "atrás", "repite", "para"),
+        ["it"] = new("avanti", "indietro", "ripeti", "basta"),
+        ["pl"] = new("dalej", "wstecz", "powtórz", "stop"),
+        ["nl"] = new("volgende", "terug", "herhaal", "stop"),
     };
 
     // Keyword sets scanned for each command, pooled across all supported languages. Longest-standing
@@ -36,6 +36,9 @@ public static class VoiceCommandVocabulary
 
     private static readonly string[] NextWords =
         ["next", "forward", "continue", "dalej", "następny", "weiter", "siguiente", "suivant", "avanti", "volgende", "verder"];
+
+    private static readonly string[] StopWords =
+        ["stop", "stopp", "przestań", "arrête", "para", "detente", "basta", "ferma", "halt"];
 
     /// <summary>ISO 639-1 codes for which hands-free voice navigation is offered.</summary>
     public static IReadOnlyCollection<string> SupportedLanguages => ExamplesByLanguage.Keys;
@@ -61,7 +64,10 @@ public static class VoiceCommandVocabulary
 
         var text = phrase.ToLowerInvariant();
 
-        // Repeat is checked first: its words ("read", "again") are the least likely to collide with
+        // Stop wins: 'stop reading' contains 'read', and a missed stop keeps talking over the cook.
+        if (ContainsAny(text, StopWords)) { command = VoiceCommand.Stop; return true; }
+
+        // Repeat is checked next: its words ("read", "again") are the least likely to collide with
         // a step's own wording, and a stray repeat is harmless where a stray step-skip is not.
         if (ContainsAny(text, RepeatWords)) { command = VoiceCommand.Repeat; return true; }
         if (ContainsAny(text, PreviousWords)) { command = VoiceCommand.Previous; return true; }

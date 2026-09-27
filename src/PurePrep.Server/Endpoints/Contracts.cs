@@ -9,12 +9,30 @@ public sealed record ParseImageRequest(Guid DeviceId, string ImageBase64, string
 /// <summary>Import from pasted recipe text (notes, messages, anything not behind a URL).</summary>
 public sealed record ParseTextRequest(Guid DeviceId, string Text, string? Language = null);
 
+public sealed record TimerDto(string Label, int MinSeconds, int MaxSeconds);
+
+public sealed record StepDto(string Text, IReadOnlyList<int> IngredientRefs, IReadOnlyList<TimerDto> Timers);
+
 public sealed record RecipeResponse(
     string Title,
     string? SourceUrl,
     string SourceSystem,
     IReadOnlyList<string> Ingredients,
-    IReadOnlyList<string> Steps);
+    IReadOnlyList<string> Steps)
+{
+    // 1.4 additions — additive only; 1.3.x clients ignore them and keep reading Steps.
+    public int? Servings { get; init; }
+    public string? ServingsNoun { get; init; }
+    public bool ServingsEstimated { get; init; }
+    public int? PrepMinutes { get; init; }
+    public int? CookMinutes { get; init; }
+    public string? ImageUrl { get; init; }
+    public string? ImageTicket { get; init; }
+    public IReadOnlyList<StepDto>? StepDetails { get; init; }
+    public IReadOnlyList<string>? TimerLabels { get; init; }
+}
+
+public sealed record ImageRequest(Guid DeviceId, string Ticket, string Title, IReadOnlyList<string>? Ingredients);
 
 public sealed record ParseResponse(RecipeResponse Recipe, int RemainingCredits);
 
@@ -24,7 +42,9 @@ public sealed record TranslateRequest(
     string Language,
     string Title,
     IReadOnlyList<string>? Ingredients,
-    IReadOnlyList<string>? Steps);
+    IReadOnlyList<string>? Steps,
+    IReadOnlyList<string>? TimerLabels = null,
+    string? ServingsNoun = null);
 
 public sealed record TranslateResponse(RecipeResponse Recipe, int RemainingCredits);
 

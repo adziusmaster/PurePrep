@@ -1,7 +1,8 @@
 ﻿<?xml version="1.0" encoding="UTF-8" ?>
-<ResourceDictionary 
+<ResourceDictionary
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
-    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml">
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:local="clr-namespace:PurePrep">
 
     <Style TargetType="ActivityIndicator">
         <Setter Property="Color" Value="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource White}}" />
@@ -18,8 +19,11 @@
         <Setter Property="StrokeThickness" Value="1"/>
     </Style>
 
+    <!-- Transparent, not the template's opaque Gray950/Gray200: BoxView paints BackgroundColor
+         underneath Color, so the template default turned every translucent scrim into a flat grey
+         slab that hid the page behind it. -->
     <Style TargetType="BoxView">
-        <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource Gray950}, Dark={StaticResource Gray200}}" />
+        <Setter Property="BackgroundColor" Value="Transparent" />
     </Style>
 
     <Style TargetType="Button">
@@ -326,9 +330,14 @@
         <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource Black}}" />
     </Style>
 
+    <!-- Switch: OnColor/ThumbColor are the theme's on-state colours, bound dynamically so a theme
+         swap re-runs the handler mapping. On Android the mapping in MauiProgram replaces MAUI's
+         colour filters with full on/off tint lists (SwitchTrackOff/SwitchThumbOff are read there);
+         without that the off state fell back to the native night-mode defaults — a white thumb on a
+         translucent-white track, invisible on the light theme's white cards. -->
     <Style TargetType="Switch">
-        <Setter Property="OnColor" Value="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource White}}" />
-        <Setter Property="ThumbColor" Value="{StaticResource White}" />
+        <Setter Property="OnColor" Value="{DynamicResource SwitchTrackOn}" />
+        <Setter Property="ThumbColor" Value="{DynamicResource SwitchThumbOn}" />
         <Setter Property="VisualStateManager.VisualStateGroups">
             <VisualStateGroupList>
                 <VisualStateGroup x:Name="CommonStates">
@@ -339,20 +348,30 @@
                             <Setter Property="ThumbColor" Value="{AppThemeBinding Light={StaticResource Gray300}, Dark={StaticResource Gray600}}" />
                         </VisualState.Setters>
                     </VisualState>
-                    <VisualState x:Name="On">
-                        <VisualState.Setters>
-                            <Setter Property="OnColor" Value="{AppThemeBinding Light={StaticResource Secondary}, Dark={StaticResource Gray200}}" />
-                            <Setter Property="ThumbColor" Value="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource White}}" />
-                        </VisualState.Setters>
-                    </VisualState>
-                    <VisualState x:Name="Off">
-                        <VisualState.Setters>
-                            <Setter Property="ThumbColor" Value="{AppThemeBinding Light={StaticResource Gray400}, Dark={StaticResource Gray500}}" />
-                        </VisualState.Setters>
-                    </VisualState>
                 </VisualStateGroup>
             </VisualStateGroupList>
         </Setter>
+    </Style>
+
+    <!-- One outline icon glyph, from the single Material Symbols Rounded font, tinted by theme. -->
+    <Style x:Key="IconLabel" TargetType="Label">
+        <Setter Property="FontFamily" Value="MaterialSymbols" />
+        <Setter Property="FontSize" Value="22" />
+        <Setter Property="TextColor" Value="{DynamicResource Ink}" />
+        <Setter Property="HorizontalOptions" Value="Center" />
+        <Setter Property="VerticalOptions" Value="Center" />
+    </Style>
+
+    <!-- The one 44x44 tappable icon chip used across every top bar's action slot. -->
+    <Style x:Key="IconButton" TargetType="Border">
+        <Setter Property="WidthRequest" Value="44" />
+        <Setter Property="HeightRequest" Value="44" />
+        <Setter Property="BackgroundColor" Value="{DynamicResource Surface}" />
+        <Setter Property="Stroke" Value="{DynamicResource Line}" />
+        <Setter Property="StrokeThickness" Value="1" />
+        <Setter Property="StrokeShape" Value="RoundRectangle 14" />
+        <Setter Property="local:TapFeedback.IsEnabled" Value="True" />
+        <Setter Property="AutomationProperties.IsInAccessibleTree" Value="True" />
     </Style>
 
     <Style TargetType="TimePicker">
@@ -429,6 +448,66 @@
         <Setter Property="BarTextColor" Value="{AppThemeBinding Light={StaticResource Magenta}, Dark={StaticResource White}}" />
         <Setter Property="UnselectedTabColor" Value="{AppThemeBinding Light={StaticResource Gray200}, Dark={StaticResource Gray950}}" />
         <Setter Property="SelectedTabColor" Value="{AppThemeBinding Light={StaticResource Gray950}, Dark={StaticResource Gray200}}" />
+    </Style>
+
+    <!-- ── Bottom sheets (Controls/BottomSheet + AppDialog) ─────────────────────────────────────
+         One look for every dialog and sheet: title/message type, and pill buttons that grow rather
+         than truncate (MinimumHeightRequest, never a fixed height). -->
+    <Style x:Key="SheetTitle" TargetType="Label">
+        <Setter Property="FontFamily" Value="OpenSansSemibold" />
+        <Setter Property="FontSize" Value="20" />
+        <Setter Property="TextColor" Value="{DynamicResource Ink}" />
+        <Setter Property="LineBreakMode" Value="WordWrap" />
+    </Style>
+
+    <Style x:Key="SheetMessage" TargetType="Label">
+        <Setter Property="FontSize" Value="14" />
+        <Setter Property="LineHeight" Value="1.3" />
+        <Setter Property="TextColor" Value="{DynamicResource Muted}" />
+        <Setter Property="LineBreakMode" Value="WordWrap" />
+    </Style>
+
+    <Style x:Key="SheetFieldLabel" TargetType="Label">
+        <Setter Property="FontFamily" Value="OpenSansSemibold" />
+        <Setter Property="FontSize" Value="12.5" />
+        <Setter Property="TextColor" Value="{DynamicResource Muted}" />
+    </Style>
+
+    <!-- Input well inside a sheet: sits a shade off the sheet surface, no underline chrome. -->
+    <Style x:Key="SheetField" TargetType="Border">
+        <Setter Property="BackgroundColor" Value="{DynamicResource Bg}" />
+        <Setter Property="Stroke" Value="{DynamicResource LineSoft}" />
+        <Setter Property="StrokeThickness" Value="1" />
+        <Setter Property="StrokeShape" Value="RoundRectangle 16" />
+        <Setter Property="Padding" Value="14,2" />
+        <Setter Property="MinimumHeightRequest" Value="52" />
+    </Style>
+
+    <Style x:Key="SheetButton" TargetType="Button">
+        <Setter Property="FontFamily" Value="OpenSansSemibold" />
+        <Setter Property="FontSize" Value="15" />
+        <Setter Property="CornerRadius" Value="26" />
+        <Setter Property="MinimumHeightRequest" Value="52" />
+        <Setter Property="Padding" Value="16,12" />
+        <Setter Property="LineBreakMode" Value="WordWrap" />
+        <Setter Property="BorderWidth" Value="0" />
+    </Style>
+
+    <Style x:Key="SheetPrimaryButton" TargetType="Button" BasedOn="{StaticResource SheetButton}">
+        <Setter Property="BackgroundColor" Value="{DynamicResource Lime}" />
+        <Setter Property="TextColor" Value="{DynamicResource LimeInk}" />
+    </Style>
+
+    <Style x:Key="SheetDangerButton" TargetType="Button" BasedOn="{StaticResource SheetButton}">
+        <Setter Property="BackgroundColor" Value="{DynamicResource Danger}" />
+        <Setter Property="TextColor" Value="{DynamicResource DangerInk}" />
+    </Style>
+
+    <Style x:Key="SheetSecondaryButton" TargetType="Button" BasedOn="{StaticResource SheetButton}">
+        <Setter Property="BackgroundColor" Value="Transparent" />
+        <Setter Property="TextColor" Value="{DynamicResource Ink}" />
+        <Setter Property="BorderColor" Value="{DynamicResource LineSoft}" />
+        <Setter Property="BorderWidth" Value="1" />
     </Style>
 
 </ResourceDictionary>

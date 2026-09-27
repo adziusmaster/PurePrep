@@ -52,3 +52,8 @@ dotnet build src/PurePrep/PurePrep.csproj -f net10.0-android
 
 For the **verified** local setup and the signed release-AAB recipe (keystore, version bumping,
 and the Android-only restore workaround), see [`BUILD.md`](./BUILD.md).
+
+## Credits
+
+- Icons: [Material Symbols Rounded](https://github.com/google/material-design-icons) by Google, licensed under [Apache-2.0](https://github.com/google/material-design-icons/blob/master/LICENSE).
+- Sample recipe photo: Zoshua Colah on Unsplash (https://unsplash.com/photos/O8RSmmnv6eg).

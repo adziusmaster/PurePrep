@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Merged into AndroidManifest.xml only when PurePrepLocalApi=true (PurePrep.csproj). Points the
+  app at the localhost-only cleartext allowance in Resources/xml/network_security_config.xml, so
+  the LOCAL_API backend URL (see MauiProgram.cs) can actually be reached over HTTP. Absent from
+  every other build, Debug or Release.
+-->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+	<application android:networkSecurityConfig="@xml/network_security_config" />
+</manifest>

@@ -18,10 +18,17 @@ public partial class App : Microsoft.Maui.Controls.Application
 		// so localized XAML strings and theme tokens resolve correctly on first render.
 		LocalizationService.Apply();
 		_services.GetRequiredService<ThemeService>().Apply();
+
+		// Resolved eagerly (rather than lazily on first use) so its SharedUrlRelay subscriptions
+		// exist before a share intent can arrive.
+		_services.GetRequiredService<ImportCoordinator>();
 	}
 
 	protected override Window CreateWindow(IActivationState? activationState)
 	{
+		// The clipboard re-check on return from another app is driven by MainActivity.OnWindowFocusChanged,
+		// not Window.Resumed: Android 10+ denies clipboard reads until the window has focus, which it
+		// does not yet have when Resumed fires.
 		return new Window(BuildRootPage());
 	}
 

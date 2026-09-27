@@ -1,3 +1,4 @@
+using FluentAssertions;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using PurePrep.Domain;
@@ -39,6 +40,132 @@ public sealed class SqliteRecipeRepositoryMigrationTests : IDisposable
         Assert.Contains("OriginalLanguage", columns);
         Assert.Contains("DisplayLanguage", columns);
         Assert.Contains("TranslationsJson", columns);
+    }
+
+    [Fact]
+    public async Task GetAllAsync_WhenDatabaseIsFrom133_ShouldLoadWithDefaultsForNewFields()
+    {
+        // Arrange — a 1.3.3-shaped table: translation columns present, 1.4 columns absent, old StepsJson.
+        await Create133DatabaseAsync();
+        var repository = new SqliteRecipeRepository(new FileContextFactory(ConnectionString));
+
+        // Act
+        var recipes = await repository.GetAllAsync();
+
+        // Assert
+        var old = recipes.Should().ContainSingle().Subject;
+        old.Status.Should().Be(RecipeStatus.WantToCook);
+        old.Servings.Should().BeNull();
+        old.Steps[0].Timers.Should().BeEmpty();
+        old.Steps[0].IngredientRefs.Should().BeEmpty();
+    }
+
+    [Fact]
+    public async Task UpdateAsync_WhenRecipeHasAllNewFields_ShouldRoundTripThem()
+    {
+        // Arrange
+        var repository = new SqliteRecipeRepository(new FileContextFactory(ConnectionString));
+        var recipe = new ParsedRecipe
+        {
+            Title = "Pasta",
+            Ingredients = ["200 g pasta"],
+            Steps = [new RecipeStep { Order = 1, Instruction = "Boil.", Timers = [new RecipeTimer("Boil", 600, 720)], IngredientRefs = [0] }],
+        };
+        await repository.SaveAsync(recipe);
+        var updated = recipe.WithNotes("Less salt").WithFavourite(true).WithServings(4).WithChosenServings(2)
+            .WithImage("images/p.jpg").MarkCooked(DateTimeOffset.UnixEpoch) with
+            { ServingsNoun = "people", ServingsEstimated = true, PrepMinutes = 5, CookMinutes = 12 };
+
+        // Act
+        await repository.UpdateAsync(updated);
+        await repository.UpdateImagePathAsync(updated.Id, updated.ImagePath);
+        var loaded = (await repository.GetAllAsync()).Single();
+
+        // Assert
+        loaded.Should().BeEquivalentTo(updated, o => o
+            .Excluding(r => r.Translations)
+            .Excluding(r => r.SavedAt));
+    }
+
+    [Fact]
+    public async Task UpdateAsync_WhenCopyPredatesAttachedPhoto_ShouldKeepStoredImagePath()
+    {
+        // Arrange — the import returned the recipe, then the photo attached in the background.
+        var repository = new SqliteRecipeRepository(new FileContextFactory(ConnectionString));
+        var imported = new ParsedRecipe { Title = "Pasta" };
+        await repository.SaveAsync(imported);
+        await repository.UpdateImagePathAsync(imported.Id, "images/p.jpg");
+
+        // Act — the detail page persists a favourite from its image-less copy.
+        await repository.UpdateAsync(imported.WithFavourite(true));
+        var loaded = (await repository.GetAllAsync()).Single();
+
+        // Assert
+        loaded.ImagePath.Should().Be("images/p.jpg");
+        loaded.IsFavourite.Should().BeTrue();
+    }
+
+    [Fact]
+    public async Task UpdateImagePathAsync_WhenNull_ShouldClearThePhoto()
+    {
+        // Arrange
+        var repository = new SqliteRecipeRepository(new FileContextFactory(ConnectionString));
+        var recipe = new ParsedRecipe { Title = "Pasta" }.WithImage("images/p.jpg");
+        await repository.SaveAsync(recipe);
+
+        // Act
+        await repository.UpdateImagePathAsync(recipe.Id, null);
+        var loaded = (await repository.GetAllAsync()).Single();
+
+        // Assert
+        loaded.ImagePath.Should().BeNull();
+    }
+
+    [Fact]
+    public async Task UpdateImagePathAsync_WhenRecipeMissing_ShouldDoNothing()
+    {
+        // Arrange
+        var repository = new SqliteRecipeRepository(new FileContextFactory(ConnectionString));
+
+        // Act
+        Func<Task> act = async () => await repository.UpdateImagePathAsync(Guid.NewGuid(), "images/x.jpg");
+
+        // Assert
+        await act.Should().NotThrowAsync();
+        (await repository.GetAllAsync()).Should().BeEmpty();
+    }
+
+    [Fact]
+    public async Task SaveAsync_WhenCalledOnFreshDatabase_ShouldNotThrowOnRepeatedMigration()
+    {
+        // Arrange
+        var repository = new SqliteRecipeRepository(new FileContextFactory(ConnectionString));
+
+        // Act
+        Func<Task> act = async () =>
+        {
+            await repository.SaveAsync(new ParsedRecipe { Title = "A" });
+            await repository.SaveAsync(new ParsedRecipe { Title = "B" });
+        };
+
+        // Assert
+        await act.Should().NotThrowAsync();
+    }
+
+    private async Task Create133DatabaseAsync()
+    {
+        await using var connection = new SqliteConnection(ConnectionString);
+        await connection.OpenAsync();
+        await using var cmd = connection.CreateCommand();
+        cmd.CommandText = """
+            CREATE TABLE Recipes (Id TEXT NOT NULL PRIMARY KEY, Title TEXT NOT NULL, SourceUrl TEXT NULL,
+              IngredientsJson TEXT NOT NULL, StepsJson TEXT NOT NULL, SourceSystem TEXT NOT NULL DEFAULT 'Metric',
+              SavedAt TEXT NOT NULL, OriginalLanguage TEXT NULL, DisplayLanguage TEXT NULL,
+              TranslationsJson TEXT NOT NULL DEFAULT '');
+            INSERT INTO Recipes VALUES ('7d1f2a3b-0000-0000-0000-000000000001','Old','https://a.b/c',
+              '["1 egg"]','[{"Order":1,"Instruction":"Boil 5 min."}]','Metric','2026-01-01 00:00:00+00:00',NULL,NULL,'');
+            """;
+        await cmd.ExecuteNonQueryAsync();
     }
 
     private async Task CreateLegacyDatabaseAsync(Guid recipeId)

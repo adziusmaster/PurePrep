@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:local="clr-namespace:PurePrep"
+             xmlns:icons="clr-namespace:PurePrep.Resources.Styles"
+             xmlns:loc="clr-namespace:PurePrep.Localization"
+             x:Class="PurePrep.Controls.ServingsStepper"
+             x:Name="Root">
+
+    <!-- People-based servings control: "Serves [-] 4 people [+] [reset]", used on the detail page for
+         recipes with a known yield. The number itself is tappable (opens a numeric prompt on the host
+         page); the ↺ reset only shows once the count has moved away from the recipe's own servings. -->
+    <Border BackgroundColor="{DynamicResource Surface}" Stroke="{DynamicResource Line}"
+            StrokeThickness="1" Padding="14,10" StrokeShape="RoundRectangle 16">
+        <HorizontalStackLayout Spacing="10" VerticalOptions="Center">
+            <Label Text="{loc:Translate Serves}" TextColor="{DynamicResource Muted}" FontSize="14.5"
+                   FontAttributes="Bold" VerticalOptions="Center" />
+
+            <Border WidthRequest="36" HeightRequest="36" BackgroundColor="{DynamicResource BgElevated}"
+                    Stroke="{DynamicResource Line}" StrokeThickness="1" StrokeShape="RoundRectangle 12"
+                    local:TapFeedback.IsEnabled="True" AutomationProperties.IsInAccessibleTree="True"
+                    AutomationProperties.Name="{loc:Translate DecreaseServings}">
+                <Border.GestureRecognizers>
+                    <TapGestureRecognizer Command="{Binding DecreaseCommand, Source={x:Reference Root}}" />
+                </Border.GestureRecognizers>
+                <Label Style="{StaticResource IconLabel}" Text="{x:Static icons:Icons.Remove}" FontSize="18" />
+            </Border>
+
+            <Label Text="{Binding NumberText, Source={x:Reference Root}}" TextColor="{DynamicResource Ink}"
+                   FontSize="17" FontAttributes="Bold" MinimumWidthRequest="30"
+                   HorizontalTextAlignment="Center" VerticalOptions="Center">
+                <Label.GestureRecognizers>
+                    <TapGestureRecognizer Tapped="OnNumberTapped" />
+                </Label.GestureRecognizers>
+            </Label>
+
+            <Label Text="{Binding Noun, Source={x:Reference Root}}" TextColor="{DynamicResource Muted}"
+                   FontSize="14.5" VerticalOptions="Center" />
+
+            <Border WidthRequest="36" HeightRequest="36" BackgroundColor="{DynamicResource BgElevated}"
+                    Stroke="{DynamicResource Line}" StrokeThickness="1" StrokeShape="RoundRectangle 12"
+                    local:TapFeedback.IsEnabled="True" AutomationProperties.IsInAccessibleTree="True"
+                    AutomationProperties.Name="{loc:Translate IncreaseServings}">
+                <Border.GestureRecognizers>
+                    <TapGestureRecognizer Command="{Binding IncreaseCommand, Source={x:Reference Root}}" />
+                </Border.GestureRecognizers>
+                <Label Style="{StaticResource IconLabel}" Text="{x:Static icons:Icons.Add}" FontSize="18" />
+            </Border>
+
+            <Border WidthRequest="36" HeightRequest="36" BackgroundColor="{DynamicResource LimeWash}"
+                    Stroke="{DynamicResource LineSoft}" StrokeThickness="1" StrokeShape="RoundRectangle 12"
+                    IsVisible="{Binding IsChanged, Source={x:Reference Root}}"
+                    local:TapFeedback.IsEnabled="True" AutomationProperties.IsInAccessibleTree="True"
+                    AutomationProperties.Name="{loc:Translate ResetServings}">
+                <Border.GestureRecognizers>
+                    <TapGestureRecognizer Command="{Binding ResetCommand, Source={x:Reference Root}}" />
+                </Border.GestureRecognizers>
+                <Label Style="{StaticResource IconLabel}" Text="{x:Static icons:Icons.Reset}" FontSize="16"
+                       TextColor="{DynamicResource Lime}" />
+            </Border>
+        </HorizontalStackLayout>
+    </Border>
+</ContentView>

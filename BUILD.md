@@ -52,6 +52,32 @@ dotnet build src/PurePrep/PurePrep.csproj -c Debug -f net10.0-android --no-resto
   -p:AndroidSdkDirectory=$HOME/android-sdk -p:JavaSdkDirectory=$JAVA_HOME
 ```
 
+## Backend API (Debug builds default to production)
+
+A Debug install talks to the deployed production API (`https://api.pureprep.lechdigital.nl/`) by
+default — same as Release — so a plain build-and-install works on any device (emulator or
+physical) without a local server. To point a Debug build at a local `PurePrep.Server` instead,
+opt in explicitly:
+
+```sh
+dotnet build src/PurePrep/PurePrep.csproj -c Debug -f net10.0-android --no-restore \
+  -p:UseDefaultPublishRuntimeIdentifier=false -p:PurePrepLocalApi=true \
+  -p:AndroidSdkDirectory=$HOME/android-sdk -p:JavaSdkDirectory=$JAVA_HOME
+```
+
+This defines `LOCAL_API`, which switches `MauiProgram.BackendBaseUrl` to
+`http://localhost:5299/` and merges in an Android manifest overlay that allows cleartext HTTP to
+`localhost` only (Android blocks plaintext HTTP by default; see
+`src/PurePrep/Platforms/Android/Resources/xml/network_security_config.xml`). On a physical device, forward the
+port first:
+
+```sh
+adb reverse tcp:5299 tcp:5299
+```
+
+(Works for the emulator too, so there's one recipe for both. The emulator also has its own host
+alias, `10.0.2.2`, if you'd rather skip `adb reverse` there — use it locally, don't commit it.)
+
 ## Signed release AAB
 
 Signing activates only for Release Android builds when `PUREPREP_KEYSTORE_PASS` is set.

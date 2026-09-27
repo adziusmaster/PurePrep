@@ -13,6 +13,24 @@ public partial class PasteTextPage : ContentPage
         _viewModel = viewModel;
     }
 
+    // Resize (not pan) for the keyboard while this page is visible, so the sticky Import button sits
+    // just above the keyboard and the form scrolls in the space left (see SheetKeyboard).
+    protected override void OnAppearing()
+    {
+        base.OnAppearing();
+#if ANDROID
+        SheetKeyboard.RequestPageResize(this);
+#endif
+    }
+
+    protected override void OnDisappearing()
+    {
+        base.OnDisappearing();
+#if ANDROID
+        SheetKeyboard.ReleasePageResize(this);
+#endif
+    }
+
     private async void OnCancelTapped(object? sender, EventArgs e) => await Navigation.PopAsync();
 
     private async void OnImportClicked(object? sender, EventArgs e)

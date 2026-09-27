@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:local="clr-namespace:PurePrep"
+             xmlns:loc="clr-namespace:PurePrep.Localization"
+             xmlns:icons="clr-namespace:PurePrep.Resources.Styles"
+             x:Class="PurePrep.Controls.TopBar"
+             x:Name="Root">
+    <!-- The one top bar: back on the left, title (+ optional subtitle), actions on the right. Every
+         page that used to hand-build this row now shares it, so back buttons and action chips line
+         up identically everywhere. -->
+    <Grid Padding="20,12,20,4" ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12">
+        <Border WidthRequest="44" HeightRequest="44" BackgroundColor="{DynamicResource Surface}"
+                Stroke="{DynamicResource Line}" StrokeThickness="1" StrokeShape="RoundRectangle 14"
+                IsVisible="{Binding ShowBack, Source={x:Reference Root}}"
+                local:TapFeedback.IsEnabled="True"
+                AutomationProperties.IsInAccessibleTree="True" AutomationProperties.Name="{loc:Translate Back}">
+            <Border.GestureRecognizers>
+                <TapGestureRecognizer Tapped="OnBackTapped" />
+            </Border.GestureRecognizers>
+            <Label Style="{StaticResource IconLabel}" Text="{x:Static icons:Icons.Back}" FontSize="26" />
+        </Border>
+        <VerticalStackLayout Grid.Column="1" VerticalOptions="Center" Spacing="0">
+            <Label Text="{Binding Title, Source={x:Reference Root}}" FontSize="22" FontFamily="OpenSansSemibold"
+                   TextColor="{DynamicResource Ink}" LineBreakMode="TailTruncation" />
+            <Label Text="{Binding Subtitle, Source={x:Reference Root}}" FontSize="13" TextColor="{DynamicResource Muted}"
+                   IsVisible="{Binding Subtitle, Source={x:Reference Root}, Converter={StaticResource StringNotNullOrEmptyConverter}}" />
+        </VerticalStackLayout>
+        <ContentView Grid.Column="2" Content="{Binding Actions, Source={x:Reference Root}}" VerticalOptions="Center" />
+    </Grid>
+</ContentView>

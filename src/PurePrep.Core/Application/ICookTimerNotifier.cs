@@ -20,8 +20,11 @@ public interface ICookTimerNotifier
     Task<bool> EnsurePermissionAsync(CancellationToken cancellationToken = default);
 
     /// <summary>Schedules the alert for <paramref name="endsAt"/>, replacing any existing one for
-    /// the same <paramref name="id"/>. Concurrent timers each get their own alarm and notification.</summary>
-    Task ScheduleAsync(int id, string label, DateTimeOffset endsAt, CancellationToken cancellationToken = default);
+    /// the same <paramref name="id"/>. Concurrent timers each get their own alarm and notification.
+    /// <paramref name="canExtend"/> is true for a range timer that has just reached its minimum and
+    /// can still be pushed towards its maximum ("+2 min"); the alert then invites a check rather than
+    /// announcing the cook is done.</summary>
+    Task ScheduleAsync(int id, string label, DateTimeOffset endsAt, bool canExtend = false, CancellationToken cancellationToken = default);
 
     /// <summary>Cancels the pending alert for <paramref name="id"/>, and clears one already showing.</summary>
     Task CancelAsync(int id, CancellationToken cancellationToken = default);
@@ -32,6 +35,6 @@ public sealed class UnsupportedCookTimerNotifier : ICookTimerNotifier
 {
     public bool IsSupported => false;
     public Task<bool> EnsurePermissionAsync(CancellationToken cancellationToken = default) => Task.FromResult(false);
-    public Task ScheduleAsync(int id, string label, DateTimeOffset endsAt, CancellationToken cancellationToken = default) => Task.CompletedTask;
+    public Task ScheduleAsync(int id, string label, DateTimeOffset endsAt, bool canExtend = false, CancellationToken cancellationToken = default) => Task.CompletedTask;
     public Task CancelAsync(int id, CancellationToken cancellationToken = default) => Task.CompletedTask;
 }

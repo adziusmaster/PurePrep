@@ -67,3 +67,6 @@ src/PurePrep.Server/pureprep.server.db*
 
 # macOS Finder metadata
 .DS_Store
+
+# Superpowers SDD scratch
+.superpowers/

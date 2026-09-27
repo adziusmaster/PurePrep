@@ -1,9 +1,10 @@
 # PurePrep — Session Handoff / Where We Are
 
-Last updated: end of session on version **1.2.11 (versionCode 20)**.
-Code changes are committed by the maintainer; the signed AAB for 1.2.11 has been
-built and the server is deployed. `store/release-notes/1.2.11.txt` is a new
-(untracked) file pending commit.
+Last updated: end of session on version **1.4.0 (versionCode 25)** — release prep
+(Task 20 of the 1.4 SDD cycle). Core + Server tests and the Web/MAUI builds are
+green; no device pass yet (a separate final device pass follows) and nothing has
+been deployed for 1.4 — see §8 below for what shipped in 1.4 and what's still
+outstanding.
 
 > House rule: **never commit or push automatically** — the maintainer does that.
 
@@ -194,4 +195,123 @@ Gotchas learned the hard way:
 Localized notes live in `store/release-notes/<version>.txt`, one `<xx-YY>` block
 per locale (en-GB, en-US, de-DE, es-ES, fr-FR, it-IT, nl-NL, pl-PL). **Google Play
 caps each language at 500 characters** — keep every block under it (fr/nl tend to
-run longest; trim them). Reuse the previous version's file as the template.
+run longest; trim them). Reuse the previous version's file as the template. There
+is no separate per-language notes file convention (e.g. `-pl.txt`) in this repo —
+every version's notes live in the one bundled file.
+
+---
+
+## 8. PurePrep 1.4 — what shipped, key contracts, device-testing lessons
+
+1.4 is a large release: share/clipboard import, AI parser v2 (servings, times,
+named/range timers, photos), scale-by-people, Focus Mode rework, a new editor,
+notes/favourites/status/sorting, in-app recipe search, unified bottom-sheet
+dialogs, and a bundled sample recipe. Server must be deployed **before** the app
+reaches users (older servers just omit the v2 fields; the contract is additive).
+
+- **Parser v2 contract** — `src/PurePrep.Server/Endpoints/Contracts.cs`:
+  `RecipeResponse` keeps its 1.3.x fields (`Steps` as `string[]`, etc.) and adds
+  1.4 fields as `init`-only additions: `Servings`, `ServingsNoun`,
+  `ServingsEstimated`, `PrepMinutes`, `CookMinutes`, `ImageUrl`, `ImageTicket`,
+  `StepDetails` (`StepDto(Text, IngredientRefs, Timers)`), `TimerLabels`. The
+  Gemini-side shape lives in `src/PurePrep.Core/Ai/GeminiOptions.cs`
+  (`AiRecipe`/`AiRecipeMeta`/`AiStep`/`AiTimer`).
+- **AI image endpoint + ticket** — `POST /api/ai/image` → `ImageEndpoint.Generate`
+  (`Program.cs`). `src/PurePrep.Server/Services/ImageTicketStore.cs`
+  (`internal sealed class ImageTicketStore(TimeProvider clock) : IImageTicketStore`)
+  issues a single-use, device-bound, 10-minute ticket (`Lifetime =
+  TimeSpan.FromMinutes(10)`; `TryRedeem` checks device + expiry, then
+  `TryRemove`s it). Image generation is covered by the same import credit — no
+  extra spend. The model is configurable: `Gemini__ImageModel` env var →
+  `GeminiOptions.ImageModel`, default `"gemini-2.5-flash-image"`, read in
+  `GeminiClient.cs` (`v1beta/models/{ImageModel}:generateContent`). Only set it
+  in prod `.env` to override the default.
+- **Translation retry (server-side)** — `TranslateEndpoint.Translate` retries
+  the Gemini call once, in-process, if `translated.Steps.Length` doesn't match
+  the source step count (so a flaky model response costs the device at most the
+  one credit already charged); a still-mismatched retry throws.
+- **Bottom sheets** — `src/PurePrep/Controls/BottomSheet.xaml(.cs)` is the one
+  shared sheet control; `OptionsSheet` and `ImportSheet` build on it. Every
+  dialog and custom sheet (Import, cooking options, timer edit, credits) now
+  renders through it (spec §16.1).
+- **SheetKeyboard** — `src/PurePrep/Platforms/Android/SheetKeyboard.cs`
+  (`internal static class SheetKeyboard`). A bottom sheet is docked to the
+  bottom, so the app's default `AdjustPan` keyboard mode (used elsewhere so a
+  focused Home search box doesn't force a full relayout) would hide sheet
+  buttons behind the keyboard. `SetResize(bool)` toggles
+  `Window.SetSoftInputMode` between `AdjustResize`/`AdjustPan`; `MainActivity`'s
+  insets listener then pads content by keyboard height while resize is active.
+- **Edge-to-edge + insets (one place)** — `MainActivity.OnCreate` calls AndroidX
+  `EdgeToEdge.Enable(this)` before `base.OnCreate` (transparent bars on every API
+  level; Android 15+ enforces it at targetSdk 35). The only inset handling is
+  `MainActivity`'s `SystemBarsInsetsListener` on the content view (system bars +
+  cutout, plus IME while `SheetKeyboard.ResizeActive`), so pages, sheets, TimersBar,
+  the Focus Back/Next bar and the editor Save button all sit above the nav bar.
+  Bar-icon colour comes from the app theme via `ThemeService.ApplyNativeBars()`
+  (`WindowInsetsControllerCompat.AppearanceLight*` + decor background), re-applied
+  on theme change and in `MainActivity.OnResume`. Our code never calls
+  `Window.SetStatusBarColor`/`SetNavigationBarColor`/`SetDecorFitsSystemWindows`;
+  Play's remaining "deprecated edge-to-edge APIs" note comes from library bytecode
+  (Material `EdgeToEdgeUtils`/`BottomSheetDialog`, still present in 1.14.0.6).
+- **Focus Mode auto-fit + "You'll need"** — the "always fits the step" behaviour
+  is `src/PurePrep/Controls/StepInstructionView.xaml.cs`, used by `FocusPage.xaml`
+  as `<controls:StepInstructionView Text="{Binding Instruction}" />`. `Refit()`
+  steps the label's `FontSize` down from `MaxFontSize` (34) to `MinFontSize` (22)
+  in `FontStep` (2) increments, calling `TextLabel.Measure(width, ...)` after each
+  step until the measured height fits the available space; if even the minimum
+  size doesn't fit, it falls back to a scrollable view with a visible "More"
+  overflow cue that hides once the last line scrolls into view. "You'll need" is
+  a literal section (`FocusPage.xaml`, resx key `YoullNeed`) built from each
+  step's `IngredientRefs` resolved against the recipe's ingredient list.
+- **Timer slot keys** — `src/PurePrep/Services/CookTimerService.cs`
+  (`sealed class CookTimerService : IDisposable`) persists running timers under
+  Preferences keys `cook_timers_v2` (state) and `cook_timers_next_id`; each
+  running timer gets a monotonically increasing int id (the brief's "slot" is
+  not a literal key in code, just this id).
+- **Editor photo + resizer** — `RecipeEditorViewModel.SetPhoto(byte[] jpeg)` /
+  `RemovePhoto()` (exposes `Photo`, `HasPhoto`, `PendingPhoto`, `PhotoRemoved`).
+  `ManualAddPage.xaml.cs` calls `RecipePhotoResizer.ToJpegAsync(stream, ct)`
+  (`src/PurePrep/Services/RecipePhotoResizer.cs`) before handing bytes to
+  `SetPhoto`.
+- **In-app search + WebRecipeDetector** — `SearchBrowserPage.xaml(.cs)` hosts
+  the in-app browser (spec §16.2). `src/PurePrep.Core/Ai/WebRecipeDetector.cs`
+  (`public static class WebRecipeDetector`) is the pure, unit-tested Core
+  parser: `Detect(jsonLdBlocks, pageUrl)` and an overload that also takes
+  microdata name/image and falls back to the JSON-LD path via
+  `JsonLdRecipeWalker.FindRecipe`. No server call, no credit, for browsing.
+- **Sample recipe + bundled photo credit** — `src/PurePrep.Core/Domain/SampleRecipe.cs`
+  (`SampleRecipe.Create()`) is the full 1.4 Pierogi sample (spec §16.3); its XML
+  doc comment credits the source ("based on Ania Gotuje's recipe — no egg in the
+  dough"). `RecipeLibraryViewModel.SeedSampleIfFirstRunAsync()` (pref
+  `sample_recipe_seeded`) seeds it once; `TrySeedSamplePhotoAsync` loads the
+  bundled `Resources/Raw/sample-pierogi.jpg` via
+  `FileSystem.OpenAppPackageFileAsync` and saves it through the image store,
+  best-effort (falls back to the placeholder silently on failure).
+- **Backup with photos** — `RecipeBackup.Export(recipes, images)` /
+  `ImportWithImages(json)` (Task 7) now round-trip each recipe's photo as
+  base64; Settings' export reads each recipe's image via
+  `IRecipeImageStore.ReadAsync` and restore writes it back via
+  `SaveBytesAsync` + `UpdateAsync(recipe.WithImage(path))` (Task 20).
+
+### Device-testing lessons (not previously written down anywhere in this repo)
+
+- **Never debug-install over a Play-distributed build.** Before any `-t:Install`,
+  run `adb shell dumpsys package com.adziusmaster.pureprep | grep
+  installerPackageName` — proceed only if it's null (debug build already
+  present); if it shows `com.android.vending`, stop and do not uninstall.
+- **One device agent at a time.** The Pixel is a single shared piece of
+  hardware — don't run concurrent adb sessions/installs against it.
+- If a debug install misbehaves (stale state, permission prompts stuck), prefer
+  `adb shell pm clear com.adziusmaster.pureprep` then re-run the
+  `-t:Install` build over guessing at in-app fixes.
+
+### Known gaps going into the final device pass
+
+- This task did **not** touch the device (per its brief) — the full click-through
+  (Home, share, import sheet, recipe detail, Focus Mode, editor, Settings
+  export/restore round-trip, dark theme) from the 1.4 spec's testing section
+  still needs to happen before a release build.
+- The server has 1.4 endpoints (`/api/ai/image`, v2 parse/translate fields) but
+  has **not** been deployed; deploy before the 1.4 app reaches real users
+  (`./deploy/deploy-prod.sh --confirm`, maintainer's call).
+- No signed AAB has been built for 1.4.0 yet.

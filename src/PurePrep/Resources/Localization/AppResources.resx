@@ -58,15 +58,6 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="AppTaglineLine1" xml:space="preserve">
-    <value>Your kitchen,</value>
-  </data>
-  <data name="AppTaglineLine2" xml:space="preserve">
-    <value>focused.</value>
-  </data>
-  <data name="AppSubtitle" xml:space="preserve">
-    <value>Paste a link. Keep the ingredients and steps. Lose the noise.</value>
-  </data>
   <data name="Import" xml:space="preserve">
     <value>Import</value>
   </data>
@@ -75,24 +66,6 @@
   </data>
   <data name="SearchPlaceholder" xml:space="preserve">
     <value>Search recipes</value>
-  </data>
-  <data name="YourRecipes" xml:space="preserve">
-    <value>Your recipes</value>
-  </data>
-  <data name="YourRecipesSubtitle" xml:space="preserve">
-    <value>Tap a recipe to cook in Focus Mode.</value>
-  </data>
-  <data name="AddManually" xml:space="preserve">
-    <value>+ Add manually</value>
-  </data>
-  <data name="AddOneManually" xml:space="preserve">
-    <value>+ Add one manually</value>
-  </data>
-  <data name="NoRecipesTitle" xml:space="preserve">
-    <value>No recipes yet</value>
-  </data>
-  <data name="NoRecipesBody" xml:space="preserve">
-    <value>Paste a recipe link above to import your first one.</value>
   </data>
   <data name="NoMatchesTitle" xml:space="preserve">
     <value>No matches</value>
@@ -121,7 +94,19 @@
   <data name="StepsCountFormat" xml:space="preserve">
     <value>{0} steps</value>
   </data>
+  <data name="StepsCountFormatOne" xml:space="preserve">
+    <value>{0} step</value>
+  </data>
+  <data name="StepsCountFormatFew" xml:space="preserve">
+    <value>{0} steps</value>
+  </data>
   <data name="IngredientsCountFormat" xml:space="preserve">
+    <value>{0} ingredients</value>
+  </data>
+  <data name="IngredientsCountFormatOne" xml:space="preserve">
+    <value>{0} ingredient</value>
+  </data>
+  <data name="IngredientsCountFormatFew" xml:space="preserve">
     <value>{0} ingredients</value>
   </data>
   <data name="SectionIngredients" xml:space="preserve">
@@ -160,6 +145,9 @@
   <data name="SectionTimers" xml:space="preserve">
     <value>TIMERS</value>
   </data>
+  <data name="YoullNeed" xml:space="preserve">
+    <value>YOU’LL NEED</value>
+  </data>
   <data name="Stop" xml:space="preserve">
     <value>Stop</value>
   </data>
@@ -174,6 +162,12 @@
   </data>
   <data name="Finish" xml:space="preserve">
     <value>Finish</value>
+  </data>
+  <data name="DoneTitle" xml:space="preserve">
+    <value>All done?</value>
+  </data>
+  <data name="MarkAsCooked" xml:space="preserve">
+    <value>Mark this recipe as cooked?</value>
   </data>
   <data name="StepOfFormat" xml:space="preserve">
     <value>STEP {0} OF {1}</value>
@@ -198,22 +192,6 @@
   </data>
   <data name="TitlePlaceholder" xml:space="preserve">
     <value>e.g. Mushroom Risotto</value>
-  </data>
-  <data name="OnePerLine" xml:space="preserve">
-    <value>One per line.</value>
-  </data>
-  <data name="OneStepPerLine" xml:space="preserve">
-    <value>One step per line.</value>
-  </data>
-  <data name="IngredientsPlaceholder" xml:space="preserve">
-    <value>250g arborio rice
-1 onion, finely chopped
-1L vegetable stock</value>
-  </data>
-  <data name="StepsPlaceholder" xml:space="preserve">
-    <value>Soften the onion in oil.
-Toast the rice for a minute.
-Add stock a ladle at a time, stirring.</value>
   </data>
   <data name="SaveRecipe" xml:space="preserve">
     <value>Save recipe</value>
@@ -244,9 +222,6 @@ Add stock a ladle at a time, stirring.</value>
   </data>
   <data name="ThemeDark" xml:space="preserve">
     <value>Dark</value>
-  </data>
-  <data name="AppearanceDesc" xml:space="preserve">
-    <value>PurePrep is designed dark-first. Light follows your recipe just as cleanly.</value>
   </data>
   <data name="SectionCooking" xml:space="preserve">
     <value>COOKING</value>
@@ -344,11 +319,11 @@ Add stock a ladle at a time, stirring.</value>
   <data name="UnitsDesc" xml:space="preserve">
     <value>Convert ingredient and step quantities to your preferred system.</value>
   </data>
+  <data name="MinutesFormat" xml:space="preserve">
+    <value>{0} min</value>
+  </data>
   <data name="ServesFormat" xml:space="preserve">
     <value>Serves {0}</value>
-  </data>
-  <data name="ScaleCaptionFormat" xml:space="preserve">
-    <value>Scale {0}</value>
   </data>
   <data name="Ok" xml:space="preserve">
     <value>OK</value>
@@ -561,11 +536,44 @@ Add stock a ladle at a time, stirring.</value>
   <data name="DuplicateKeepBoth" xml:space="preserve">
     <value>Keep both</value>
   </data>
+  <data name="ImportSheetTitle" xml:space="preserve">
+    <value>Import this recipe?</value>
+  </data>
+  <data name="ImportSheetCostFormat" xml:space="preserve">
+    <value>Uses 1 Smart Credit · you have {0}</value>
+  </data>
+  <data name="ImportSheetCost" xml:space="preserve">
+    <value>Uses 1 Smart Credit</value>
+  </data>
+  <data name="ImportSheetNoCredits" xml:space="preserve">
+    <value>You're out of Smart Credits — importing a recipe uses 1.</value>
+  </data>
+  <data name="ImportSheetAlreadySaved" xml:space="preserve">
+    <value>Already saved to your library</value>
+  </data>
+  <data name="OpenIt" xml:space="preserve">
+    <value>Open it</value>
+  </data>
+  <data name="ImportAgain" xml:space="preserve">
+    <value>Import again</value>
+  </data>
+  <data name="ClipboardSuggestFormat" xml:space="preserve">
+    <value>{0} · Import?</value>
+  </data>
   <data name="SourceOpen" xml:space="preserve">
     <value>Open link</value>
   </data>
   <data name="SourceCopy" xml:space="preserve">
     <value>Copy link</value>
+  </data>
+  <data name="More" xml:space="preserve">
+    <value>More</value>
+  </data>
+  <data name="ShareRecipe" xml:space="preserve">
+    <value>Share recipe</value>
+  </data>
+  <data name="OpenOriginal" xml:space="preserve">
+    <value>Open original</value>
   </data>
   <data name="ExportSaveToDevice" xml:space="preserve">
     <value>Save to device</value>
@@ -578,12 +586,6 @@ Add stock a ladle at a time, stirring.</value>
   </data>
   <data name="ExportSavedFormat" xml:space="preserve">
     <value>Saved to {0} as {1}.</value>
-  </data>
-  <data name="ImportPhoto" xml:space="preserve">
-    <value>Photo</value>
-  </data>
-  <data name="ImportText" xml:space="preserve">
-    <value>Paste text</value>
   </data>
   <data name="ImportPhotoTitle" xml:space="preserve">
     <value>Import from a photo</value>
@@ -615,17 +617,20 @@ Add stock a ladle at a time, stirring.</value>
   <data name="Start" xml:space="preserve">
     <value>Start</value>
   </data>
-  <data name="TimerNameTitle" xml:space="preserve">
-    <value>Name this timer</value>
-  </data>
-  <data name="TimerNameMessage" xml:space="preserve">
-    <value>Give it a name so you can tell your timers apart.</value>
+  <data name="CookingOptions" xml:space="preserve">
+    <value>Cooking options</value>
   </data>
   <data name="ReadAloud" xml:space="preserve">
     <value>Read aloud</value>
   </data>
+  <data name="ReadEachStepAloud" xml:space="preserve">
+    <value>Read each step aloud</value>
+  </data>
   <data name="ReadStep" xml:space="preserve">
     <value>Read step</value>
+  </data>
+  <data name="StopReading" xml:space="preserve">
+    <value>Stop reading</value>
   </data>
   <data name="VoiceControl" xml:space="preserve">
     <value>Voice</value>
@@ -634,8 +639,8 @@ Add stock a ladle at a time, stirring.</value>
     <value>Listening…</value>
   </data>
   <data name="VoiceCommandsHintFormat" xml:space="preserve">
-    <value>Say “{0}”, “{1}” or “{2}”.</value>
-    <comment>Hands-free hint. {0}=next word, {1}=back word, {2}=repeat word, in the recipe language.</comment>
+    <value>Say “{0}”, “{1}”, “{2}” or “{3}”.</value>
+    <comment>Hands-free hint. {0}=next word, {1}=back word, {2}=repeat word, {3}=stop word, in the recipe language.</comment>
   </data>
   <data name="SectionReadingVoice" xml:space="preserve">
     <value>READING &amp; VOICE</value>
@@ -661,5 +666,218 @@ Add stock a ladle at a time, stirring.</value>
   </data>
   <data name="VoiceCommandsDesc" xml:space="preserve">
     <value>In Focus Mode, tap the mic and speak to move through the recipe without touching the screen.</value>
+  </data>
+  <data name="FilterAll" xml:space="preserve">
+    <value>All</value>
+  </data>
+  <data name="FilterWantToCook" xml:space="preserve">
+    <value>Want to cook</value>
+  </data>
+  <data name="FilterCooked" xml:space="preserve">
+    <value>Cooked</value>
+  </data>
+  <data name="FilterFavourites" xml:space="preserve">
+    <value>Favourites</value>
+  </data>
+  <data name="SortBy" xml:space="preserve">
+    <value>Sort by</value>
+  </data>
+  <data name="SortRecentlyAdded" xml:space="preserve">
+    <value>Recently added</value>
+  </data>
+  <data name="SortRecentlyCooked" xml:space="preserve">
+    <value>Recently cooked</value>
+  </data>
+  <data name="SortAlphabetical" xml:space="preserve">
+    <value>A–Z</value>
+  </data>
+  <data name="NoFilterMatchesTitle" xml:space="preserve">
+    <value>No recipes match this filter</value>
+  </data>
+  <data name="NoFilterMatchesBody" xml:space="preserve">
+    <value>Try a different filter, or switch back to All.</value>
+  </data>
+  <data name="ShowAllFilter" xml:space="preserve">
+    <value>Show all</value>
+  </data>
+  <data name="Serves" xml:space="preserve">
+    <value>Serves</value>
+  </data>
+  <data name="People" xml:space="preserve">
+    <value>people</value>
+  </data>
+  <data name="ServesUnknown" xml:space="preserve">
+    <value>Servings unknown</value>
+  </data>
+  <data name="SetServings" xml:space="preserve">
+    <value>Set servings</value>
+  </data>
+  <data name="YourNotes" xml:space="preserve">
+    <value>Your notes</value>
+  </data>
+  <data name="NotesPlaceholder" xml:space="preserve">
+    <value>Add your own notes, tweaks or reminders…</value>
+  </data>
+  <data name="StatusWantToCook" xml:space="preserve">
+    <value>Want to cook</value>
+  </data>
+  <data name="StatusCookedFormat" xml:space="preserve">
+    <value>Cooked {0}</value>
+  </data>
+  <data name="Favourite" xml:space="preserve">
+    <value>Favourite</value>
+  </data>
+  <data name="PrepFormat" xml:space="preserve">
+    <value>Prep {0} min</value>
+  </data>
+  <data name="CookFormat" xml:space="preserve">
+    <value>Cook {0} min</value>
+  </data>
+  <data name="DecreaseServings" xml:space="preserve">
+    <value>Decrease servings</value>
+  </data>
+  <data name="IncreaseServings" xml:space="preserve">
+    <value>Increase servings</value>
+  </data>
+  <data name="ResetServings" xml:space="preserve">
+    <value>Reset servings</value>
+  </data>
+  <data name="CheckNow" xml:space="preserve">
+    <value>Check now</value>
+  </data>
+  <data name="AddTwoMinutes" xml:space="preserve">
+    <value>+2 min</value>
+  </data>
+  <data name="EditTimer" xml:space="preserve">
+    <value>Edit timer</value>
+  </data>
+  <data name="TimerLabel" xml:space="preserve">
+    <value>Label</value>
+  </data>
+  <data name="TimerMinutes" xml:space="preserve">
+    <value>Minutes</value>
+  </data>
+  <data name="DurationSecondsFormat" xml:space="preserve">
+    <value>{0} s</value>
+  </data>
+  <data name="DurationMinutesFormat" xml:space="preserve">
+    <value>{0} min</value>
+  </data>
+  <data name="DurationMinutesSecondsFormat" xml:space="preserve">
+    <value>{0} min {1} s</value>
+  </data>
+  <data name="DurationHoursFormat" xml:space="preserve">
+    <value>{0} h</value>
+  </data>
+  <data name="DurationHoursMinutesFormat" xml:space="preserve">
+    <value>{0} h {1} min</value>
+  </data>
+  <data name="DurationRangeMinutesFormat" xml:space="preserve">
+    <value>{0}–{1} min</value>
+  </data>
+  <data name="AddIngredient" xml:space="preserve">
+    <value>+ Add ingredient</value>
+  </data>
+  <data name="AddStep" xml:space="preserve">
+    <value>+ Add step</value>
+  </data>
+  <data name="IngredientPlaceholder" xml:space="preserve">
+    <value>e.g. 200 g spinach</value>
+  </data>
+  <data name="StepPlaceholder" xml:space="preserve">
+    <value>Describe this step…</value>
+  </data>
+  <data name="PrepMinutes" xml:space="preserve">
+    <value>Prep (min)</value>
+  </data>
+  <data name="CookMinutes" xml:space="preserve">
+    <value>Cook (min)</value>
+  </data>
+  <data name="StepNumberFormat" xml:space="preserve">
+    <value>Step {0}</value>
+  </data>
+  <data name="Servings" xml:space="preserve">
+    <value>Servings</value>
+  </data>
+  <data name="MoreTimersFormat" xml:space="preserve">
+    <value>+{0} more</value>
+  </data>
+  <data name="StepTimersTitle" xml:space="preserve">
+    <value>Timers in this step</value>
+  </data>
+  <data name="AddPhoto" xml:space="preserve">
+    <value>Add photo</value>
+  </data>
+  <data name="ChangePhoto" xml:space="preserve">
+    <value>Change photo</value>
+  </data>
+  <data name="RemovePhoto" xml:space="preserve">
+    <value>Remove photo</value>
+  </data>
+  <data name="CameraPermissionDenied" xml:space="preserve">
+    <value>PurePrep needs camera access to take a photo. You can allow it in Settings.</value>
+  </data>
+  <data name="SearchTheWeb" xml:space="preserve">
+    <value>Search the web for a recipe</value>
+  </data>
+  <data name="AddToPurePrep" xml:space="preserve">
+    <value>Add to PurePrep</value>
+  </data>
+  <data name="OpenInBrowser" xml:space="preserve">
+    <value>Open in browser</value>
+  </data>
+  <data name="TryImportAnyway" xml:space="preserve">
+    <value>Try importing this page anyway</value>
+  </data>
+  <data name="RecipeSearchWord" xml:space="preserve">
+    <value>recipe</value>
+  </data>
+  <data name="TryAddingThisPage" xml:space="preserve">
+    <value>Try adding this page</value>
+  </data>
+  <data name="AddRecipe" xml:space="preserve">
+    <value>Add recipe</value>
+  </data>
+  <data name="PasteALink" xml:space="preserve">
+    <value>Paste a link</value>
+  </data>
+  <data name="SearchTheWebRow" xml:space="preserve">
+    <value>Search the web</value>
+  </data>
+  <data name="FromAPhoto" xml:space="preserve">
+    <value>From a photo</value>
+  </data>
+  <data name="FromText" xml:space="preserve">
+    <value>From text</value>
+  </data>
+  <data name="TypeItYourself" xml:space="preserve">
+    <value>Type it yourself</value>
+  </data>
+  <data name="AddSheetCost" xml:space="preserve">
+    <value>Link, photo and text imports use Smart Credits</value>
+  </data>
+  <data name="AddSheetCostFormat" xml:space="preserve">
+    <value>Link, photo and text imports use Smart Credits · you have {0}</value>
+  </data>
+  <data name="AddYourFirstRecipe" xml:space="preserve">
+    <value>Add your first recipe</value>
+  </data>
+  <data name="AddFirstRecipeBody" xml:space="preserve">
+    <value>Import one from a link, a photo or some text — or type it in yourself.</value>
+  </data>
+  <data name="ImportingRecipe" xml:space="preserve">
+    <value>Importing…</value>
+  </data>
+  <data name="ErrGeneric" xml:space="preserve">
+    <value>Something went wrong. Please try again.</value>
+  </data>
+  <data name="TimerUpFormat" xml:space="preserve">
+    <value>{0} is up.</value>
+  </data>
+  <data name="TimerFinishedTitle" xml:space="preserve">
+    <value>Timer finished</value>
+  </data>
+  <data name="TimerFinishedBody" xml:space="preserve">
+    <value>Your cooking timer has finished.</value>
   </data>
 </root>

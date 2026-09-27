@@ -1,6 +1,6 @@
 namespace PurePrep.Domain;
 
-public sealed class ParsedRecipe
+public sealed record ParsedRecipe
 {
     public Guid Id { get; init; } = Guid.NewGuid();
     public required string Title { get; init; }
@@ -40,6 +40,24 @@ public sealed class ParsedRecipe
     public IReadOnlyDictionary<string, RecipeTranslation> Translations { get; init; } =
         new Dictionary<string, RecipeTranslation>(StringComparer.OrdinalIgnoreCase);
 
+    public int? Servings { get; init; }
+    /// <summary>What the servings count counts: "people" (default), or pieces like "pancakes".</summary>
+    public string? ServingsNoun { get; init; }
+    /// <summary>True when the model estimated servings because the source did not state them.</summary>
+    public bool ServingsEstimated { get; init; }
+    public int? PrepMinutes { get; init; }
+    public int? CookMinutes { get; init; }
+    /// <summary>Path of the locally stored photo, relative to the image store root.</summary>
+    public string? ImagePath { get; init; }
+    /// <summary>The cook's own notes. Never translated, never sent to the server.</summary>
+    public string? Notes { get; init; }
+    public RecipeStatus Status { get; init; } = RecipeStatus.WantToCook;
+    public DateTimeOffset? CookedAt { get; init; }
+    public int CookCount { get; init; }
+    public bool IsFavourite { get; init; }
+    /// <summary>People the cook last scaled this recipe to; null means the original servings.</summary>
+    public int? ChosenServings { get; init; }
+
     /// <summary>True when a cached translation exists for <paramref name="language"/>.</summary>
     public bool HasTranslation(string? language) =>
         !string.IsNullOrWhiteSpace(language) && Translations.ContainsKey(language);
@@ -57,18 +75,11 @@ public sealed class ParsedRecipe
         if (string.IsNullOrWhiteSpace(language) || !Translations.TryGetValue(language, out var translation))
             return this;
 
-        return new ParsedRecipe
+        return this with
         {
-            Id = Id,
             Title = translation.Title,
-            SourceUrl = SourceUrl,
             Ingredients = translation.Ingredients,
             Steps = translation.Steps,
-            SourceSystem = SourceSystem,
-            SavedAt = SavedAt,
-            OriginalLanguage = OriginalLanguage,
-            DisplayLanguage = DisplayLanguage,
-            Translations = Translations,
         };
     }
 
@@ -87,31 +98,43 @@ public sealed class ParsedRecipe
         With(OriginalLanguage, language, Translations);
 
     private ParsedRecipe With(
-        string? originalLanguage, string? displayLanguage, IReadOnlyDictionary<string, RecipeTranslation> translations) => new()
-    {
-        Id = Id,
-        Title = Title,
-        SourceUrl = SourceUrl,
-        Ingredients = Ingredients,
-        Steps = Steps,
-        SourceSystem = SourceSystem,
-        SavedAt = SavedAt,
-        OriginalLanguage = originalLanguage,
-        DisplayLanguage = displayLanguage,
-        Translations = translations,
-    };
+        string? originalLanguage, string? displayLanguage, IReadOnlyDictionary<string, RecipeTranslation> translations) =>
+        this with { OriginalLanguage = originalLanguage, DisplayLanguage = displayLanguage, Translations = translations };
+
+    public ParsedRecipe MarkCooked(DateTimeOffset now) =>
+        this with { Status = RecipeStatus.Cooked, CookedAt = now, CookCount = CookCount + 1 };
+
+    public ParsedRecipe WithStatus(RecipeStatus status) => this with { Status = status };
+    public ParsedRecipe WithFavourite(bool favourite) => this with { IsFavourite = favourite };
+    public ParsedRecipe WithNotes(string? notes) =>
+        this with { Notes = string.IsNullOrWhiteSpace(notes) ? null : notes.Trim() };
+    public ParsedRecipe WithChosenServings(int? servings) =>
+        this with { ChosenServings = servings is null ? null : Math.Clamp(servings.Value, 1, 99) };
+    public ParsedRecipe WithServings(int? servings) =>
+        this with { Servings = servings is null ? null : Math.Clamp(servings.Value, 1, 99), ServingsEstimated = false };
+    public ParsedRecipe WithImage(string? imagePath) => this with { ImagePath = imagePath };
 }
 
-public sealed class RecipeStep
+public sealed record RecipeStep
 {
     public int Order { get; init; }
     public required string Instruction { get; init; }
+    /// <summary>Named timers from the parser. Empty for legacy recipes (regex fallback applies).</summary>
+    public IReadOnlyList<RecipeTimer> Timers { get; init; } = Array.Empty<RecipeTimer>();
+    /// <summary>0-based indexes into the recipe's ingredient list used by this step.</summary>
+    public IReadOnlyList<int> IngredientRefs { get; init; } = Array.Empty<int>();
 }
 
 /// <summary>A single cached translation of a recipe's user-facing text into one language.</summary>
-public sealed class RecipeTranslation
+public sealed record RecipeTranslation
 {
     public required string Title { get; init; }
     public IReadOnlyList<string> Ingredients { get; init; } = Array.Empty<string>();
     public IReadOnlyList<RecipeStep> Steps { get; init; } = Array.Empty<RecipeStep>();
+}
+
+public enum RecipeStatus
+{
+    WantToCook,
+    Cooked,
 }

@@ -1,4 +1,14 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Adaptive-icon background: the app's lime (#A7D46F) with a subtle top-left to bottom-right
+     gradient, matching store-assets/icon-512.png (option B, "Lime tile"). Full bleed; the
+     launcher applies its own mask. -->
 <svg width="456" height="456" viewBox="0 0 456 456" version="1.1" xmlns="http://www.w3.org/2000/svg">
-    <rect x="0" y="0" width="456" height="456" fill="#0C100D" />
+    <defs>
+        <linearGradient id="lime" x1="0.33" y1="0" x2="0.67" y2="1">
+            <stop offset="0" stop-color="#B9E07F" />
+            <stop offset="0.55" stop-color="#A7D46F" />
+            <stop offset="1" stop-color="#93C25A" />
+        </linearGradient>
+    </defs>
+    <rect x="0" y="0" width="456" height="456" fill="url(#lime)" />
 </svg>

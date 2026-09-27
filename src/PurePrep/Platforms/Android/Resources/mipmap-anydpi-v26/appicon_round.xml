@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Overrides the adaptive icon MAUI's resizetizer generates (it lands in a library resource
+     directory, so this app resource wins) to add a dedicated themed-icon layer. The
+     background/foreground PNGs are still generated from Resources/AppIcon/*.svg. -->
+<adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android">
+    <background android:drawable="@mipmap/appicon_background" />
+    <foreground android:drawable="@mipmap/appicon_foreground" />
+    <monochrome android:drawable="@drawable/appicon_monochrome" />
+</adaptive-icon>

@@ -17,17 +17,19 @@ public sealed class FocusModeViewModel : INotifyPropertyChanged
     private bool _showIngredients;
     private bool _keepScreenAwake;
     private bool _readStepsAloud;
+    private bool _isSpeaking;
     private CancellationTokenSource? _speechCts;
 
-    private IReadOnlyList<StepTimer> _currentStepTimers = Array.Empty<StepTimer>();
+    private IReadOnlyList<RecipeTimer> _currentStepTimers = Array.Empty<RecipeTimer>();
     private readonly CookTimerService? _timers;
     private readonly IVoiceCommandListener? _voice;
     private readonly ReadAloudService? _readAloud;
     private readonly string? _spokenLanguage;
     private bool _isListening;
     private bool _canReadAloud;
+    private readonly bool _isFirstCook;
 
-    public FocusModeViewModel(ParsedRecipe recipe, IDispatcher? dispatcher = null, CookTimerService? timers = null, IVoiceCommandListener? voice = null, ReadAloudService? readAloud = null, string? spokenLanguage = null)
+    public FocusModeViewModel(ParsedRecipe recipe, IDispatcher? dispatcher = null, CookTimerService? timers = null, IVoiceCommandListener? voice = null, ReadAloudService? readAloud = null, string? spokenLanguage = null, int? startIndex = null)
     {
         Recipe = recipe;
         _dispatcher = dispatcher;
@@ -36,40 +38,62 @@ public sealed class FocusModeViewModel : INotifyPropertyChanged
         _readAloud = readAloud;
         _spokenLanguage = string.IsNullOrWhiteSpace(spokenLanguage) ? null : spokenLanguage;
         ActiveTimers = new ObservableCollection<ActiveTimerItem>();
+        StepTimerRows = new ObservableCollection<StepTimerRow>();
 
-        Ingredients = recipe.Ingredients
-            .Select(text => new CheckableIngredient(text))
-            .ToArray();
         _keepScreenAwake = CookingSettings.KeepScreenAwake;
         _readStepsAloud = CookingSettings.ReadStepsAloud;
+        // The "Tap Next…" hint is for the very first cook only; it stays up on step 1 of that session.
+        _isFirstCook = !CookingSettings.FocusHintSeen;
+        if (_isFirstCook)
+            CookingSettings.FocusHintSeen = true;
         PreviousCommand = new Command(() => CurrentStepIndex--, () => !IsFirstStep);
-        NextCommand = new Command(() => CurrentStepIndex++, () => !IsLastStep);
         AdvanceCommand = new Command(() =>
         {
             Haptic();
             if (IsLastStep)
-                Completed?.Invoke(this, EventArgs.Empty);
+                Finished?.Invoke(this, EventArgs.Empty);
             else
                 CurrentStepIndex++;
         });
         ToggleIngredientsCommand = new Command(() => ShowIngredients = !ShowIngredients);
-        StartTimerCommand = new Command<StepTimer>(timer => _ = StartTimerAsync(timer));
-        ReadStepCommand = new Command(() => SpeakCurrentStep(force: true));
+        // Chips start instantly, with no naming prompt — the detected/authored label is used as-is.
+        // Renaming (or adjusting a range's minutes) is now the small pencil target's job instead.
+        StartTimerCommand = new Command<RecipeTimer>(timer => _ = StartTimerAsync(timer));
+        EditTimerCommand = new Command<RecipeTimer>(timer =>
+        {
+            if (timer is not null)
+                EditTimerRequested?.Invoke(this, timer);
+        });
+        ToggleReadCommand = new Command(() =>
+        {
+            if (IsSpeaking)
+                StopSpeaking();
+            else
+                SpeakCurrentStep(force: true);
+        });
         ToggleVoiceCommand = new Command(() => _ = ToggleVoiceAsync());
         UpdateCurrentStepTimers();
+
+        // Opening Focus Mode from the app-wide timers bar lands directly on the step the tapped
+        // timer belongs to, rather than always starting from step one.
+        if (startIndex is int index && index > 0 && index < Steps.Count)
+            CurrentStepIndex = index;
     }
 
     /// <summary>Raised when the user finishes the final step.</summary>
-    public event EventHandler? Completed;
+    public event EventHandler? Finished;
 
     public ParsedRecipe Recipe { get; }
     public IReadOnlyList<RecipeStep> Steps => Recipe.Steps;
-    /// <summary>
-    /// Ingredients with a tick-off state. Losing your place in a list while your hands are busy is
-    /// the single most common way cooking from a screen goes wrong.
-    /// </summary>
-    public IReadOnlyList<CheckableIngredient> Ingredients { get; }
-    public bool HasIngredients => Ingredients.Count > 0;
+    /// <summary>The recipe's ingredients, plain and read-only — no tick-off state any more.</summary>
+    public IReadOnlyList<string> AllIngredients => Recipe.Ingredients;
+    public bool HasIngredients => Recipe.Ingredients.Count > 0;
+    /// <summary>The cook's own notes, shown on the first step only (see <see cref="ShowNotes"/>).</summary>
+    public string? Notes => Recipe.Notes;
+    /// <summary>True on the first step only, and only when there are notes to show.</summary>
+    public bool ShowNotes => CurrentStepIndex == 0 && !string.IsNullOrWhiteSpace(Notes);
+    /// <summary>The "Tap Next when this step is done…" hint: step 1 of the first-ever cook only.</summary>
+    public bool ShowFocusHint => _isFirstCook && CurrentStepIndex == 0;
     public int CurrentStepIndex
     {
         get => _currentStepIndex;
@@ -85,8 +109,9 @@ public sealed class FocusModeViewModel : INotifyPropertyChanged
             OnPropertyChanged(nameof(IsFirstStep));
             OnPropertyChanged(nameof(IsLastStep));
             OnPropertyChanged(nameof(PrimaryActionLabel));
+            OnPropertyChanged(nameof(ShowNotes));
+            OnPropertyChanged(nameof(ShowFocusHint));
             ((Command)PreviousCommand).ChangeCanExecute();
-            ((Command)NextCommand).ChangeCanExecute();
             UpdateCurrentStepTimers();
             SpeakCurrentStep(force: false);
         }
@@ -171,12 +196,22 @@ public sealed class FocusModeViewModel : INotifyPropertyChanged
         ? AppResources.Get("Finish") + "  \u2713"
         : AppResources.Get("Next") + "  \u203A";
     public ICommand PreviousCommand { get; }
-    public ICommand NextCommand { get; }
     public ICommand AdvanceCommand { get; }
     public ICommand ToggleIngredientsCommand { get; }
     public ICommand StartTimerCommand { get; }
-    public ICommand ReadStepCommand { get; }
+    public ICommand EditTimerCommand { get; }
+    public ICommand ToggleReadCommand { get; }
     public ICommand ToggleVoiceCommand { get; }
+
+    /// <summary>
+    /// The ingredients this step's <see cref="RecipeStep.IngredientRefs"/> point at, resolved to
+    /// text. Out-of-range indexes (a corrupt or hand-edited recipe) are skipped rather than crashing
+    /// the binding — a missing chip is a far smaller problem than Focus Mode refusing to open.
+    /// </summary>
+    public IReadOnlyList<string> CurrentStepIngredients =>
+        CurrentStep?.IngredientRefs.Where(i => i >= 0 && i < Recipe.Ingredients.Count).Select(i => Recipe.Ingredients[i]).ToArray()
+        ?? Array.Empty<string>();
+    public bool HasStepIngredients => CurrentStepIngredients.Count > 0;
 
     // ===== Voice step navigation =====
 
@@ -197,7 +232,7 @@ public sealed class FocusModeViewModel : INotifyPropertyChanged
         get
         {
             var phrases = VoiceCommandVocabulary.ExamplesFor(_spokenLanguage ?? DeviceLanguage);
-            return AppResources.Format("VoiceCommandsHintFormat", phrases.Next, phrases.Previous, phrases.Repeat);
+            return AppResources.Format("VoiceCommandsHintFormat", phrases.Next, phrases.Previous, phrases.Repeat, phrases.Stop);
         }
     }
 
@@ -249,6 +284,9 @@ public sealed class FocusModeViewModel : INotifyPropertyChanged
                 case VoiceCommand.Repeat:
                     SpeakCurrentStep(force: true);
                     break;
+                case VoiceCommand.Stop:
+                    StopSpeaking();
+                    break;
             }
         }
 
@@ -261,6 +299,21 @@ public sealed class FocusModeViewModel : INotifyPropertyChanged
     }
 
     // ===== Read aloud (text-to-speech) =====
+
+    /// <summary>
+    /// True while a step is actively being spoken. Drives the Read/Stop toggle on the button: tapping
+    /// it reads the step when false, or hushes mid-sentence when true.
+    /// </summary>
+    public bool IsSpeaking
+    {
+        get => _isSpeaking;
+        private set
+        {
+            if (_isSpeaking == value) return;
+            _isSpeaking = value;
+            OnPropertyChanged();
+        }
+    }
 
     // Speaks the current step. When force is false it only speaks if the read-aloud toggle is on,
     // so it can be called blindly on every step change. Any in-flight speech is cancelled first so
@@ -283,6 +336,7 @@ public sealed class FocusModeViewModel : INotifyPropertyChanged
         var cts = new CancellationTokenSource();
         _speechCts = cts;
         var language = _spokenLanguage;
+        IsSpeaking = true;
 
         _ = Task.Run(async () =>
         {
@@ -302,7 +356,26 @@ public sealed class FocusModeViewModel : INotifyPropertyChanged
                 // TTS is unavailable or no engine is installed; reading aloud is a bonus, not a
                 // requirement, so fail silently rather than disrupt cooking.
             }
+            finally
+            {
+                // Only clear the flag for the session that's still current — StopSpeaking() (or a
+                // newer SpeakCurrentStep call) may already have replaced _speechCts, and that newer
+                // session's own true/false transitions must win.
+                if (ReferenceEquals(_speechCts, cts))
+                    SetIsSpeaking(false);
+            }
         });
+    }
+
+    // Applies IsSpeaking on the UI thread; the finally above runs on the background Task.Run thread.
+    private void SetIsSpeaking(bool value)
+    {
+        void Apply() => IsSpeaking = value;
+
+        if (_dispatcher is null || !_dispatcher.IsDispatchRequired)
+            Apply();
+        else
+            _dispatcher.Dispatch(Apply);
     }
 
     // Confirms (once) whether an installed voice can read this recipe's language, so the read-aloud
@@ -351,13 +424,18 @@ public sealed class FocusModeViewModel : INotifyPropertyChanged
         {
             _speechCts.Dispose();
             _speechCts = null;
+            IsSpeaking = false;
         }
     }
 
     // ===== Cook timers =====
 
-    /// <summary>Timers detected in the current step's instruction (e.g. "simmer 20 minutes").</summary>
-    public IReadOnlyList<StepTimer> CurrentStepTimers => _currentStepTimers;
+    /// <summary>
+    /// The timers to offer for the current step: named ones from the parser when present, otherwise
+    /// durations detected in the instruction text (e.g. "simmer 20 minutes"). A range like
+    /// "10–12 min" counts down to the minimum before offering "+2 min" up to the maximum.
+    /// </summary>
+    public IReadOnlyList<RecipeTimer> CurrentStepTimers => _currentStepTimers;
     public bool HasStepTimers => _currentStepTimers.Count > 0;
 
     /// <summary>
@@ -368,11 +446,16 @@ public sealed class FocusModeViewModel : INotifyPropertyChanged
     public bool HasActiveTimers => ActiveTimers.Count > 0;
 
     /// <summary>
-    /// Asked (by the page) for a name when a timer is started, pre-filled with the detected label,
-    /// so concurrent timers are told apart at a glance. A null result cancels the start; when unset
-    /// the detected label is used as-is.
+    /// Every timer of the current step for the "+N more" sheet, each marked running (with its live
+    /// countdown) while a timer started from that slot (<see cref="StepTimerSlot"/>) counts down.
     /// </summary>
-    public Func<StepTimer, Task<string?>>? RequestTimerNameAsync { get; set; }
+    public ObservableCollection<StepTimerRow> StepTimerRows { get; }
+
+    /// <summary>
+    /// Raised (for the page) when the small pencil target on a chip is tapped, so it can open the
+    /// rename/adjust sheet pre-filled with this timer's label and minutes.
+    /// </summary>
+    public event EventHandler<RecipeTimer>? EditTimerRequested;
 
     private void OnTimerTick(object? sender, EventArgs e) => SyncActiveTimers();
 
@@ -392,48 +475,97 @@ public sealed class FocusModeViewModel : INotifyPropertyChanged
         foreach (var timer in live)
         {
             var existing = ActiveTimers.FirstOrDefault(t => t.Id == timer.Id);
-            var display = _timers?.Display(timer) ?? string.Empty;
+            // A range timer sitting at its minimum invites a check rather than showing "00:00": the
+            // big countdown swaps to "Check now" and a "+2 min" button appears alongside Stop.
+            var showExtend = _timers?.IsAtCheckpoint(timer) ?? false;
+            var display = showExtend ? AppResources.Get("CheckNow") : (_timers?.Display(timer) ?? string.Empty);
+
             if (existing is null)
-                ActiveTimers.Add(new ActiveTimerItem(timer.Id, timer.Label, display, StopTimer));
+                ActiveTimers.Add(new ActiveTimerItem(timer.Id, timer.Label, display, timer.CanExtend, showExtend, StopTimer, ExtendTimer));
             else
+            {
                 existing.Display = display;
+                existing.ShowExtend = showExtend;
+            }
         }
 
         OnPropertyChanged(nameof(HasActiveTimers));
+        RefreshStepTimerRows();
+    }
+
+    // Updates each sheet row's running state in place, so an open sheet ticks without rebuilding.
+    private void RefreshStepTimerRows()
+    {
+        var live = _timers?.Timers ?? Array.Empty<Domain.CookTimerState>();
+        for (var i = 0; i < StepTimerRows.Count; i++)
+        {
+            var row = StepTimerRows[i];
+            var running = StepTimerSlot.FindRunning(live, Recipe.Id, CurrentStepIndex, i, row.Timer.Label);
+            row.IsRunning = running is not null;
+            row.Display = running is null ? string.Empty
+                : _timers!.IsAtCheckpoint(running) ? AppResources.Get("CheckNow") : _timers.Display(running);
+        }
     }
 
     private void UpdateCurrentStepTimers()
     {
-        _currentStepTimers = StepTimers.Detect(CurrentStep?.Instruction);
+        _currentStepTimers = CurrentStep is null ? Array.Empty<RecipeTimer>() : StepTimerResolver.Resolve(CurrentStep);
         OnPropertyChanged(nameof(CurrentStepTimers));
         OnPropertyChanged(nameof(HasStepTimers));
+        StepTimerRows.Clear();
+        foreach (var timer in _currentStepTimers)
+            StepTimerRows.Add(new StepTimerRow(timer));
+        RefreshStepTimerRows();
+        OnPropertyChanged(nameof(CurrentStepIngredients));
+        OnPropertyChanged(nameof(HasStepIngredients));
     }
 
-    private async Task StartTimerAsync(StepTimer? timer)
+    /// <summary>
+    /// Starts <paramref name="timer"/> immediately — no naming prompt. Used both by the chip's tap
+    /// (the detected/authored label as-is) and by the edit sheet's Start button (a renamed/adjusted
+    /// copy of <paramref name="slot"/>, the step timer it was opened from). A slot that is already
+    /// running is not started twice; its countdown is already on screen.
+    /// </summary>
+    public async Task StartTimerAsync(RecipeTimer? timer, RecipeTimer? slot = null)
     {
         if (timer is null || _timers is null)
             return;
 
-        var label = timer.Label;
-        if (RequestTimerNameAsync is not null)
-        {
-            var chosen = await RequestTimerNameAsync(timer);
-            if (chosen is null)
-                return; // The user cancelled the name prompt.
+        int? timerIndex = IndexOfStepTimer(slot ?? timer) is var index and >= 0 ? index : null;
+        if (timerIndex is int i && StepTimerSlot.FindRunning(_timers.Timers, Recipe.Id, CurrentStepIndex, i, _currentStepTimers[i].Label) is not null)
+            return;
 
-            chosen = chosen.Trim();
-            if (chosen.Length > 0)
-                label = chosen;
-        }
-
-        await _timers.StartAsync(label, timer.TotalSeconds);
+        await _timers.StartAsync(timer.Label, timer.MinSeconds, timer.MaxSeconds, Recipe.Id, CurrentStepIndex, timerIndex);
         SyncActiveTimers();
+    }
+
+    // By reference first, so two identical timers in one step ("Boil · 5 min" twice) stay separate
+    // slots; value equality only as a fallback.
+    private int IndexOfStepTimer(RecipeTimer timer)
+    {
+        for (var i = 0; i < _currentStepTimers.Count; i++)
+        {
+            if (ReferenceEquals(_currentStepTimers[i], timer))
+                return i;
+        }
+        for (var i = 0; i < _currentStepTimers.Count; i++)
+        {
+            if (_currentStepTimers[i] == timer)
+                return i;
+        }
+        return -1;
     }
 
     private void StopTimer(int id)
     {
         if (_timers is not null)
             _ = _timers.StopAsync(id);
+    }
+
+    private void ExtendTimer(int id)
+    {
+        if (_timers is not null)
+            _ = _timers.ExtendAsync(id, 120);
     }
 
     private static void Haptic()
@@ -502,23 +634,31 @@ public sealed class FocusModeViewModel : INotifyPropertyChanged
 }
 
 /// <summary>
-/// One row in the active-timers overview strip: a name, a live countdown, and a stop button. Its
-/// <see cref="Display"/> is updated in place every second so the strip does not flicker.
+/// One row in the active-timers overview strip: a name, a live countdown, a stop button and — for a
+/// range timer sitting at its minimum — a "+2 min" extend button. <see cref="Display"/> and
+/// <see cref="ShowExtend"/> are updated in place every second so the strip does not flicker.
 /// </summary>
 public sealed class ActiveTimerItem : INotifyPropertyChanged
 {
     private string _display;
+    private bool _showExtend;
 
-    public ActiveTimerItem(int id, string label, string display, Action<int> stop)
+    public ActiveTimerItem(int id, string label, string display, bool canExtend, bool showExtend, Action<int> stop, Action<int> extend)
     {
         Id = id;
         Label = label;
         _display = display;
+        CanExtend = canExtend;
+        _showExtend = showExtend;
         StopCommand = new Command(() => stop(id));
+        ExtendCommand = new Command(() => extend(id));
     }
 
     public int Id { get; }
     public string Label { get; }
+
+    /// <summary>True for a range timer that has not yet reached its maximum.</summary>
+    public bool CanExtend { get; }
 
     public string Display
     {
@@ -532,7 +672,60 @@ public sealed class ActiveTimerItem : INotifyPropertyChanged
         }
     }
 
+    /// <summary>True once this range timer has counted down to its minimum and can still be extended
+    /// — shows the "+2 min" button alongside Stop.</summary>
+    public bool ShowExtend
+    {
+        get => _showExtend;
+        set
+        {
+            if (value == _showExtend)
+                return;
+            _showExtend = value;
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(ShowExtend)));
+        }
+    }
+
     public ICommand StopCommand { get; }
+    public ICommand ExtendCommand { get; }
+
+    public event PropertyChangedEventHandler? PropertyChanged;
+}
+
+/// <summary>
+/// One row of the step's timers sheet: the timer itself (label · duration, Start and edit) or, while
+/// it runs, its live countdown in place of Start. Updated in place every second.
+/// </summary>
+public sealed class StepTimerRow(RecipeTimer timer) : INotifyPropertyChanged
+{
+    private bool _isRunning;
+    private string _display = string.Empty;
+
+    public RecipeTimer Timer { get; } = timer;
+
+    public bool IsRunning
+    {
+        get => _isRunning;
+        set
+        {
+            if (value == _isRunning)
+                return;
+            _isRunning = value;
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(IsRunning)));
+        }
+    }
+
+    public string Display
+    {
+        get => _display;
+        set
+        {
+            if (value == _display)
+                return;
+            _display = value;
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Display)));
+        }
+    }
 
     public event PropertyChangedEventHandler? PropertyChanged;
 }

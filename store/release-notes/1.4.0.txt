@@ -1,0 +1,95 @@
+<en-GB>
+What's new in 1.4.0
+• Share or copy a recipe link — PurePrep offers to import it.
+• Search recipes on the web in-app, then "Add to PurePrep".
+• Smarter imports: named timers, servings, times, a photo.
+• Scale by people: Serves − 4 +.
+• Focus Mode always fits the step: "You'll need", Read/Stop, timers bar.
+• New editor: one row per ingredient/step, drag to reorder, add photos.
+• Notes, favourites, Want to cook / Cooked, sorting.
+• Dialogs got a fresh look.
+</en-GB>
+
+<en-US>
+What's new in 1.4.0
+• Share or copy a recipe link — PurePrep offers to import it.
+• Search recipes on the web in-app, then "Add to PurePrep".
+• Smarter imports: named timers, servings, times, a photo.
+• Scale by people: Serves − 4 +.
+• Focus Mode always fits the step: "You'll need", Read/Stop, timers bar.
+• New editor: one row per ingredient/step, drag to reorder, add photos.
+• Notes, favorites, Want to cook / Cooked, sorting.
+• Dialogs got a fresh look.
+</en-US>
+
+<de-DE>
+Neu in 1.4.0
+• Rezeptlink teilen oder kopieren — PurePrep bietet den Import an.
+• Rezepte im Web in der App suchen, dann „Zu PurePrep hinzufügen“.
+• Schlauere Importe: benannte Timer, Portionen, Zeiten, Foto.
+• Nach Personen skalieren: Portionen − 4 +.
+• Fokus-Modus passt immer: „Du brauchst“, Vorlesen/Stopp, Timer.
+• Neuer Editor: Zeile je Zutat/Schritt, per Drag ordnen, mit Foto.
+• Notizen, Favoriten, Will kochen / Gekocht, Sortierung.
+• Dialoge im neuen Look.
+</de-DE>
+
+<es-ES>
+Novedades en 1.4.0
+• Comparte o copia el enlace — PurePrep ofrece importarlo.
+• Busca recetas en la web en la app y pulsa "Añadir a PurePrep".
+• Importaciones más listas: temporizadores, raciones, tiempos, foto.
+• Escala por personas: Raciones − 4 +.
+• Modo Concentración siempre encaja: "Necesitas", Leer/Detener, temporizadores.
+• Nuevo editor: fila por ingrediente/paso, arrastra, añade foto.
+• Notas, favoritos, Quiero cocinar / Cocinado, orden.
+• Nuevo aspecto en los diálogos.
+</es-ES>
+
+<fr-FR>
+Nouveautés de la 1.4.0
+• Partagez ou copiez le lien — PurePrep propose l'import.
+• Cherchez des recettes sur le web dans l'appli, « Ajouter à PurePrep ».
+• Imports plus malins : minuteurs, portions, temps, photo.
+• Selon le nombre de personnes : Portions − 4 +.
+• Le mode Focus s'adapte toujours : « Il vous faut », Lire/Stop, minuteurs.
+• Nouvel éditeur : ligne par ingrédient/étape, glissez, ajoutez une photo.
+• Notes, favoris, À cuisiner / Cuisiné, tri.
+• Nouveau look pour les fenêtres.
+</fr-FR>
+
+<it-IT>
+Novità della 1.4.0
+• Condividi o copia il link — PurePrep propone di importarlo.
+• Cerca ricette sul web nell'app, poi tocca "Aggiungi a PurePrep".
+• Import più intelligenti: timer con nome, porzioni, tempi, foto.
+• Scala per persone: Porzioni − 4 +.
+• Focus si adatta sempre: "Ti serve", Leggi/Stop, timer.
+• Nuovo editor: riga per ingrediente/passaggio, trascina, aggiungi foto.
+• Note, preferiti, Da cucinare / Cucinato, ordinamento.
+• Nuovo aspetto per le finestre.
+</it-IT>
+
+<nl-NL>
+Nieuw in 1.4.0
+• Deel of kopieer een receptlink — PurePrep biedt aan te importeren.
+• Zoek recepten op het web in de app, tik op "Toevoegen aan PurePrep".
+• Slimmere imports: timers met naam, porties, tijden, foto.
+• Schaal op personen: Porties − 4 +.
+• Focus-modus past altijd: "Je hebt nodig", Voorlezen/Stop, timerbalk.
+• Nieuwe editor: regel per ingrediënt/stap, sleep, voeg foto toe.
+• Notities, favorieten, Wil koken / Gekookt, sortering.
+• Nieuwe look voor dialogen.
+</nl-NL>
+
+<pl-PL>
+Co nowego w 1.4.0
+• Udostępnij lub skopiuj link — PurePrep zaproponuje import.
+• Szukaj przepisów w sieci w aplikacji, potem "Dodaj do PurePrep".
+• Sprytniejszy import: nazwane minutniki, porcje, czasy, zdjęcie.
+• Skaluj wg liczby osób: Porcje − 4 +.
+• Tryb Skupienia dopasowany: "Potrzebujesz", Czytaj/Stop, minutniki.
+• Nowy edytor: wiersz na składnik/krok, przeciągnij, dodaj zdjęcie.
+• Notatki, ulubione, Chcę ugotować / Ugotowane, sortowanie.
+• Nowy wygląd okien.
+</pl-PL>

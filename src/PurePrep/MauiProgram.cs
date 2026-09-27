@@ -11,11 +11,20 @@ namespace PurePrep;
 public static class MauiProgram
 {
 	// Backend base URL for the AI Smart Parser + credit endpoints.
-	// - Release builds target the deployed backend over HTTPS.
-	// - Debug builds target 10.0.2.2, the Android emulator's alias for the host
-	//   machine running the local server (dotnet run on PurePrep.Server).
-#if DEBUG
-	private const string BackendBaseUrl = "http://10.0.2.2:5299/";
+	// - Release builds, and Debug builds by default, target the deployed production backend over
+	//   HTTPS. A local backend is opt-in: build with -p:PurePrepLocalApi=true (defines LOCAL_API,
+	//   Debug configuration only — see PurePrep.csproj) to point Debug builds at
+	//   http://localhost:5299/ instead, then forward the port:
+	//     adb reverse tcp:5299 tcp:5299
+	//   That works for both a physical device and the emulator. (The emulator also has its own
+	//   host alias, 10.0.2.2, if you'd rather skip adb reverse there — swap it in locally, don't
+	//   commit it back.) LOCAL_API also unlocks cleartext-to-localhost only in the Android manifest
+	//   (see PurePrep.csproj's AndroidManifestOverlay); without it, plain HTTP is blocked.
+	// - The `DEBUG &&` half of the check below is belt-and-braces: PurePrep.csproj already scopes
+	//   LOCAL_API to Configuration=='Debug', but this line must never resolve to the localhost URL
+	//   in a Release build even if that guard were ever loosened by mistake.
+#if DEBUG && LOCAL_API
+	private const string BackendBaseUrl = "http://localhost:5299/";
 #else
 	private const string BackendBaseUrl = "https://api.pureprep.lechdigital.nl/";
 #endif
@@ -29,7 +38,17 @@ public static class MauiProgram
 			{
 				fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
 				fonts.AddFont("OpenSans-Semibold.ttf", "OpenSansSemibold");
+				fonts.AddFont("MaterialSymbolsRounded.ttf", "MaterialSymbols");
 			});
+
+		// Switch colours: MAUI paints OnColor/ThumbColor as colour filters and leaves the off state
+		// to the native (night-mode) defaults, which vanish on the light theme's white cards. After
+		// every colour/state mapping, drop the filters and set explicit on/off tint lists instead.
+		// OnColor/ThumbColor are DynamicResource-bound, so a theme swap re-runs this with new colours.
+#if ANDROID
+		foreach (var key in new[] { nameof(ISwitch.TrackColor), nameof(ISwitch.ThumbColor), nameof(ISwitch.IsOn) })
+			Microsoft.Maui.Handlers.SwitchHandler.Mapper.AppendToMapping(key, (handler, view) => ApplySwitchColors(handler.PlatformView, view));
+#endif
 
 		var databasePath = Path.Combine(FileSystem.AppDataDirectory, "pureprep.db");
 		builder.Services.AddDbContextFactory<PurePrepDbContext>(options => options.UseSqlite($"Data Source={databasePath}"));
@@ -54,6 +73,9 @@ public static class MauiProgram
 
 		// Carries links shared into the app from the Android share sheet across to the library page.
 		builder.Services.AddSingleton<SharedUrlRelay>();
+
+		// Routes every "here's a link" moment (share, clipboard chip) to the Import sheet on Home.
+		builder.Services.AddSingleton<ImportCoordinator>();
 
 		// Cook timers outlive the Focus Mode page, so the countdown survives navigating away.
 #if ANDROID
@@ -96,12 +118,57 @@ public static class MauiProgram
 			client.Timeout = TimeSpan.FromSeconds(15);
 		});
 
+		// Recipe photo: the page's own image is downloaded, shrunk to editor size and stored; when that
+		// fails, an AI-generated one is fetched instead (already paid for by the import's Smart Credit).
+		builder.Services.AddSingleton<IRecipePhotoShrinker, RecipePhotoShrinker>();
+		builder.Services.AddHttpClient<IRecipeImageStore, FileRecipeImageStore>((http, services) =>
+			new FileRecipeImageStore(
+				http,
+				FileSystem.AppDataDirectory,
+				services.GetRequiredService<IRecipePhotoShrinker>(),
+				services.GetService<ILogger<FileRecipeImageStore>>()));
+		// Image generation takes longer than a text call, and 30 s can cut it off while the server is
+		// still waiting on the model (the single-use ticket is then spent for nothing).
+		// It runs in the background after the recipe is already open, so a generous limit costs nothing.
+		builder.Services.AddHttpClient<IRecipeImageGenerator, AiProxyRecipeImageGenerator>(client =>
+		{
+			client.BaseAddress = new Uri(BackendBaseUrl);
+			client.Timeout = TimeSpan.FromSeconds(90);
+		});
+		builder.Services.AddSingleton<RecipeImageAttacher>();
+
 		builder.Services.AddTransient<RecipeLibraryViewModel>();
 
 #if DEBUG
 		builder.Logging.AddDebug();
+		// Debug-level lines from the app's own code (e.g. why an imported recipe got no photo).
+		builder.Logging.AddFilter("PurePrep", LogLevel.Debug);
 #endif
 
 		return builder.Build();
 	}
+
+#if ANDROID
+	private static void ApplySwitchColors(AndroidX.AppCompat.Widget.SwitchCompat platformView, ISwitch view)
+	{
+		static Android.Graphics.Color Native(Color color) => new(
+			(byte)(color.Red * 255), (byte)(color.Green * 255), (byte)(color.Blue * 255), (byte)(color.Alpha * 255));
+
+		static Color Token(string key, Color fallback) =>
+			Microsoft.Maui.Controls.Application.Current?.Resources.TryGetValue(key, out var value) == true && value is Color color
+				? color
+				: fallback;
+
+		var trackOn = view.TrackColor ?? Token("SwitchTrackOn", Colors.YellowGreen);
+		var thumbOn = view.ThumbColor ?? Token("SwitchThumbOn", Colors.White);
+		var trackOff = Token("SwitchTrackOff", Colors.LightGray);
+		var thumbOff = Token("SwitchThumbOff", Colors.Gray);
+
+		int[][] states = [[Android.Resource.Attribute.StateChecked], []];
+		platformView.TrackDrawable?.ClearColorFilter();
+		platformView.ThumbDrawable?.ClearColorFilter();
+		platformView.TrackTintList = new Android.Content.Res.ColorStateList(states, [Native(trackOn), Native(trackOff)]);
+		platformView.ThumbTintList = new Android.Content.Res.ColorStateList(states, [Native(thumbOn), Native(thumbOff)]);
+	}
+#endif
 }

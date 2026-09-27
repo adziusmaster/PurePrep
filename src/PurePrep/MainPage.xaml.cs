@@ -10,26 +10,31 @@ public partial class MainPage : ContentPage, IHardwareBackHandler
 {
 	private bool _hasLoaded;
 
-	private readonly SharedUrlRelay? _sharedUrls;
+	private readonly ImportCoordinator? _coordinator;
 
 	public MainPage(RecipeLibraryViewModel viewModel)
 	{
 		InitializeComponent();
-		_sharedUrls = IPlatformApplication.Current?.Services.GetService<SharedUrlRelay>();
-		if (_sharedUrls is not null)
-		{
-			_sharedUrls.Received += OnSharedUrlReceived;
-			_sharedUrls.ReceivedWithoutUrl += OnSharedUrlMissing;
-		}
+		_coordinator = IPlatformApplication.Current?.Services.GetService<ImportCoordinator>();
+		TimersBarControl.Library = viewModel;
 		viewModel.FocusRequested += OnFocusRequested;
 		viewModel.DetailRequested += OnDetailRequested;
-		viewModel.AddManuallyRequested += OnAddManuallyRequested;
 		viewModel.SettingsRequested += OnSettingsTapped;
+		viewModel.SortRequested += OnSortRequested;
 		viewModel.ResolveDuplicateImportAsync = OnResolveDuplicateImportAsync;
 		viewModel.PropertyChanged += OnViewModelPropertyChanged;
 		BindingContext = viewModel;
 		SizeChanged += OnPageSizeChanged;
+		AddSheet.PropertyChanged += OnSheetVisibilityChanged;
+		ImportSheet.PropertyChanged += OnSheetVisibilityChanged;
+		BottomDock.SizeChanged += (_, _) =>
+		{
+			if (BottomDock.Height > 0)
+				BottomDockSpacer.HeightRequest = BottomDock.Height + 8;
+		};
 	}
+
+	public RecipeLibraryViewModel ViewModel => (RecipeLibraryViewModel)BindingContext;
 
 	// MAUI-Android keeps a stale measured width on a centred, max-width container after an
 	// orientation change, so rotating to landscape and back could leave the list mis-sized (and
@@ -41,6 +46,67 @@ public partial class MainPage : ContentPage, IHardwareBackHandler
 		if (Width <= 0)
 			return;
 		ContentRoot.WidthRequest = Math.Min(Width, maxWidth);
+		BottomDock.WidthRequest = Math.Min(Width, maxWidth);
+	}
+
+	// The floating Add button steps aside while the Add or Import sheet is up. It fades rather than
+	// collapses so the bottom dock (and the list's footer spacer sized from it) keeps its height.
+	private void OnSheetVisibilityChanged(object? sender, PropertyChangedEventArgs e)
+	{
+		if (e.PropertyName != nameof(IsVisible))
+			return;
+		var sheetUp = AddSheet.IsVisible || ImportSheet.IsVisible;
+		AddButton.Opacity = sheetUp ? 0 : 1;
+		AddButton.InputTransparent = sheetUp;
+	}
+
+	private void OnAddRecipeTapped(object? sender, EventArgs e)
+	{
+		AddSheet.Balance = ViewModel.CreditBalance;
+		AddSheet.Show();
+	}
+
+	// Link box → the same Import sheet a share or the clipboard banner opens, so the cost, duplicate
+	// and out-of-credits handling are identical. An unusable link keeps the Add sheet open with the error.
+	private async void OnAddSheetImportLink(object? sender, string input)
+	{
+		if (ViewModel.PrepareLinkImport(input) is not { } url)
+			return;
+		await AddSheet.HideAsync();
+		ShowImportSheet(url);
+	}
+
+	private async void OnAddSheetClipboardSuggestion(object? sender, EventArgs e)
+	{
+		if (ViewModel.ClipboardSuggestionUrl is not { } url)
+			return;
+		await AddSheet.HideAsync();
+		ShowImportSheet(url);
+	}
+
+	// "Search the web": opens the in-app browser on a recipe search.
+	private async void OnAddSheetWebSearch(object? sender, string query)
+	{
+		await AddSheet.HideAsync();
+		await Navigation.PushAsync(new SearchBrowserPage(query, ViewModel));
+	}
+
+	private async void OnAddSheetPhoto(object? sender, EventArgs e)
+	{
+		await AddSheet.HideAsync();
+		await ImportPhotoAsync();
+	}
+
+	private async void OnAddSheetText(object? sender, EventArgs e)
+	{
+		await AddSheet.HideAsync();
+		await Navigation.PushAsync(new PasteTextPage(ViewModel));
+	}
+
+	private async void OnAddSheetManual(object? sender, EventArgs e)
+	{
+		await AddSheet.HideAsync();
+		await Navigation.PushAsync(new ManualAddPage(ViewModel));
 	}
 
 	private void OnViewModelPropertyChanged(object? sender, PropertyChangedEventArgs e)
@@ -67,11 +133,7 @@ public partial class MainPage : ContentPage, IHardwareBackHandler
 		_buyCreditsOpen = true;
 		try
 		{
-			var services = this.Handler?.MauiContext?.Services;
-			var credits = services?.GetService(typeof(PurePrep.Application.ISmartCreditsClient)) as PurePrep.Application.ISmartCreditsClient;
-			var billing = services?.GetService(typeof(PurePrep.Application.IBillingService)) as PurePrep.Application.IBillingService;
-			var balance = ((RecipeLibraryViewModel)BindingContext).CreditBalance;
-			await Navigation.PushAsync(new BuyCreditsPage(billing, credits, balance));
+			await BuyCreditsPage.OpenAsync(Navigation, ViewModel.CreditBalance);
 		}
 		finally
 		{
@@ -79,20 +141,59 @@ public partial class MainPage : ContentPage, IHardwareBackHandler
 		}
 	}
 
-	private void OnSharedUrlReceived(object? sender, string url) =>
-		Dispatcher.Dispatch(() =>
-		{
-			((RecipeLibraryViewModel)BindingContext).ApplySharedUrl(url);
-			_sharedUrls?.Clear();
-		});
+	/// <summary>Configures and opens the Import sheet for a link that arrived from a share or the clipboard chip.</summary>
+	public void ShowImportSheet(string url)
+	{
+		var existing = ViewModel.FindBySourceUrl(url);
+		ImportSheet.Url = url;
+		ImportSheet.Host = Uri.TryCreate(url, UriKind.Absolute, out var u) ? u.Host.Replace("www.", "") : url;
+		ImportSheet.Balance = ViewModel.CreditBalance;
+		ImportSheet.IsDuplicate = existing is not null;
+		ImportSheet.PreviewTitle = null;
+		ImportSheet.PreviewImage = null;
+		ImportSheet.Show();
+	}
 
-	private void OnSharedUrlMissing(object? sender, EventArgs e) =>
-		Dispatcher.Dispatch(() => ((RecipeLibraryViewModel)BindingContext).ReportSharedUrlMissing());
+	private async void OnImportSheetImport(object? sender, EventArgs e)
+	{
+		ImportSheet.Hide();
+		// Only clear the chip when it's the link actually being imported — this sheet can just as
+		// easily be showing a share that arrived on top of an untouched clipboard suggestion.
+		if (RecipeUrl.SameRecipe(ImportSheet.Url, ViewModel.ClipboardSuggestionUrl))
+			ViewModel.DismissClipboardSuggestion();
+		var result = await ViewModel.ImportUrlAsync(ImportSheet.Url, allowDuplicate: ImportSheet.IsDuplicate);
+		if (result is { Outcome: PurePrep.Application.ImportOutcome.Imported, Recipe: { } saved })
+			await Navigation.PushAsync(new RecipeDetailPage(saved, ViewModel));
+		else if (result.Outcome == PurePrep.Application.ImportOutcome.OutOfCredits)
+			await OpenBuyCreditsAsync();
+	}
+
+	// The sheet offered Buy Smart Credits instead of Import (zero balance): nothing is attempted.
+	private async void OnImportSheetBuyCredits(object? sender, EventArgs e)
+	{
+		ImportSheet.Hide();
+		await OpenBuyCreditsAsync();
+	}
+
+	private async void OnImportSheetOpenExisting(object? sender, EventArgs e)
+	{
+		ImportSheet.Hide();
+		if (ViewModel.FindBySourceUrl(ImportSheet.Url) is { } existing)
+			await Navigation.PushAsync(new RecipeDetailPage(existing, ViewModel));
+	}
+
+	private void OnImportSheetCancel(object? sender, EventArgs e) => ImportSheet.Hide();
+
+	private void OnClipboardChipTapped(object? sender, EventArgs e)
+	{
+		if (ViewModel.ClipboardSuggestionUrl is { } url)
+			ShowImportSheet(url);
+	}
 
 	private async void OnPasteTapped(object? sender, EventArgs e) =>
 		await ((RecipeLibraryViewModel)BindingContext).PasteFromClipboardAsync();
 
-	private async void OnImportPhotoTapped(object? sender, EventArgs e)
+	private async Task ImportPhotoAsync()
 	{
 		var vm = (RecipeLibraryViewModel)BindingContext;
 
@@ -139,8 +240,24 @@ public partial class MainPage : ContentPage, IHardwareBackHandler
 		}
 	}
 
-	private async void OnImportTextTapped(object? sender, EventArgs e) =>
-		await Navigation.PushAsync(new PasteTextPage((RecipeLibraryViewModel)BindingContext));
+	private async void OnSortRequested(object? sender, EventArgs e)
+	{
+		var vm = (RecipeLibraryViewModel)BindingContext;
+
+		var recentlyAdded = AppResources.Get("SortRecentlyAdded");
+		var recentlyCooked = AppResources.Get("SortRecentlyCooked");
+		var alphabetical = AppResources.Get("SortAlphabetical");
+		var cancel = AppResources.Get("Cancel");
+
+		var choice = await Services.AppDialog.ChooseAsync(this, AppResources.Get("SortBy"), cancel, recentlyAdded, recentlyCooked, alphabetical);
+
+		if (choice == recentlyAdded)
+			vm.Sort = Domain.LibrarySort.RecentlyAdded;
+		else if (choice == recentlyCooked)
+			vm.Sort = Domain.LibrarySort.RecentlyCooked;
+		else if (choice == alphabetical)
+			vm.Sort = Domain.LibrarySort.Alphabetical;
+	}
 
 	private async Task<DuplicateImportAction> OnResolveDuplicateImportAsync(Domain.ParsedRecipe existing)
 	{
@@ -160,11 +277,8 @@ public partial class MainPage : ContentPage, IHardwareBackHandler
 	protected override async void OnAppearing()
 	{
 		base.OnAppearing();
-		var vm = (RecipeLibraryViewModel)BindingContext;
+		var vm = ViewModel;
 
-		// A share that arrived before this page existed (cold start) is waiting to be collected.
-		if (_sharedUrls?.TakePending() is { } sharedUrl)
-			vm.ApplySharedUrl(sharedUrl);
 		if (!_hasLoaded)
 		{
 			_hasLoaded = true;
@@ -177,13 +291,32 @@ public partial class MainPage : ContentPage, IHardwareBackHandler
 			// our back. LoadAsync also refreshes the credit chip, so it covers the redeem-code case too.
 			await vm.LoadAsync();
 		}
+
+		// Attach only once the library + balance are loaded: a cold-start pending share is collected
+		// here and opens the Import sheet, which needs FindBySourceUrl and CreditBalance to reflect
+		// real data, not the empty/unknown state from before LoadAsync ran.
+		_coordinator?.Attach(this);
+
+		await vm.CheckClipboardAsync();
 	}
 
-	// The paywall sheet is an in-page overlay, so the hardware back button should close it rather
-	// than pop/exit. MainActivity drives the back policy and calls this first.
+	// The paywall/import sheets are in-page overlays, so the hardware back button should close
+	// whichever is open rather than pop/exit. MainActivity drives the back policy and calls this first.
 	public bool OnHardwareBack()
 	{
-		var vm = (RecipeLibraryViewModel)BindingContext;
+		if (AddSheet.IsOpen)
+		{
+			AddSheet.Hide();
+			return true;
+		}
+
+		if (ImportSheet.IsVisible)
+		{
+			ImportSheet.Hide();
+			return true;
+		}
+
+		var vm = ViewModel;
 		if (vm.IsUpgradePromptVisible)
 		{
 			vm.CloseUpgradePrompt();
@@ -195,10 +328,10 @@ public partial class MainPage : ContentPage, IHardwareBackHandler
 
 	private async void OnFocusRequested(object? sender, ParsedRecipe recipe)
 	{
-		// Convert to the user's chosen units first. Cooking straight from a library card used to
-		// hand Focus Mode the raw recipe, so the same button behaved differently here and on the
-		// detail screen — metric quantities for someone who had selected imperial.
-		await Navigation.PushAsync(new FocusPage(RecipeUnits.ForDisplay(recipe)));
+		// Same cook copy as the detail screen's Cook button: displayed translation, the cook's units and
+		// remembered servings, read aloud in that text's language. The saved `recipe` is passed through
+		// separately as the original, so "mark as cooked" persists on the saved recipe, not this copy.
+		await Navigation.PushAsync(FocusPage.ForRecipe(recipe, (RecipeLibraryViewModel)BindingContext));
 	}
 
 	private async void OnDetailRequested(object? sender, ParsedRecipe recipe)
@@ -206,19 +339,17 @@ public partial class MainPage : ContentPage, IHardwareBackHandler
 		await Navigation.PushAsync(new RecipeDetailPage(recipe, (RecipeLibraryViewModel)BindingContext));
 	}
 
-	private async void OnAddManuallyRequested(object? sender, EventArgs e)
-	{
-		await Navigation.PushAsync(new ManualAddPage((RecipeLibraryViewModel)BindingContext));
-	}
-
 	private async void OnSettingsTapped(object? sender, EventArgs e)
 	{
+		// The Add sheet's translate tip links here; close the sheet so it isn't still up on return.
+		if (AddSheet.IsOpen)
+			await AddSheet.HideAsync();
 		var services = this.Handler?.MauiContext?.Services;
 		var theme = services?.GetService(typeof(ThemeService)) as ThemeService;
 		var credits = services?.GetService(typeof(PurePrep.Application.ISmartCreditsClient)) as PurePrep.Application.ISmartCreditsClient;
 		var billing = services?.GetService(typeof(PurePrep.Application.IBillingService)) as PurePrep.Application.IBillingService;
 		if (theme is not null)
-			await Navigation.PushAsync(new SettingsPage(theme, credits, billing));
+			await Navigation.PushAsync(new SettingsPage(theme, credits, billing, (RecipeLibraryViewModel)BindingContext));
 	}
 }
 

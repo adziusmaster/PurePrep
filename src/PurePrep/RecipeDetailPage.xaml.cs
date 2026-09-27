@@ -3,6 +3,7 @@ using PurePrep.Application;
 using PurePrep.Domain;
 using PurePrep.Localization;
 using PurePrep.Presentation;
+using PurePrep.Resources.Styles;
 using PurePrep.Services;
 
 namespace PurePrep;
@@ -19,12 +20,44 @@ public partial class RecipeDetailPage : ContentPage
         _recipe = recipe;
         _library = library;
         _viewModel = new RecipeDetailViewModel(recipe);
+        _viewModel.RecipeChanged += OnRecipeChanged;
         BindingContext = _viewModel;
+        TimersBarControl.Library = library;
+    }
+
+    // Notes/favourite/status/servings changes persist immediately (see RecipeDetailViewModel.Persist).
+    // Keeping this page's own _recipe copy in sync ensures a later change (e.g. notes after favourite)
+    // is saved on top of the previous one instead of overwriting it with a stale snapshot.
+    private async void OnRecipeChanged(object? sender, ParsedRecipe recipe)
+    {
+        _recipe = recipe;
+        var saved = await _library.UpdateRecipeAsync(recipe);
+        if (ReferenceEquals(_recipe, recipe))
+            _recipe = saved;
+    }
+
+    // The import that opened this page returns before its photo is downloaded/generated; when the photo
+    // lands (or a Replace re-import rewrites the recipe) the library says so and the header catches up.
+    // While another page covers this one, OnAppearing's re-read below catches up instead.
+    private void OnLibraryRecipeRefreshed(object? sender, ParsedRecipe recipe)
+    {
+        if (recipe.Id != _recipe.Id)
+            return;
+        _viewModel.SetImage(recipe.ImagePath);
+        _recipe = _viewModel.Recipe;
+    }
+
+    protected override void OnDisappearing()
+    {
+        _library.RecipeRefreshed -= OnLibraryRecipeRefreshed;
+        base.OnDisappearing();
     }
 
     protected override void OnAppearing()
     {
         base.OnAppearing();
+        _library.RecipeRefreshed -= OnLibraryRecipeRefreshed;
+        _library.RecipeRefreshed += OnLibraryRecipeRefreshed;
 
         // The recipe may have been edited on a page pushed above this one. Re-read from the full
         // library rather than the bound Recipes collection: that one is search-filtered, so an edit
@@ -37,8 +70,6 @@ public partial class RecipeDetailPage : ContentPage
         }
     }
 
-    private async void OnBackTapped(object? sender, EventArgs e) => await Navigation.PopAsync();
-
     private async void OnUnitsHintTapped(object? sender, EventArgs e)
     {
         // Same wiring as the home screen's settings button, so the units hint lands users directly
@@ -48,11 +79,33 @@ public partial class RecipeDetailPage : ContentPage
         var credits = services?.GetService(typeof(ISmartCreditsClient)) as ISmartCreditsClient;
         var billing = services?.GetService(typeof(IBillingService)) as IBillingService;
         if (theme is not null)
-            await Navigation.PushAsync(new SettingsPage(theme, credits, billing));
+            await Navigation.PushAsync(new SettingsPage(theme, credits, billing, _library));
     }
 
     private async void OnEditTapped(object? sender, EventArgs e) =>
         await Navigation.PushAsync(new ManualAddPage(_library, _recipe));
+
+    // ServingsStepper's number is tappable (keypad) rather than only +/-, per the brief.
+    private async void OnServingsNumberTapped(object? sender, EventArgs e)
+    {
+        var input = await Services.AppDialog.PromptAsync(this, AppResources.Get("SetServings"), null,
+            AppResources.Get("Ok"), AppResources.Get("Cancel"), keyboard: Keyboard.Numeric,
+            initialValue: _viewModel.CurrentServings.ToString());
+        if (int.TryParse(input, out var value))
+            _viewModel.SetServings(value);
+    }
+
+    // "Set servings" link shown for recipes whose yield couldn't be detected — sets it once, after
+    // which the ServingsStepper takes over for that recipe.
+    private async void OnSetServingsTapped(object? sender, EventArgs e)
+    {
+        var input = await Services.AppDialog.PromptAsync(this, AppResources.Get("SetServings"), null,
+            AppResources.Get("Ok"), AppResources.Get("Cancel"), keyboard: Keyboard.Numeric);
+        if (int.TryParse(input, out var value))
+            _viewModel.SetInitialServings(value);
+    }
+
+    private void OnNotesUnfocused(object? sender, FocusEventArgs e) => _viewModel.CommitNotes();
 
     private async void OnTranslateTapped(object? sender, EventArgs e)
     {
@@ -178,9 +231,9 @@ public partial class RecipeDetailPage : ContentPage
     // layer; the credit (if any) was already charged by the backend translate call.
     private async Task ApplyRecipeAsync(ParsedRecipe current, ParsedRecipe updated)
     {
-        await _library.UpdateRecipeAsync(current, updated);
-        _recipe = updated;
-        _viewModel.SetRecipe(updated);
+        var saved = await _library.UpdateRecipeAsync(current, updated);
+        _recipe = saved;
+        _viewModel.SetRecipe(saved);
     }
 
     private static string? DetectOriginalLanguage(ParsedRecipe recipe)
@@ -204,11 +257,59 @@ public partial class RecipeDetailPage : ContentPage
     }
 
     private async void OnCookClicked(object? sender, EventArgs e) =>
-        await Navigation.PushAsync(new FocusPage(_viewModel.CookRecipe, _viewModel.SpokenLanguageCode));
+        await Navigation.PushAsync(FocusPage.ForRecipe(_viewModel.Recipe, _library, fallbackFactor: _viewModel.Factor));
 
-    private async void OnDeleteTapped(object? sender, EventArgs e)
+    // The old top bar had separate Translate/Edit/Delete icon buttons; Delete (and the newer
+    // Share / Open original actions) now live behind the single ⋯ "More" button instead of taking
+    // a whole top-bar slot each.
+    private async void OnMoreTapped(object? sender, EventArgs e)
     {
-        var confirmed = await Services.AppDialog.ConfirmAsync(this, AppResources.Get("DeleteRecipeTitle"), AppResources.Format("DeleteRecipeBodyFormat", _recipe.Title), AppResources.Get("Delete"), AppResources.Get("Cancel"));
+        var share = AppResources.Get("ShareRecipe");
+        var openOriginal = AppResources.Get("OpenOriginal");
+        var delete = AppResources.Get("Delete");
+        var cancel = AppResources.Get("Cancel");
+
+        var options = _viewModel.HasSource
+            ? new[] { new DialogChoice(share, Icon: Icons.Share), new DialogChoice(openOriginal, Icon: Icons.OpenInNew), new DialogChoice(delete, Destructive: true, Icon: Icons.Delete) }
+            : new[] { new DialogChoice(share, Icon: Icons.Share), new DialogChoice(delete, Destructive: true, Icon: Icons.Delete) };
+
+        var choice = await Services.AppDialog.ChooseAsync(this, AppResources.Get("More"), cancel, options);
+
+        if (choice == share)
+        {
+            await Share.Default.RequestAsync(new ShareTextRequest(RecipeBackup.ToPlainText(_recipe), _recipe.Title));
+        }
+        else if (choice == openOriginal)
+        {
+            await OpenOriginalAsync();
+        }
+        else if (choice == delete)
+        {
+            await DeleteRecipeAsync();
+        }
+    }
+
+    private async Task OpenOriginalAsync()
+    {
+        var url = _viewModel.SourceUrl;
+        if (string.IsNullOrWhiteSpace(url))
+            return;
+
+        try
+        {
+            await Launcher.OpenAsync(url);
+        }
+        catch
+        {
+            // No browser / malformed link: fall back to copying so the link is never lost.
+            await Clipboard.SetTextAsync(url);
+        }
+    }
+
+    private async Task DeleteRecipeAsync()
+    {
+        var confirmed = await Services.AppDialog.ConfirmAsync(this, AppResources.Get("DeleteRecipeTitle"), AppResources.Format("DeleteRecipeBodyFormat", _recipe.Title), AppResources.Get("Delete"), AppResources.Get("Cancel"),
+            destructive: true, icon: Icons.Delete);
         if (!confirmed)
             return;
 

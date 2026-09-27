@@ -4,6 +4,7 @@
              xmlns:local="clr-namespace:PurePrep"
              xmlns:controls="clr-namespace:PurePrep.Controls"
              xmlns:loc="clr-namespace:PurePrep.Localization"
+             xmlns:icons="clr-namespace:PurePrep.Resources.Styles"
              x:Class="PurePrep.BuyCreditsPage"
              Shell.NavBarIsVisible="False"
              NavigationPage.HasNavigationBar="False"
@@ -15,20 +16,7 @@
     <Grid RowDefinitions="Auto,*">
 
         <!-- Top bar: back + screen title -->
-        <Grid Padding="20,14,20,10" ColumnDefinitions="Auto,*,Auto" ColumnSpacing="10">
-            <Border WidthRequest="48" HeightRequest="48" BackgroundColor="{DynamicResource Surface}"
-                    Stroke="{DynamicResource Line}" StrokeThickness="1" StrokeShape="RoundRectangle 14"
-                    local:TapFeedback.IsEnabled="True" AutomationProperties.IsInAccessibleTree="True"
-                    AutomationProperties.Name="{loc:Translate Back}">
-                <Border.GestureRecognizers>
-                    <TapGestureRecognizer Tapped="OnBackTapped" />
-                </Border.GestureRecognizers>
-                <Label Text="&#8249;" TextColor="{DynamicResource Ink}" FontSize="26"
-                       HorizontalOptions="Center" VerticalOptions="Center" />
-            </Border>
-            <Label Grid.Column="1" Text="{loc:Translate BuyCredits}" TextColor="{DynamicResource Ink}"
-                   FontSize="18" FontAttributes="Bold" VerticalOptions="Center" />
-        </Grid>
+        <controls:TopBar Title="{loc:Translate BuyCredits}" BackTapped="OnBackTapped" />
 
         <ScrollView Grid.Row="1" Padding="20,4,20,28">
             <VerticalStackLayout Spacing="18" MaximumWidthRequest="720" HorizontalOptions="Center">
@@ -42,8 +30,8 @@
                         <Border WidthRequest="48" HeightRequest="48" BackgroundColor="{DynamicResource LimeWash}"
                                 Stroke="{DynamicResource LineSoft}" StrokeThickness="1" StrokeShape="RoundRectangle 15"
                                 VerticalOptions="Center">
-                            <Label Text="&#9733;" TextColor="{DynamicResource LimeBright}" FontSize="22"
-                                   HorizontalOptions="Center" VerticalOptions="Center" />
+                            <Label Style="{StaticResource IconLabel}" Text="{x:Static icons:Icons.Star}"
+                                   TextColor="{DynamicResource LimeBright}" FontSize="22" />
                         </Border>
                         <VerticalStackLayout Grid.Column="1" Spacing="3" VerticalOptions="Center">
                             <Label x:Name="BalanceLabel" TextColor="{DynamicResource Ink}" FontSize="17"

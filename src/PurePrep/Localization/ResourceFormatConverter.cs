@@ -13,7 +13,8 @@ public sealed class ResourceFormatConverter : IValueConverter
         if (parameter is not string key || string.IsNullOrEmpty(key))
             return value?.ToString() ?? string.Empty;
 
-        return AppResources.Format(key, value ?? string.Empty);
+        // A whole-number count picks its plural form ("1 step", Polish "3 kroki").
+        return value is int count ? AppResources.Plural(key, count) : AppResources.Format(key, value ?? string.Empty);
     }
 
     public object ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture) =>

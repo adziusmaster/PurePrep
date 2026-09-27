@@ -19,19 +19,17 @@ public sealed class SqliteRecipeRepository(IDbContextFactory<PurePrepDbContext> 
     {
         await using var db = await contextFactory.CreateDbContextAsync(cancellationToken);
         await EnsureReadyAsync(db, cancellationToken);
-        db.Recipes.Add(new RecipeRecord
+        var record = new RecipeRecord
         {
             Id = recipe.Id,
             Title = recipe.Title,
-            SourceUrl = recipe.SourceUrl,
-            IngredientsJson = JsonSerializer.Serialize(recipe.Ingredients),
-            StepsJson = JsonSerializer.Serialize(recipe.Steps),
-            SourceSystem = recipe.SourceSystem.ToString(),
-            SavedAt = recipe.SavedAt,
-            OriginalLanguage = recipe.OriginalLanguage,
-            DisplayLanguage = recipe.DisplayLanguage,
-            TranslationsJson = SerializeTranslations(recipe.Translations)
-        });
+            IngredientsJson = "",
+            StepsJson = "",
+            SavedAt = recipe.SavedAt
+        };
+        Fill(record, recipe);
+        record.ImagePath = recipe.ImagePath;
+        db.Recipes.Add(record);
         await db.SaveChangesAsync(cancellationToken);
     }
 
@@ -42,14 +40,19 @@ public sealed class SqliteRecipeRepository(IDbContextFactory<PurePrepDbContext> 
         var record = await db.Recipes.FirstOrDefaultAsync(x => x.Id == recipe.Id, cancellationToken);
         if (record is null)
             return;
-        record.Title = recipe.Title;
-        record.SourceUrl = recipe.SourceUrl;
-        record.IngredientsJson = JsonSerializer.Serialize(recipe.Ingredients);
-        record.StepsJson = JsonSerializer.Serialize(recipe.Steps);
-        record.SourceSystem = recipe.SourceSystem.ToString();
-        record.OriginalLanguage = recipe.OriginalLanguage;
-        record.DisplayLanguage = recipe.DisplayLanguage;
-        record.TranslationsJson = SerializeTranslations(recipe.Translations);
+        // ImagePath is deliberately left alone (see IRecipeRepository.UpdateAsync).
+        Fill(record, recipe);
+        await db.SaveChangesAsync(cancellationToken);
+    }
+
+    public async Task UpdateImagePathAsync(Guid id, string? imagePath, CancellationToken cancellationToken = default)
+    {
+        await using var db = await contextFactory.CreateDbContextAsync(cancellationToken);
+        await EnsureReadyAsync(db, cancellationToken);
+        var record = await db.Recipes.FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
+        if (record is null)
+            return;
+        record.ImagePath = imagePath;
         await db.SaveChangesAsync(cancellationToken);
     }
 
@@ -92,6 +95,51 @@ public sealed class SqliteRecipeRepository(IDbContextFactory<PurePrepDbContext> 
         if (!columns.Contains("TranslationsJson"))
             await db.Database.ExecuteSqlRawAsync(
                 "ALTER TABLE Recipes ADD COLUMN TranslationsJson TEXT NOT NULL DEFAULT ''", cancellationToken);
+
+        // 1.4 columns — additive, brace-free SQL (ExecuteSqlRaw formats the string).
+        (string Name, string Ddl)[] added =
+        [
+            ("Servings", "INTEGER NULL"),
+            ("ServingsNoun", "TEXT NULL"),
+            ("ServingsEstimated", "INTEGER NOT NULL DEFAULT 0"),
+            ("PrepMinutes", "INTEGER NULL"),
+            ("CookMinutes", "INTEGER NULL"),
+            ("ImagePath", "TEXT NULL"),
+            ("Notes", "TEXT NULL"),
+            ("Status", "TEXT NOT NULL DEFAULT 'WantToCook'"),
+            ("CookedAt", "TEXT NULL"),
+            ("CookCount", "INTEGER NOT NULL DEFAULT 0"),
+            ("IsFavourite", "INTEGER NOT NULL DEFAULT 0"),
+            ("ChosenServings", "INTEGER NULL"),
+        ];
+        foreach (var (name, ddl) in added)
+        {
+            if (!columns.Contains(name))
+                await db.Database.ExecuteSqlRawAsync($"ALTER TABLE Recipes ADD COLUMN {name} {ddl}", cancellationToken);
+        }
+    }
+
+    private static void Fill(RecipeRecord record, ParsedRecipe recipe)
+    {
+        record.Title = recipe.Title;
+        record.SourceUrl = recipe.SourceUrl;
+        record.IngredientsJson = JsonSerializer.Serialize(recipe.Ingredients);
+        record.StepsJson = JsonSerializer.Serialize(recipe.Steps);
+        record.SourceSystem = recipe.SourceSystem.ToString();
+        record.OriginalLanguage = recipe.OriginalLanguage;
+        record.DisplayLanguage = recipe.DisplayLanguage;
+        record.TranslationsJson = SerializeTranslations(recipe.Translations);
+        record.Servings = recipe.Servings;
+        record.ServingsNoun = recipe.ServingsNoun;
+        record.ServingsEstimated = recipe.ServingsEstimated;
+        record.PrepMinutes = recipe.PrepMinutes;
+        record.CookMinutes = recipe.CookMinutes;
+        record.Notes = recipe.Notes;
+        record.Status = recipe.Status.ToString();
+        record.CookedAt = recipe.CookedAt;
+        record.CookCount = recipe.CookCount;
+        record.IsFavourite = recipe.IsFavourite;
+        record.ChosenServings = recipe.ChosenServings;
     }
 
     private static string SerializeTranslations(IReadOnlyDictionary<string, RecipeTranslation> translations) =>
@@ -118,6 +166,18 @@ public sealed class SqliteRecipeRepository(IDbContextFactory<PurePrepDbContext> 
         SavedAt = record.SavedAt,
         OriginalLanguage = record.OriginalLanguage,
         DisplayLanguage = record.DisplayLanguage,
-        Translations = DeserializeTranslations(record.TranslationsJson)
+        Translations = DeserializeTranslations(record.TranslationsJson),
+        Servings = record.Servings,
+        ServingsNoun = record.ServingsNoun,
+        ServingsEstimated = record.ServingsEstimated,
+        PrepMinutes = record.PrepMinutes,
+        CookMinutes = record.CookMinutes,
+        ImagePath = record.ImagePath,
+        Notes = record.Notes,
+        Status = Enum.TryParse<RecipeStatus>(record.Status, out var status) ? status : RecipeStatus.WantToCook,
+        CookedAt = record.CookedAt,
+        CookCount = record.CookCount,
+        IsFavourite = record.IsFavourite,
+        ChosenServings = record.ChosenServings,
     };
 }

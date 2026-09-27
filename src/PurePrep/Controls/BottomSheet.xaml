@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:loc="clr-namespace:PurePrep.Localization"
+             x:Class="PurePrep.Controls.BottomSheet"
+             IsVisible="False"
+             InputTransparent="False">
+
+    <!-- The one modal surface in the app: every AppDialog and every in-page sheet renders inside
+         this chrome so they all look and behave the same. The backdrop is a translucent Grid (not a
+         BoxView) so no implicit style can ever make it opaque; the page stays visible behind it.
+         Explicit ContentView.Content: the class's [ContentProperty] is SheetContent (for callers). -->
+    <ContentView.Content>
+    <Grid>
+        <Grid x:Name="Backdrop" BackgroundColor="{DynamicResource Scrim}" Opacity="0"
+              AutomationProperties.IsInAccessibleTree="True"
+              AutomationProperties.Name="{loc:Translate Close}">
+            <Grid.GestureRecognizers>
+                <TapGestureRecognizer Tapped="OnBackdropTapped" />
+            </Grid.GestureRecognizers>
+        </Grid>
+
+        <Border x:Name="Sheet" VerticalOptions="End" HorizontalOptions="Fill" MaximumWidthRequest="760"
+                BackgroundColor="{DynamicResource Surface}" StrokeThickness="0"
+                StrokeShape="RoundRectangle 28,28,0,0" Padding="24,10,24,24">
+            <Border.Shadow>
+                <Shadow Brush="Black" Opacity="0.22" Radius="28" Offset="0,-6" />
+            </Border.Shadow>
+            <!-- Swallows taps on the sheet's own empty space so they never reach the backdrop. -->
+            <Border.GestureRecognizers>
+                <TapGestureRecognizer />
+            </Border.GestureRecognizers>
+            <VerticalStackLayout Spacing="0">
+                <!-- Grab handle. -->
+                <Border WidthRequest="36" HeightRequest="4" StrokeThickness="0" StrokeShape="RoundRectangle 2"
+                        BackgroundColor="{DynamicResource LineSoft}" HorizontalOptions="Center" Margin="0,0,0,18" />
+                <ContentView x:Name="Presenter" />
+            </VerticalStackLayout>
+        </Border>
+    </Grid>
+    </ContentView.Content>
+</ContentView>

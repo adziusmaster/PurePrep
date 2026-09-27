@@ -10,26 +10,16 @@
              BackgroundColor="{DynamicResource Bg}">
 
     <Grid>
-        <ScrollView x:Name="ContentRoot">
+        <Grid RowDefinitions="Auto,*">
+
+        <!-- Top bar -->
+        <controls:TopBar Title="{loc:Translate Settings}" BackTapped="OnBackTapped" />
+
+        <ScrollView Grid.Row="1" x:Name="ContentRoot">
             <Grid MaximumWidthRequest="760" HorizontalOptions="Center"
-                  Padding="20,12,20,24" RowDefinitions="Auto,Auto" RowSpacing="22">
+                  Padding="20,4,20,24" RowDefinitions="Auto" RowSpacing="22">
 
-            <!-- Header -->
-            <Grid ColumnDefinitions="Auto,*" ColumnSpacing="12" VerticalOptions="Center">
-                <Border WidthRequest="48" HeightRequest="48" BackgroundColor="{DynamicResource Surface}"
-                        Stroke="{DynamicResource Line}" StrokeThickness="1" StrokeShape="RoundRectangle 14"
-                        local:TapFeedback.IsEnabled="True" AutomationProperties.IsInAccessibleTree="True" AutomationProperties.Name="{loc:Translate Back}">
-                    <Border.GestureRecognizers>
-                        <TapGestureRecognizer Tapped="OnBackTapped" />
-                    </Border.GestureRecognizers>
-                    <Label Text="&#8249;" TextColor="{DynamicResource Ink}" FontSize="26"
-                           HorizontalOptions="Center" VerticalOptions="Center" />
-                </Border>
-                <Label Grid.Column="1" Text="{loc:Translate Settings}" TextColor="{DynamicResource Ink}"
-                       FontSize="24" FontAttributes="Bold" VerticalOptions="Center" />
-            </Grid>
-
-            <VerticalStackLayout Grid.Row="1" Spacing="26">
+            <VerticalStackLayout Spacing="26">
 
                 <!-- Appearance -->
                 <VerticalStackLayout Spacing="12">
@@ -64,8 +54,6 @@
                             </Border>
                         </Grid>
                     </Border>
-                    <Label Text="{loc:Translate AppearanceDesc}"
-                           TextColor="{DynamicResource Faint}" FontSize="12.5" />
                 </VerticalStackLayout>
 
                 <!-- Units -->
@@ -199,7 +187,6 @@
                                        TextColor="{DynamicResource Muted}" FontSize="13" />
                             </VerticalStackLayout>
                             <Switch x:Name="KeepAwakeSwitch" Grid.Column="1" VerticalOptions="Center"
-                                    OnColor="{DynamicResource Lime}" ThumbColor="{DynamicResource BgElevated}"
                                     Toggled="OnKeepAwakeToggled" />
                         </Grid>
                     </Border>
@@ -259,5 +246,10 @@
             </VerticalStackLayout>
         </Grid>
         </ScrollView>
+        </Grid>
+
+        <!-- App-wide running-timers bar: docked at the bottom, over the scrolling content. -->
+        <controls:TimersBar x:Name="TimersBarControl" VerticalOptions="End"
+                             MaximumWidthRequest="760" HorizontalOptions="Center" Margin="20,0" />
     </Grid>
 </ContentPage>

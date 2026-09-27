@@ -9,13 +9,42 @@ namespace PurePrep.Core.Tests.TestSupport;
 public sealed class StubHttpMessageHandler : HttpMessageHandler
 {
     private readonly Queue<Func<HttpRequestMessage, HttpResponseMessage>> _script = new();
+    private readonly Func<HttpRequestMessage, HttpResponseMessage>? _repeatingResponse;
 
     public List<Uri> RequestedUris { get; } = new();
 
     /// <summary>Snapshot of the identity headers each request went out with, for asserting the honest→browser escalation.</summary>
     public List<SentRequest> SentRequests { get; } = new();
 
+    /// <summary>Total number of requests this handler has answered, for asserting retry behaviour.</summary>
+    public int CallCount { get; private set; }
+
     public sealed record SentRequest(Uri Uri, string? UserAgent, string? From, string? Purpose, string? Info);
+
+    public StubHttpMessageHandler()
+    {
+    }
+
+    private StubHttpMessageHandler(Func<HttpRequestMessage, HttpResponseMessage> repeatingResponse)
+    {
+        _repeatingResponse = repeatingResponse;
+    }
+
+    /// <summary>A handler that answers every request — no matter how many — with the same JSON body.</summary>
+    public static StubHttpMessageHandler Json(HttpStatusCode status, string body) =>
+        new(_ => new HttpResponseMessage(status)
+        {
+            Content = new StringContent(body, System.Text.Encoding.UTF8, "application/json"),
+        });
+
+    /// <summary>A handler that answers every request — no matter how many — with the same raw bytes.</summary>
+    public static StubHttpMessageHandler Bytes(HttpStatusCode status, byte[] body, string contentType) =>
+        new(_ =>
+        {
+            var response = new HttpResponseMessage(status) { Content = new ByteArrayContent(body) };
+            response.Content.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue(contentType);
+            return response;
+        });
 
     public StubHttpMessageHandler Respond(HttpStatusCode status, string body = "")
     {
@@ -36,6 +65,7 @@ public sealed class StubHttpMessageHandler : HttpMessageHandler
 
     protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
     {
+        CallCount++;
         RequestedUris.Add(request.RequestUri!);
         var ua = request.Headers.UserAgent.ToString();
         SentRequests.Add(new SentRequest(
@@ -44,6 +74,9 @@ public sealed class StubHttpMessageHandler : HttpMessageHandler
             request.Headers.From,
             request.Headers.TryGetValues("X-PurePrep-Purpose", out var purpose) ? string.Join(",", purpose) : null,
             request.Headers.TryGetValues("X-PurePrep-Info", out var info) ? string.Join(",", info) : null));
+
+        if (_repeatingResponse is not null)
+            return Task.FromResult(_repeatingResponse(request));
 
         if (_script.Count == 0)
             throw new InvalidOperationException($"No scripted response for {request.RequestUri}.");

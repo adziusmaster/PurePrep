@@ -13,7 +13,7 @@ namespace PurePrep.Infrastructure;
 /// </summary>
 public sealed class AiProxyRecipeParser(HttpClient http, IDeviceIdentity identity, IRecipeLanguageProvider? languageProvider = null) : IRecipeParser
 {
-    public async Task<ParsedRecipe> ParseAsync(Uri source, CancellationToken cancellationToken = default)
+    public async Task<ParsedImport> ParseAsync(Uri source, CancellationToken cancellationToken = default)
     {
         var deviceId = await identity.GetDeviceIdAsync(cancellationToken);
         var language = languageProvider?.GetRecipeLanguage();
@@ -24,7 +24,7 @@ public sealed class AiProxyRecipeParser(HttpClient http, IDeviceIdentity identit
             cancellationToken);
     }
 
-    public async Task<ParsedRecipe> ParseImageAsync(byte[] image, string mimeType, CancellationToken cancellationToken = default)
+    public async Task<ParsedImport> ParseImageAsync(byte[] image, string mimeType, CancellationToken cancellationToken = default)
     {
         var deviceId = await identity.GetDeviceIdAsync(cancellationToken);
         var language = languageProvider?.GetRecipeLanguage();
@@ -35,7 +35,7 @@ public sealed class AiProxyRecipeParser(HttpClient http, IDeviceIdentity identit
             cancellationToken);
     }
 
-    public async Task<ParsedRecipe> ParseTextAsync(string text, CancellationToken cancellationToken = default)
+    public async Task<ParsedImport> ParseTextAsync(string text, CancellationToken cancellationToken = default)
     {
         var deviceId = await identity.GetDeviceIdAsync(cancellationToken);
         var language = languageProvider?.GetRecipeLanguage();
@@ -48,7 +48,7 @@ public sealed class AiProxyRecipeParser(HttpClient http, IDeviceIdentity identit
 
     // Posts an import request and maps the response into a domain recipe. Shared by every import
     // source (URL, image, text) so credit/error handling stays identical across all of them.
-    private async Task<ParsedRecipe> PostAndMapAsync(string endpoint, object body, CancellationToken cancellationToken)
+    private async Task<ParsedImport> PostAndMapAsync(string endpoint, object body, CancellationToken cancellationToken)
     {
         using var response = await http.PostAsJsonAsync(endpoint, body, cancellationToken);
 
@@ -74,16 +74,33 @@ public sealed class AiProxyRecipeParser(HttpClient http, IDeviceIdentity identit
             ? parsed
             : MeasurementSystem.Metric;
 
-        return new ParsedRecipe
+        var plain = recipe.Steps ?? Array.Empty<string>();
+        var details = recipe.StepDetails is { } d && d.Count == plain.Count ? d : null;
+        var ingredientCount = (recipe.Ingredients ?? Array.Empty<string>()).Count;
+        var steps = plain.Select((instruction, index) => new RecipeStep
+        {
+            Order = index + 1,
+            Instruction = instruction,
+            IngredientRefs = details?[index].IngredientRefs?.Where(i => i >= 0 && i < ingredientCount).ToArray() ?? Array.Empty<int>(),
+            Timers = details?[index].Timers?.Select(t => new RecipeTimer(t.Label, t.MinSeconds, t.MaxSeconds)).ToArray() ?? Array.Empty<RecipeTimer>(),
+        }).ToArray();
+
+        var parsedRecipe = new ParsedRecipe
         {
             Title = recipe.Title,
             SourceUrl = recipe.SourceUrl,
             Ingredients = recipe.Ingredients ?? Array.Empty<string>(),
-            Steps = (recipe.Steps ?? Array.Empty<string>())
-                .Select((instruction, index) => new RecipeStep { Order = index + 1, Instruction = instruction })
-                .ToArray(),
+            Steps = steps,
             SourceSystem = system,
+            Servings = recipe.Servings,
+            ServingsNoun = recipe.ServingsNoun,
+            ServingsEstimated = recipe.ServingsEstimated,
+            PrepMinutes = recipe.PrepMinutes,
+            CookMinutes = recipe.CookMinutes,
         };
+
+        var imageUrl = Uri.TryCreate(recipe.ImageUrl, UriKind.Absolute, out var img) ? img : null;
+        return new ParsedImport(parsedRecipe, imageUrl, recipe.ImageTicket);
     }
 
     private sealed record ParsePayload(RecipePayload? Recipe, int RemainingCredits);
@@ -93,7 +110,19 @@ public sealed class AiProxyRecipeParser(HttpClient http, IDeviceIdentity identit
         string? SourceUrl,
         string SourceSystem,
         IReadOnlyList<string>? Ingredients,
-        IReadOnlyList<string>? Steps);
+        IReadOnlyList<string>? Steps,
+        int? Servings = null,
+        string? ServingsNoun = null,
+        bool ServingsEstimated = false,
+        int? PrepMinutes = null,
+        int? CookMinutes = null,
+        string? ImageUrl = null,
+        string? ImageTicket = null,
+        IReadOnlyList<StepPayload>? StepDetails = null);
+
+    private sealed record StepPayload(string Text, IReadOnlyList<int>? IngredientRefs, IReadOnlyList<TimerPayload>? Timers);
+
+    private sealed record TimerPayload(string Label, int MinSeconds, int MaxSeconds);
 
     private sealed record ImportErrorPayload(string? Code, string? Error);
 

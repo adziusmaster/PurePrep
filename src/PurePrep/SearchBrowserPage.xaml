@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:local="clr-namespace:PurePrep"
+             xmlns:loc="clr-namespace:PurePrep.Localization"
+             xmlns:controls="clr-namespace:PurePrep.Controls"
+             xmlns:icons="clr-namespace:PurePrep.Resources.Styles"
+             x:Class="PurePrep.SearchBrowserPage"
+             Shell.NavBarIsVisible="False"
+             NavigationPage.HasNavigationBar="False"
+             BackgroundColor="{DynamicResource Bg}">
+
+    <!-- Outer grid lets the Add pill and the Import sheet float above the web page. -->
+    <Grid>
+        <Grid RowDefinitions="Auto,*">
+            <controls:TopBar x:Name="Bar">
+                <controls:TopBar.Actions>
+                    <Border Style="{StaticResource IconButton}" AutomationProperties.Name="{loc:Translate More}">
+                        <Border.GestureRecognizers>
+                            <TapGestureRecognizer Tapped="OnMoreTapped" />
+                        </Border.GestureRecognizers>
+                        <Label Style="{StaticResource IconLabel}" Text="{x:Static icons:Icons.More}" />
+                    </Border>
+                </controls:TopBar.Actions>
+            </controls:TopBar>
+
+            <WebView Grid.Row="1" x:Name="Browser"
+                     Navigating="OnNavigating" Navigated="OnNavigated" />
+        </Grid>
+
+        <!-- "+ Add to PurePrep": shown only while the current page is a recipe (JSON-LD or microdata). -->
+        <Border x:Name="AddPill" IsVisible="False"
+                HorizontalOptions="Center" VerticalOptions="End" Margin="0,0,0,24"
+                BackgroundColor="{DynamicResource Lime}" StrokeThickness="0"
+                StrokeShape="RoundRectangle 26" Padding="20,0,24,0" HeightRequest="52"
+                local:TapFeedback.IsEnabled="True"
+                AutomationProperties.IsInAccessibleTree="True" AutomationProperties.Name="{loc:Translate AddToPurePrep}">
+            <Border.Shadow>
+                <Shadow Brush="Black" Opacity="0.3" Radius="16" Offset="0,4" />
+            </Border.Shadow>
+            <Border.GestureRecognizers>
+                <TapGestureRecognizer Tapped="OnAddTapped" />
+            </Border.GestureRecognizers>
+            <Grid>
+                <HorizontalStackLayout x:Name="AddPillContent" Spacing="8" VerticalOptions="Center">
+                    <Label Style="{StaticResource IconLabel}" Text="{x:Static icons:Icons.Add}" FontSize="20"
+                           TextColor="{DynamicResource LimeInk}" />
+                    <Label Text="{loc:Translate AddToPurePrep}" TextColor="{DynamicResource LimeInk}"
+                           FontAttributes="Bold" FontSize="15" VerticalOptions="Center" />
+                </HorizontalStackLayout>
+                <ActivityIndicator x:Name="AddPillBusy" IsVisible="False" IsRunning="False"
+                                   Color="{DynamicResource LimeInk}" WidthRequest="22" HeightRequest="22"
+                                   HorizontalOptions="Center" VerticalOptions="Center" />
+            </Grid>
+        </Border>
+
+        <!-- "Try adding this page": quieter outlined fallback for pages with no detected recipe (never on
+             Google's own pages). Opens the same Import sheet, without a photo. -->
+        <Border x:Name="TryPill" IsVisible="False"
+                HorizontalOptions="Center" VerticalOptions="End" Margin="0,0,0,24"
+                BackgroundColor="{DynamicResource Surface}" Stroke="{DynamicResource Lime}" StrokeThickness="1.5"
+                StrokeShape="RoundRectangle 24" Padding="22,0" HeightRequest="48"
+                local:TapFeedback.IsEnabled="True"
+                AutomationProperties.IsInAccessibleTree="True" AutomationProperties.Name="{loc:Translate TryAddingThisPage}">
+            <Border.Shadow>
+                <Shadow Brush="Black" Opacity="0.25" Radius="12" Offset="0,3" />
+            </Border.Shadow>
+            <Border.GestureRecognizers>
+                <TapGestureRecognizer Tapped="OnTryAddTapped" />
+            </Border.GestureRecognizers>
+            <Label Text="{loc:Translate TryAddingThisPage}" TextColor="{DynamicResource LimeBright}"
+                   FontAttributes="Bold" FontSize="14" VerticalOptions="Center" />
+        </Border>
+
+        <controls:ImportSheet x:Name="ImportSheet"
+                               ImportTapped="OnImportSheetImport"
+                               BuyCreditsTapped="OnImportSheetBuyCredits"
+                               OpenExistingTapped="OnImportSheetOpenExisting"
+                               CancelTapped="OnImportSheetCancel" />
+    </Grid>
+</ContentPage>

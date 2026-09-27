@@ -1,8 +1,7 @@
 # PurePrep — Product Overview
 
-> **Status:** Closed testing (Google Play). Targeting public production release in **~2 weeks**
-> (early-to-mid September 2026).
-> **Current build:** 1.2.6 (version code 15) · Android · `com.adziusmaster.pureprep`
+> **Status:** Closed testing (Google Play), release-prep for open/production.
+> **Current build:** 1.4.0 (version code 25) · Android · `com.adziusmaster.pureprep`
 
 ---
 
@@ -27,16 +26,20 @@ list, and who want their saved recipes to work reliably, offline, and in their o
 
 | Feature | Description |
 |---|---|
-| **URL import** | Paste any recipe link; the app extracts a clean Title / Ingredients / Steps. |
+| **URL import** | Paste, share, or copy a recipe link; PurePrep extracts a clean Title / Ingredients / Steps, servings, prep/cook times, named timers and a photo (AI Smart Parser v2). |
+| **In-app recipe search** | Search the web for recipes without leaving the app; recognised recipe pages get a floating "Add to PurePrep" button. |
 | **On-device library** | Recipes are stored locally in SQLite — yours, offline, no account required. |
-| **Focus Mode** | Full-screen, step-by-step cooking view that keeps the screen awake and the clutter away. |
-| **Cook timers** | Durations inside steps (e.g. "simmer for 20 min", "leave 30 mins to cool") become tappable timers. |
-| **Translation** | Imported recipes are translated into your language on-device (Google ML Kit), no per-use cost. |
+| **Focus Mode** | Full-screen, step-by-step cooking view that always fits the step to the screen, shows "You'll need" per step, keeps the screen awake, and offers Read-aloud/Stop with running timers. |
+| **Cook timers** | Durations inside steps become named, tappable timers (including ranges, e.g. "15–20 min"), with a running-timers bar visible across the app. |
+| **Scale by people** | Adjust servings with a stepper; ingredient amounts (and step amounts) scale live. |
+| **Recipe editor** | One row per ingredient and step, drag to reorder, attach/replace a photo. |
+| **Notes, favourites & status** | Add notes, mark favourites, track Want to cook / Cooked, and sort the library. |
+| **Translation** | Imported recipes are translated into your language via the server (Google Gemini); each language is cached so it's paid for once. |
 | **Unit switching** | Toggle ingredients between metric and US/imperial. |
 | **Manual add & edit** | Add or correct recipes by hand. |
-| **Backup & import** | Export/import your recipe library as a file. |
-| **Share-to-import** | Share a URL from the browser straight into PurePrep. |
-| **Freemium** | A free tier with a recipe quota; Premium unlocks the full experience (Google Play Billing). |
+| **Backup & restore** | Export/import your recipe library as a file, including each recipe's saved photo. |
+| **Share-to-import** | Share a URL from another app, or just copy a link — PurePrep offers to import it. |
+| **Smart Credits** | A free-credit starter balance plus paid top-ups (Google Play Billing) cover AI recipe/photo imports; saving, editing, scaling and cooking are always free. |
 
 ## Supported languages
 
@@ -92,7 +95,8 @@ The public marketing / waitlist landing page is served from the server's `wwwroo
 
 ## Privacy & data
 
-- Recipes live **on the device**; no account is required to use the app.
+- Recipes, and any **photo** attached to them, live **on the device**; no account is required to use the app.
+- In-app recipe search loads **Google and third-party recipe sites inside the app**; those pages carry their own cookies/consent, same as in a regular browser.
 - The waitlist stores only an email address and an explicit **GDPR consent** timestamp, used
   solely to send a single launch-notification email.
 - See the in-app / hosted privacy notice (`/privacy`) for details.

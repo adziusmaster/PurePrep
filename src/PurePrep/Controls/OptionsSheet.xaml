@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:local="clr-namespace:PurePrep"
+             xmlns:controls="clr-namespace:PurePrep.Controls"
+             xmlns:loc="clr-namespace:PurePrep.Localization"
+             xmlns:icons="clr-namespace:PurePrep.Resources.Styles"
+             x:Class="PurePrep.Controls.OptionsSheet"
+             x:Name="Root"
+             IsVisible="False"
+             InputTransparent="False">
+
+    <!-- Focus Mode's "⋯" sheet: cooking-time toggles that used to be squeezed into the top bar, where
+         the two switches barely had room to render. A proper full-width row each, hosted in the
+         shared BottomSheet. No explicit BindingContext here — it inherits FocusPage's
+         (FocusModeViewModel), same as the old top-bar switches did. -->
+    <controls:BottomSheet x:Name="Sheet" Cancelled="OnSheetCancelled">
+        <VerticalStackLayout Spacing="0">
+
+            <Grid ColumnDefinitions="*,Auto" Margin="0,0,0,10">
+                <Label Text="{loc:Translate CookingOptions}" Style="{StaticResource SheetTitle}"
+                       VerticalOptions="Center" />
+                <Border Grid.Column="1" WidthRequest="40" HeightRequest="40"
+                        BackgroundColor="{DynamicResource Bg}" StrokeThickness="0" StrokeShape="RoundRectangle 20"
+                        local:TapFeedback.IsEnabled="True" AutomationProperties.IsInAccessibleTree="True"
+                        AutomationProperties.Name="{loc:Translate Close}">
+                    <Border.GestureRecognizers>
+                        <TapGestureRecognizer Tapped="OnSheetCancelled" />
+                    </Border.GestureRecognizers>
+                    <Label Style="{StaticResource IconLabel}" Text="{x:Static icons:Icons.Close}"
+                           TextColor="{DynamicResource Muted}" FontSize="18" />
+                </Border>
+            </Grid>
+
+            <!-- Read each step aloud — hidden entirely where no voice can speak this recipe's
+                 language (CanReadAloud), same gating the old top-bar switch used. -->
+            <Grid ColumnDefinitions="*,Auto" IsVisible="{Binding CanReadAloud}"
+                  MinimumHeightRequest="56">
+                <Label Text="{loc:Translate ReadEachStepAloud}" TextColor="{DynamicResource Ink}"
+                       FontSize="16" VerticalOptions="Center" />
+                <Switch Grid.Column="1" IsToggled="{Binding ReadStepsAloud, Mode=TwoWay}"
+                        VerticalOptions="Center"
+                        AutomationProperties.IsInAccessibleTree="True"
+                        AutomationProperties.Name="{loc:Translate ReadEachStepAloud}" />
+            </Grid>
+
+            <!-- Keep screen on. -->
+            <Grid ColumnDefinitions="*,Auto" MinimumHeightRequest="56">
+                <Label Text="{loc:Translate ScreenOn}" TextColor="{DynamicResource Ink}"
+                       FontSize="16" VerticalOptions="Center" />
+                <Switch Grid.Column="1" IsToggled="{Binding KeepScreenAwake, Mode=TwoWay}"
+                        VerticalOptions="Center"
+                        AutomationProperties.IsInAccessibleTree="True"
+                        AutomationProperties.Name="{loc:Translate ScreenOn}" />
+            </Grid>
+        </VerticalStackLayout>
+    </controls:BottomSheet>
+</ContentView>

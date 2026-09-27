@@ -3,74 +3,197 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:local="clr-namespace:PurePrep"
              xmlns:loc="clr-namespace:PurePrep.Localization"
+             xmlns:controls="clr-namespace:PurePrep.Controls"
+             xmlns:icons="clr-namespace:PurePrep.Resources.Styles"
              x:Class="PurePrep.ManualAddPage"
+             x:Name="EditorRoot"
              Shell.NavBarIsVisible="False"
              NavigationPage.HasNavigationBar="False"
              BackgroundColor="{DynamicResource Bg}">
 
     <Grid MaximumWidthRequest="760" HorizontalOptions="Center"
-          RowDefinitions="Auto,*,Auto" Padding="20,12,20,16" RowSpacing="18">
+          RowDefinitions="Auto,*,Auto">
 
         <!-- Header -->
-        <Grid ColumnDefinitions="Auto,*" ColumnSpacing="10" VerticalOptions="Center">
-            <Border WidthRequest="48" HeightRequest="48" BackgroundColor="{DynamicResource Surface}"
-                    Stroke="{DynamicResource Line}" StrokeThickness="1" StrokeShape="RoundRectangle 14"
-                    local:TapFeedback.IsEnabled="True" AutomationProperties.IsInAccessibleTree="True" AutomationProperties.Name="{loc:Translate Cancel}">
-                <Border.GestureRecognizers>
-                    <TapGestureRecognizer Tapped="OnCancelTapped" />
-                </Border.GestureRecognizers>
-                <Label Text="&#8249;" TextColor="{DynamicResource Ink}" FontSize="26"
-                       HorizontalOptions="Center" VerticalOptions="Center" />
-            </Border>
-            <VerticalStackLayout Grid.Column="1" Spacing="1">
-                <Label x:Name="HeaderTitle" Text="{loc:Translate AddRecipeTitle}" TextColor="{DynamicResource Ink}" FontSize="20" FontAttributes="Bold" />
-                <Label x:Name="HeaderSubtitle" Text="{loc:Translate AddRecipeSubtitle}" TextColor="{DynamicResource Muted}" FontSize="13" />
-            </VerticalStackLayout>
-        </Grid>
+        <controls:TopBar x:Name="HeaderTopBar" Title="{loc:Translate AddRecipeTitle}"
+                          Subtitle="{loc:Translate AddRecipeSubtitle}" BackTapped="OnCancelTapped" />
 
-        <!-- Form -->
-        <ScrollView Grid.Row="1">
-            <VerticalStackLayout Spacing="16">
+        <!-- Form: one scrolling column; every field grows with its content (no fixed-height boxes). -->
+        <ScrollView Grid.Row="1" Padding="20,10,20,0">
+            <VerticalStackLayout Spacing="18" Padding="0,0,0,16">
+
+                <!-- Photo (16:9): the current / pending photo with a "Change photo" pill, or an "Add photo" placeholder.
+                     Tapping opens take / choose / remove; a change is only written on Save. -->
+                <Border x:Name="PhotoArea" HeightRequest="190" SizeChanged="OnPhotoAreaSizeChanged"
+                        BackgroundColor="{DynamicResource LimeWash}" Stroke="{DynamicResource Line}"
+                        StrokeThickness="1" StrokeShape="RoundRectangle 20"
+                        local:TapFeedback.IsEnabled="True" AutomationProperties.IsInAccessibleTree="True"
+                        SemanticProperties.Description="{Binding PhotoActionText}">
+                    <Border.GestureRecognizers>
+                        <TapGestureRecognizer Tapped="OnPhotoTapped" />
+                    </Border.GestureRecognizers>
+                    <Grid>
+                        <VerticalStackLayout Spacing="6" HorizontalOptions="Center" VerticalOptions="Center"
+                                             IsVisible="{Binding HasPhoto, Converter={StaticResource InvertedBoolConverter}}">
+                            <Label Style="{StaticResource IconLabel}" Text="{x:Static icons:Icons.Photo}"
+                                   TextColor="{DynamicResource Lime}" FontSize="34" HorizontalOptions="Center" />
+                            <Label Text="{loc:Translate AddPhoto}" TextColor="{DynamicResource Lime}"
+                                   FontAttributes="Bold" FontSize="14.5" HorizontalOptions="Center" />
+                        </VerticalStackLayout>
+                        <Image Source="{Binding Photo}" Aspect="AspectFill" IsVisible="{Binding HasPhoto}" />
+                        <!-- Fixed dark pill (not a theme token): it always sits on top of a photo. -->
+                        <Border IsVisible="{Binding HasPhoto}" HorizontalOptions="End" VerticalOptions="End"
+                                Margin="10" Padding="12,6" BackgroundColor="#99000000" StrokeThickness="0"
+                                StrokeShape="RoundRectangle 14" InputTransparent="True">
+                            <HorizontalStackLayout Spacing="6">
+                                <Label Style="{StaticResource IconLabel}" Text="{x:Static icons:Icons.Photo}"
+                                       TextColor="White" FontSize="16" VerticalOptions="Center" />
+                                <Label Text="{loc:Translate ChangePhoto}" TextColor="White" FontAttributes="Bold"
+                                       FontSize="13" VerticalOptions="Center" />
+                            </HorizontalStackLayout>
+                        </Border>
+                    </Grid>
+                </Border>
+
+                <!-- Title -->
                 <VerticalStackLayout Spacing="7">
                     <Label Text="{loc:Translate FieldTitle}" TextColor="{DynamicResource Muted}" FontSize="11.5"
                            CharacterSpacing="1.6" FontAttributes="Bold" />
                     <Border BackgroundColor="{DynamicResource Surface}" Stroke="{DynamicResource Line}"
                             StrokeThickness="1" Padding="14,2" StrokeShape="RoundRectangle 15">
-                        <Entry x:Name="TitleEntry" Placeholder="{loc:Translate TitlePlaceholder}"
+                        <Entry x:Name="TitleEntry" Text="{Binding Title}" Placeholder="{loc:Translate TitlePlaceholder}"
                                TextColor="{DynamicResource Ink}" PlaceholderColor="{DynamicResource Faint}" />
                     </Border>
                 </VerticalStackLayout>
 
+                <!-- Serves / Prep / Cook -->
+                <Grid ColumnDefinitions="*,*,*" ColumnSpacing="10">
+                    <VerticalStackLayout Spacing="7">
+                        <Label Text="{loc:Translate Servings}" TextColor="{DynamicResource Muted}" FontSize="11.5"
+                               CharacterSpacing="1.6" FontAttributes="Bold" LineBreakMode="TailTruncation" TextTransform="Uppercase" />
+                        <Border BackgroundColor="{DynamicResource Surface}" Stroke="{DynamicResource Line}"
+                                StrokeThickness="1" Padding="14,2" StrokeShape="RoundRectangle 15">
+                            <Entry x:Name="ServesEntry" Keyboard="Numeric" Placeholder="4" MaxLength="3"
+                                   TextColor="{DynamicResource Ink}" PlaceholderColor="{DynamicResource Faint}" />
+                        </Border>
+                    </VerticalStackLayout>
+                    <VerticalStackLayout Grid.Column="1" Spacing="7">
+                        <Label Text="{loc:Translate PrepMinutes}" TextColor="{DynamicResource Muted}" FontSize="11.5"
+                               CharacterSpacing="1.6" FontAttributes="Bold" LineBreakMode="TailTruncation" TextTransform="Uppercase" />
+                        <Border BackgroundColor="{DynamicResource Surface}" Stroke="{DynamicResource Line}"
+                                StrokeThickness="1" Padding="14,2" StrokeShape="RoundRectangle 15">
+                            <Entry x:Name="PrepEntry" Keyboard="Numeric" Placeholder="15" MaxLength="4"
+                                   TextColor="{DynamicResource Ink}" PlaceholderColor="{DynamicResource Faint}" />
+                        </Border>
+                    </VerticalStackLayout>
+                    <VerticalStackLayout Grid.Column="2" Spacing="7">
+                        <Label Text="{loc:Translate CookMinutes}" TextColor="{DynamicResource Muted}" FontSize="11.5"
+                               CharacterSpacing="1.6" FontAttributes="Bold" LineBreakMode="TailTruncation" TextTransform="Uppercase" />
+                        <Border BackgroundColor="{DynamicResource Surface}" Stroke="{DynamicResource Line}"
+                                StrokeThickness="1" Padding="14,2" StrokeShape="RoundRectangle 15">
+                            <Entry x:Name="CookEntry" Keyboard="Numeric" Placeholder="30" MaxLength="4"
+                                   TextColor="{DynamicResource Ink}" PlaceholderColor="{DynamicResource Faint}" />
+                        </Border>
+                    </VerticalStackLayout>
+                </Grid>
+
+                <!-- Ingredients: one row each; long-press a row to drag it. -->
                 <VerticalStackLayout Spacing="7">
                     <Label Text="{loc:Translate SectionIngredients}" TextColor="{DynamicResource Muted}" FontSize="11.5"
                            CharacterSpacing="1.6" FontAttributes="Bold" />
-                    <Label Text="{loc:Translate OnePerLine}" TextColor="{DynamicResource Faint}" FontSize="12.5" />
-                    <Border BackgroundColor="{DynamicResource Surface}" Stroke="{DynamicResource Line}"
-                            StrokeThickness="1" Padding="12,6" StrokeShape="RoundRectangle 15">
-                        <Editor x:Name="IngredientsEditor" AutoSize="TextChanges" HeightRequest="150"
-                                Placeholder="{loc:Translate IngredientsPlaceholder}"
-                                TextColor="{DynamicResource Ink}" PlaceholderColor="{DynamicResource Faint}" />
-                    </Border>
+                    <CollectionView x:Name="IngredientsList" ItemsSource="{Binding Ingredients}"
+                                    CanReorderItems="True" ReorderCompleted="OnReorderCompleted"
+                                    ItemsLayout="VerticalList" SelectionMode="None">
+                        <CollectionView.ItemTemplate>
+                            <DataTemplate>
+                                <Grid Padding="0,3">
+                                    <Border BackgroundColor="{DynamicResource Surface}" Stroke="{DynamicResource Line}"
+                                            StrokeThickness="1" Padding="6,0,4,0" StrokeShape="RoundRectangle 13">
+                                        <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="4">
+                                            <Label Style="{StaticResource IconLabel}" Text="{x:Static icons:Icons.Drag}"
+                                                   TextColor="{DynamicResource Faint}" FontSize="20" />
+                                            <Entry Grid.Column="1" Text="{Binding Text}" ReturnType="Next"
+                                                   Placeholder="{loc:Translate IngredientPlaceholder}"
+                                                   TextColor="{DynamicResource Ink}" PlaceholderColor="{DynamicResource Faint}"
+                                                   Completed="OnIngredientCompleted" TextChanged="OnIngredientTextChanged"
+                                                   Loaded="OnIngredientEntryLoaded"
+                                                   BindingContextChanged="OnIngredientEntryBindingContextChanged" />
+                                            <Grid Grid.Column="2" WidthRequest="40" HeightRequest="44">
+                                                <Label Style="{StaticResource IconLabel}" Text="{x:Static icons:Icons.Close}"
+                                                       TextColor="{DynamicResource Muted}" FontSize="18" />
+                                                <Grid.GestureRecognizers>
+                                                    <TapGestureRecognizer
+                                                        Command="{Binding Source={x:Reference EditorRoot}, Path=BindingContext.RemoveIngredientCommand}"
+                                                        CommandParameter="{Binding .}" />
+                                                </Grid.GestureRecognizers>
+                                            </Grid>
+                                        </Grid>
+                                    </Border>
+                                </Grid>
+                            </DataTemplate>
+                        </CollectionView.ItemTemplate>
+                    </CollectionView>
+                    <Label Text="{loc:Translate AddIngredient}" TextColor="{DynamicResource Ink}" FontSize="14.5"
+                           FontAttributes="Bold" Padding="4,8">
+                        <Label.GestureRecognizers>
+                            <TapGestureRecognizer Command="{Binding AddIngredientCommand}" />
+                        </Label.GestureRecognizers>
+                    </Label>
                 </VerticalStackLayout>
 
+                <!-- Method: numbered step cards whose text wraps and grows inside the card. -->
                 <VerticalStackLayout Spacing="7">
                     <Label Text="{loc:Translate SectionMethod}" TextColor="{DynamicResource Muted}" FontSize="11.5"
                            CharacterSpacing="1.6" FontAttributes="Bold" />
-                    <Label Text="{loc:Translate OneStepPerLine}" TextColor="{DynamicResource Faint}" FontSize="12.5" />
-                    <Border BackgroundColor="{DynamicResource Surface}" Stroke="{DynamicResource Line}"
-                            StrokeThickness="1" Padding="12,6" StrokeShape="RoundRectangle 15">
-                        <Editor x:Name="StepsEditor" AutoSize="TextChanges" HeightRequest="200"
-                                Placeholder="{loc:Translate StepsPlaceholder}"
-                                TextColor="{DynamicResource Ink}" PlaceholderColor="{DynamicResource Faint}" />
-                    </Border>
+                    <CollectionView x:Name="StepsList" ItemsSource="{Binding Steps}"
+                                    CanReorderItems="True" ReorderCompleted="OnReorderCompleted"
+                                    ItemsLayout="VerticalList" SelectionMode="None">
+                        <CollectionView.ItemTemplate>
+                            <DataTemplate>
+                                <Grid Padding="0,4">
+                                    <Border BackgroundColor="{DynamicResource Surface}" Stroke="{DynamicResource Line}"
+                                            StrokeThickness="1" Padding="10,6,4,6" StrokeShape="RoundRectangle 15">
+                                        <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="8">
+                                            <Border WidthRequest="28" HeightRequest="28" VerticalOptions="Start" Margin="0,8,0,0"
+                                                    BackgroundColor="{DynamicResource Lime}" StrokeThickness="0"
+                                                    StrokeShape="RoundRectangle 14">
+                                                <Label Text="{Binding Number}" SemanticProperties.Description="{Binding NumberDescription}" TextColor="{DynamicResource LimeInk}"
+                                                       FontAttributes="Bold" FontSize="13"
+                                                       HorizontalOptions="Center" VerticalOptions="Center" />
+                                            </Border>
+                                            <Editor Grid.Column="1" Text="{Binding Text}" AutoSize="TextChanges"
+                                                    Placeholder="{loc:Translate StepPlaceholder}"
+                                                    TextColor="{DynamicResource Ink}" PlaceholderColor="{DynamicResource Faint}" />
+                                            <Grid Grid.Column="2" WidthRequest="40" HeightRequest="44" VerticalOptions="Start">
+                                                <Label Style="{StaticResource IconLabel}" Text="{x:Static icons:Icons.Close}"
+                                                       TextColor="{DynamicResource Muted}" FontSize="18" />
+                                                <Grid.GestureRecognizers>
+                                                    <TapGestureRecognizer
+                                                        Command="{Binding Source={x:Reference EditorRoot}, Path=BindingContext.RemoveStepCommand}"
+                                                        CommandParameter="{Binding .}" />
+                                                </Grid.GestureRecognizers>
+                                            </Grid>
+                                        </Grid>
+                                    </Border>
+                                </Grid>
+                            </DataTemplate>
+                        </CollectionView.ItemTemplate>
+                    </CollectionView>
+                    <Label Text="{loc:Translate AddStep}" TextColor="{DynamicResource Ink}" FontSize="14.5"
+                           FontAttributes="Bold" Padding="4,8">
+                        <Label.GestureRecognizers>
+                            <TapGestureRecognizer Command="{Binding AddStepCommand}" />
+                        </Label.GestureRecognizers>
+                    </Label>
                 </VerticalStackLayout>
 
                 <Label x:Name="ErrorLabel" TextColor="{DynamicResource Danger}" FontSize="13" IsVisible="False" />
             </VerticalStackLayout>
         </ScrollView>
 
-        <!-- Save -->
+        <!-- Save (sticky: outside the scroll area) -->
         <Button Grid.Row="2" x:Name="SaveButton" Text="{loc:Translate SaveRecipe}" Clicked="OnSaveClicked"
+                Margin="20,14,20,16"
                 BackgroundColor="{DynamicResource Lime}" TextColor="{DynamicResource LimeInk}"
                 FontAttributes="Bold" FontSize="16" HeightRequest="54" CornerRadius="16" />
     </Grid>

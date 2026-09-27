@@ -16,6 +16,7 @@ public sealed class ThemeService
     private readonly DarkTheme _dark = new();
     private readonly LightTheme _light = new();
     private ResourceDictionary? _active;
+    private double _barDim;
 
     public AppThemeChoice Current { get; private set; }
 
@@ -71,8 +72,21 @@ public sealed class ThemeService
     };
 
     /// <summary>
-    /// Paints the window chrome so the status/navigation bar regions match the app background
-    /// (killing the white bands seen in light OS mode) and picks readable bar-icon colours.
+    /// How far an open bottom sheet shows in the bar bands: 0 = none, 1 = fully (status band dimmed
+    /// by the scrim, navigation band in the sheet's surface colour). Driven by <c>BottomSheet</c> in
+    /// step with its backdrop fade so there is no undimmed seam at the bars.
+    /// </summary>
+    public void SetBarDim(double amount)
+    {
+        _barDim = Math.Clamp(amount, 0, 1);
+        ApplyNativeBars();
+    }
+
+    /// <summary>
+    /// Paints the decor background that shows through the transparent edge-to-edge bars so the
+    /// status/navigation bar regions match the app background (killing the white bands seen in
+    /// light OS mode) and picks readable bar-icon colours. Called on theme change and on resume;
+    /// never touches the deprecated Window.SetStatusBarColor / SetNavigationBarColor.
     /// </summary>
     public void ApplyNativeBars()
     {
@@ -87,7 +101,25 @@ public sealed class ThemeService
             ? new Android.Graphics.Color(0x0B, 0x0F, 0x0C)
             : new Android.Graphics.Color(0xF4, 0xF5, 0xEF);
 
-        window.DecorView.SetBackgroundColor(bg);
+        // An open sheet's backdrop only covers the content view (which is inset from the bars):
+        // dim the status band with the same scrim, and continue the docked sheet's surface through
+        // the navigation band, both blended in by the sheet's fade.
+        var top = bg;
+        var bottom = bg;
+        if (_barDim > 0 && MauiApp.Current?.Resources is { } resources)
+        {
+            if (resources.TryGetValue("Scrim", out var s) && s is Color scrim)
+                top = Blend(bg, scrim, scrim.Alpha * _barDim);
+            if (resources.TryGetValue("Surface", out var f) && f is Color surface)
+                bottom = Blend(bg, surface, _barDim);
+        }
+
+        if (window.DecorView.Background is not BarBandsDrawable bands)
+        {
+            bands = new BarBandsDrawable();
+            window.DecorView.Background = bands;
+        }
+        bands.SetColors(top, bottom);
 
         var controller = AndroidX.Core.View.WindowCompat.GetInsetsController(window, window.DecorView);
         if (controller is not null)
@@ -98,4 +130,11 @@ public sealed class ThemeService
         }
 #endif
     }
+
+#if ANDROID
+    private static Android.Graphics.Color Blend(Android.Graphics.Color under, Color over, double amount) => new(
+        (byte)Math.Round(under.R * (1 - amount) + over.Red * 255 * amount),
+        (byte)Math.Round(under.G * (1 - amount) + over.Green * 255 * amount),
+        (byte)Math.Round(under.B * (1 - amount) + over.Blue * 255 * amount));
+#endif
 }

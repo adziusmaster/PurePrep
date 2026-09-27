@@ -178,6 +178,68 @@ public sealed class ParseEndpointTests : IClassFixture<PurePrepAppFactory>
         after.Should().Be(before);
     }
 
+    [Fact]
+    public async Task Parse_WhenModelReturnsV2_ShouldReturnStepDetailsAndKeepLegacySteps()
+    {
+        // Arrange
+        _factory.PageFetcher.FetchAsync(Arg.Any<Uri>(), Arg.Any<CancellationToken>()).Returns(PageWithJsonLd);
+        _factory.Gemini.ExtractAsync(Arg.Any<string>(), Arg.Any<string?>(), Arg.Any<CancellationToken>())
+            .Returns(new AiRecipe("Lemon Pasta", ["200 g spaghetti"], ["Boil for 10 min."])
+            {
+                Meta = new AiRecipeMeta(4, null, false, 5, 10),
+                StepDetails = [new AiStep("Boil for 10 min.", [0], [new AiTimer("Boil pasta", 600, 600)])],
+            });
+        var client = _factory.CreateClient();
+
+        // Act
+        var response = await ParseAsync(client, Guid.NewGuid());
+        var body = await response.Content.ReadFromJsonAsync<System.Text.Json.JsonElement>();
+
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        var recipe = body.GetProperty("recipe");
+        recipe.GetProperty("steps")[0].GetString().Should().Be("Boil for 10 min.");
+        recipe.GetProperty("servings").GetInt32().Should().Be(4);
+        recipe.GetProperty("stepDetails")[0].GetProperty("timers")[0].GetProperty("label").GetString().Should().Be("Boil pasta");
+    }
+
+    [Fact]
+    public async Task Parse_WhenPageHasNoImage_ShouldIssueImageTicket()
+    {
+        // Arrange
+        _factory.PageFetcher.FetchAsync(Arg.Any<Uri>(), Arg.Any<CancellationToken>()).Returns(PageWithJsonLd);
+        ArrangeGemini();
+        var client = _factory.CreateClient();
+
+        // Act
+        var body = await (await ParseAsync(client, Guid.NewGuid())).Content.ReadFromJsonAsync<System.Text.Json.JsonElement>();
+
+        // Assert
+        var recipe = body.GetProperty("recipe");
+        recipe.GetProperty("imageTicket").GetString().Should().NotBeNullOrWhiteSpace();
+        recipe.TryGetProperty("imageUrl", out var url).Should().BeTrue();
+        url.ValueKind.Should().Be(System.Text.Json.JsonValueKind.Null);
+    }
+
+    [Fact]
+    public async Task Parse_WhenPageHasOgImage_ShouldReturnImageUrlAndAFallbackTicket()
+    {
+        // Arrange
+        var page = PageWithJsonLd.Replace("<head>", """<head><meta property="og:image" content="https://example.com/p.jpg">""");
+        _factory.PageFetcher.FetchAsync(Arg.Any<Uri>(), Arg.Any<CancellationToken>()).Returns(page);
+        ArrangeGemini();
+        var client = _factory.CreateClient();
+
+        // Act
+        var body = await (await ParseAsync(client, Guid.NewGuid())).Content.ReadFromJsonAsync<System.Text.Json.JsonElement>();
+
+        // Assert
+        var recipe = body.GetProperty("recipe");
+        recipe.GetProperty("imageUrl").GetString().Should().Be("https://example.com/p.jpg");
+        recipe.GetProperty("imageTicket").GetString().Should().NotBeNullOrWhiteSpace(
+            because: "the client redeems it only if the page image fails to download");
+    }
+
     private static async Task<string?> ReadCodeAsync(HttpResponseMessage response) =>
         (await response.Content.ReadFromJsonAsync<ImportErrorDto>())?.Code;
 

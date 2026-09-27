@@ -1,0 +1,26 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@400;600;700;800&display=swap');
+:root{--ink:#f4f1e8;--muted:#8e9a8b;--line:#30402d;--panel:#182018;--panel2:#202b1e;--lime:#b7df78;--lime-dark:#172313;--orange:#ee9b5a;}
+*{box-sizing:border-box;-webkit-font-smoothing:antialiased;}
+html,body{margin:0;padding:0;}
+body{background:#0c100d;color:var(--ink);font-family:Manrope,sans-serif;overflow:hidden;}
+.grid-bg:before{content:"";position:fixed;inset:0;pointer-events:none;opacity:.16;
+  background-image:linear-gradient(rgba(183,223,120,.06) 1px,transparent 1px),linear-gradient(90deg,rgba(183,223,120,.06) 1px,transparent 1px);
+  background-size:56px 56px;mask-image:linear-gradient(to bottom,black,transparent 82%);}
+.eyebrow{font:500 clamp(11px,1.5vw,15px) 'DM Mono',monospace;letter-spacing:.18em;text-transform:uppercase;color:var(--lime);}
+.mono{font-family:'DM Mono',monospace;}
+
+html,body{width:512px;height:512px;}
+body:before{display:none;}
+</style></head><body class="grid-bg">
+<div style="position:absolute;inset:0;background:linear-gradient(160deg, #b9e07f 0%, #A7D46F 55%, #93c25a 100%);"></div>
+<div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;"><svg width="360" height="360" viewBox="40 30 220 240">
+  <g stroke="#0C100D" stroke-width="15" stroke-linecap="round" fill="none">
+    <path d="M112 96 C 96 78, 128 66, 112 46"/>
+    <path d="M150 100 C 134 78, 166 64, 150 40"/>
+    <path d="M188 96 C 172 78, 204 66, 188 46"/>
+  </g>
+  <rect x="70" y="150" width="160" height="26" rx="13" fill="#0C100D"/>
+  <path d="M84 178 h132 a10 10 0 0 1 10 12 a76 76 0 0 1 -152 0 a10 10 0 0 1 10 -12 z" fill="#0C100D"/>
+  <path d="M150 250 a76 76 0 0 0 66 -60 h-132 a76 76 0 0 0 66 60 z" fill="#A7D46F" opacity="0"/></svg></div></body></html>

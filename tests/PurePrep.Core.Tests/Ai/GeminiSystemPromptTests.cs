@@ -54,4 +54,16 @@ public sealed class GeminiSystemPromptTests
 
         prompt.Should().NotContain("OUTPUT LANGUAGE");
     }
+
+    [Fact]
+    public void BuildSystemPrompt_Always_ShouldAskForNamedTimersAndServings()
+    {
+        // Arrange — no language
+
+        // Act
+        var prompt = GeminiClient.BuildSystemPrompt(null);
+
+        // Assert
+        prompt.Should().Contain("timers").And.Contain("servings").And.Contain("ingredientRefs");
+    }
 }

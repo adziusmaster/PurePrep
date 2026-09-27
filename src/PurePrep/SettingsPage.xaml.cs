@@ -17,12 +17,13 @@ public partial class SettingsPage : ContentPage, IHardwareBackHandler
     // Recipe-language options: index 0 = follow the app language (""), then each concrete language.
     private readonly List<string> _recipeLanguageCodes = new();
 
-    public SettingsPage(ThemeService theme, ISmartCreditsClient? credits = null, IBillingService? billing = null)
+    public SettingsPage(ThemeService theme, ISmartCreditsClient? credits = null, IBillingService? billing = null, Presentation.RecipeLibraryViewModel? library = null)
     {
         InitializeComponent();
         _theme = theme;
         _credits = credits;
         _billing = billing;
+        TimersBarControl.Library = library;
 
         KeepAwakeSwitch.IsToggled = CookingSettings.KeepScreenAwake;
         VersionLabel.Text = $"{AppInfo.Current.VersionString} ({AppInfo.Current.BuildString})";
@@ -150,9 +151,25 @@ public partial class SettingsPage : ContentPage, IHardwareBackHandler
 
     private void OnBackTapped(object? sender, EventArgs e) => _ = Navigation.PopAsync();
 
+    // async void handlers: an unhandled exception here (out of memory on a big library, a full disk, a
+    // share target that throws) would crash the app, so both backup handlers report a friendly error instead.
     private async void OnExportTapped(object? sender, EventArgs e)
     {
+        try
+        {
+            await ExportAsync();
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"Backup export failed: {ex}");
+            await Services.AppDialog.AlertAsync(this, AppResources.Get("ExportRecipes"), AppResources.Get("ErrGeneric"), AppResources.Get("Ok"));
+        }
+    }
+
+    private async Task ExportAsync()
+    {
         var repository = IPlatformApplication.Current?.Services.GetService<IRecipeRepository>();
+        var imageStore = IPlatformApplication.Current?.Services.GetService<IRecipeImageStore>();
         if (repository is null)
             return;
 
@@ -163,9 +180,22 @@ public partial class SettingsPage : ContentPage, IHardwareBackHandler
             return;
         }
 
+        // Bundle each recipe's saved photo into the backup so a restore keeps the picture, not just
+        // the text — the store returns null for anything missing or unreadable, which is fine here.
+        var images = new Dictionary<Guid, byte[]>();
+        if (imageStore is not null)
+        {
+            foreach (var recipe in recipes.Where(r => !string.IsNullOrWhiteSpace(r.ImagePath)))
+            {
+                var bytes = await imageStore.ReadAsync(recipe.ImagePath!, CancellationToken.None);
+                if (bytes is not null)
+                    images[recipe.Id] = bytes;
+            }
+        }
+
         // Written to the cache directory first (no storage permission needed there).
         var fileName = $"pureprep-recipes-{DateTime.Now:yyyy-MM-dd}.json";
-        var json = RecipeBackup.Export(recipes);
+        var json = RecipeBackup.Export(recipes, images);
         var path = Path.Combine(FileSystem.CacheDirectory, fileName);
         await File.WriteAllTextAsync(path, json);
 
@@ -199,7 +229,21 @@ public partial class SettingsPage : ContentPage, IHardwareBackHandler
 
     private async void OnImportTapped(object? sender, EventArgs e)
     {
+        try
+        {
+            await RestoreAsync();
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"Backup restore failed: {ex}");
+            await Services.AppDialog.AlertAsync(this, AppResources.Get("ImportRecipes"), AppResources.Get("ErrGeneric"), AppResources.Get("Ok"));
+        }
+    }
+
+    private async Task RestoreAsync()
+    {
         var repository = IPlatformApplication.Current?.Services.GetService<IRecipeRepository>();
+        var imageStore = IPlatformApplication.Current?.Services.GetService<IRecipeImageStore>();
         if (repository is null)
             return;
 
@@ -224,16 +268,25 @@ public partial class SettingsPage : ContentPage, IHardwareBackHandler
         {
             using var stream = await file.OpenReadAsync();
             using var reader = new StreamReader(stream);
-            var restored = RecipeBackup.Import(await reader.ReadToEndAsync());
+            var contents = RecipeBackup.ImportWithImages(await reader.ReadToEndAsync());
 
             // Existing recipes keep their place: a restore adds what is missing rather than
             // replacing a library the user may have added to since the backup was taken.
             var existing = (await repository.GetAllAsync()).Select(r => r.Id).ToHashSet();
             var added = 0;
-            foreach (var recipe in restored.Where(r => !existing.Contains(r.Id)))
+            foreach (var recipe in contents.Recipes.Where(r => !existing.Contains(r.Id)))
             {
                 await repository.SaveAsync(recipe);
                 added++;
+
+                // Restore the bundled photo, if any: saved to a fresh path on this device, since the
+                // backup only carries raw bytes (a v1 path would be meaningless here).
+                if (imageStore is not null && contents.Images.TryGetValue(recipe.Id, out var bytes))
+                {
+                    var path = await imageStore.SaveBytesAsync(recipe.Id, bytes, CancellationToken.None);
+                    if (path is not null)
+                        await repository.UpdateImagePathAsync(recipe.Id, path);
+                }
             }
 
             await Services.AppDialog.AlertAsync(this, AppResources.Get("ImportRecipes"), AppResources.Format("ImportedFormat", added), AppResources.Get("Ok"));
@@ -270,15 +323,9 @@ public partial class SettingsPage : ContentPage, IHardwareBackHandler
     private void RefreshUnitPills()
     {
         var current = UnitSettings.Display;
-        Apply(UnitsSourcePill, UnitsSourceLabel, current == UnitDisplay.Source);
-        Apply(UnitsMetricPill, UnitsMetricLabel, current == UnitDisplay.Metric);
-        Apply(UnitsImperialPill, UnitsImperialLabel, current == UnitDisplay.Imperial);
-
-        static void Apply(Border pill, Label label, bool selected)
-        {
-            pill.BackgroundColor = selected ? Token("Lime") : Colors.Transparent;
-            label.TextColor = selected ? Token("LimeInk") : Token("Muted");
-        }
+        ApplyPillSelection(UnitsSourcePill, UnitsSourceLabel, current == UnitDisplay.Source);
+        ApplyPillSelection(UnitsMetricPill, UnitsMetricLabel, current == UnitDisplay.Metric);
+        ApplyPillSelection(UnitsImperialPill, UnitsImperialLabel, current == UnitDisplay.Imperial);
     }
 
     private async void OnPrivacyTapped(object? sender, EventArgs e)
@@ -295,19 +342,22 @@ public partial class SettingsPage : ContentPage, IHardwareBackHandler
 
     private void RefreshAppearancePills()
     {
-        Apply(SystemPill, SystemLabel, _theme.Current == AppThemeChoice.System);
-        Apply(LightPill, LightLabel, _theme.Current == AppThemeChoice.Light);
-        Apply(DarkPill, DarkLabel, _theme.Current == AppThemeChoice.Dark);
-
-        static void Apply(Border pill, Label label, bool selected)
-        {
-            pill.BackgroundColor = selected ? Token("Lime") : Colors.Transparent;
-            label.TextColor = selected ? Token("LimeInk") : Token("Muted");
-        }
+        ApplyPillSelection(SystemPill, SystemLabel, _theme.Current == AppThemeChoice.System);
+        ApplyPillSelection(LightPill, LightLabel, _theme.Current == AppThemeChoice.Light);
+        ApplyPillSelection(DarkPill, DarkLabel, _theme.Current == AppThemeChoice.Dark);
     }
 
-    private static Color Token(string key) =>
-        MauiApp.Current?.Resources.TryGetValue(key, out var value) == true && value is Color color
-            ? color
-            : Colors.Gray;
+    // Shared by every segmented control on this page (Appearance, Units). Both states go through
+    // SetDynamicResource — never a plain SetValue — so a later theme switch (the light/dark
+    // dictionary swap in ThemeService) repaints every pill automatically, with no need to re-run
+    // this method. A manual SetValue (e.g. `pill.BackgroundColor = Colors.Transparent`) sets a
+    // higher-precedence local value that permanently blocks a subsequent SetDynamicResource on the
+    // same property from ever rendering, even though the resource lookup itself keeps resolving
+    // correctly — that mix (manual for "unselected", dynamic for "selected") is what let a pill's
+    // colour go stale across a theme switch. "Transparent" resolves the same in every theme.
+    private static void ApplyPillSelection(Border pill, Label label, bool selected)
+    {
+        pill.SetDynamicResource(VisualElement.BackgroundColorProperty, selected ? "Lime" : "Transparent");
+        label.SetDynamicResource(Label.TextColorProperty, selected ? "LimeInk" : "Muted");
+    }
 }

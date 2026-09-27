@@ -1,0 +1,68 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@400;600;700;800&display=swap');
+:root{--ink:#f4f1e8;--muted:#8e9a8b;--line:#30402d;--panel:#182018;--panel2:#202b1e;--lime:#b7df78;--lime-dark:#172313;--orange:#ee9b5a;}
+*{box-sizing:border-box;-webkit-font-smoothing:antialiased;}
+html,body{margin:0;padding:0;}
+body{background:#0c100d;color:var(--ink);font-family:Manrope,sans-serif;overflow:hidden;}
+.grid-bg:before{content:"";position:fixed;inset:0;pointer-events:none;opacity:.16;
+  background-image:linear-gradient(rgba(183,223,120,.06) 1px,transparent 1px),linear-gradient(90deg,rgba(183,223,120,.06) 1px,transparent 1px);
+  background-size:56px 56px;mask-image:linear-gradient(to bottom,black,transparent 82%);}
+.eyebrow{font:500 clamp(11px,1.5vw,15px) 'DM Mono',monospace;letter-spacing:.18em;text-transform:uppercase;color:var(--lime);}
+.mono{font-family:'DM Mono',monospace;}
+
+html,body{width:1080px;height:1920px;}
+
+body:before{display:none;}
+.copy{position:absolute;left:76px;right:76px;top:112px;}
+.head{font-weight:800;line-height:1.04;letter-spacing:-.035em;color:#f4f1e8;}
+.head div{white-space:nowrap;}
+.head em{font-style:normal;color:#A7D46F;}
+.sub{margin-top:30px;font-weight:600;font-size:36px;line-height:1.36;color:#c9d2c4;letter-spacing:-.005em;}
+
+</style></head><body class="grid-bg">
+<div style="position:absolute;inset:0;background:#0C100D;"></div>
+<div style="position:absolute;inset:0;background:
+    radial-gradient(70% 48% at 62% 66%, rgba(167,212,111,.20) 0%, rgba(167,212,111,.06) 48%, transparent 72%);"></div>
+
+<div class="phone" data-gap="160" data-fit="" data-tilt="-3"
+     style="position:absolute;left:158px;top:560px;width:804px;height:1579px;
+            transform:rotate(-3deg);transform-origin:50% 30%;border-radius:78px;padding:14px;
+            background:linear-gradient(155deg,#2a312b 0%,#151a16 45%,#1d231e 100%);
+            box-shadow:0 0 0 2px rgba(255,255,255,.07) inset, 0 0 0 1.5px #050705,
+                       0 60px 110px rgba(0,0,0,.62), 0 18px 40px rgba(0,0,0,.45);">
+  <div style="position:relative;width:776px;height:1551px;border-radius:64px;overflow:hidden;background:#000;">
+    <img src="../shots/en/6-scaled.png" style="position:absolute;left:0;top:-101px;width:776px;height:1742px;display:block;">
+  </div>
+  
+  
+</div>
+
+<div class="copy">
+  <div class="head"><div><em>Scale</em> it for</div><div>any table.</div></div>
+  <div class="sub">Serves − 8 +. Every amount follows.</div>
+</div>
+
+<script>
+document.fonts.ready.then(() => {
+  const box = document.querySelector('.copy'), head = document.querySelector('.head'), sub = document.querySelector('.sub');
+  let s = 100;
+  head.style.fontSize = s + 'px';
+  const wide = () => [...head.children].some((l) => l.scrollWidth > box.clientWidth);
+  while (wide() && s > 54) { s -= 1; head.style.fontSize = s + 'px'; }
+  // Last resort for a line that is too long even at the minimum size: let it wrap rather than clip.
+  if (wide()) for (const l of head.children) l.style.whiteSpace = 'normal';
+  let t = 36;
+  const lh = () => parseFloat(getComputedStyle(sub).lineHeight);
+  while (sub.scrollHeight > lh() * 2 + 2 && t > 26) { t -= 1; sub.style.fontSize = t + 'px'; }
+  const phone = document.querySelector('.phone');
+  const top = box.getBoundingClientRect().bottom + Number(phone.dataset.gap);
+  if (phone.dataset.fit) {
+    // Bottom-anchored 70px above the canvas edge, scaled down to the room under the copy.
+    const h = phone.offsetHeight, k = Math.min(1, (1850 - top) / h);
+    phone.style.top = (1850 - h) + 'px';
+    phone.style.transform = 'rotate(' + phone.dataset.tilt + 'deg) scale(' + k.toFixed(4) + ')';
+  } else phone.style.top = Math.round(top) + 'px';
+  document.body.dataset.fit = s;
+});
+</script></body></html>

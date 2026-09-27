@@ -1,0 +1,60 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@400;600;700;800&display=swap');
+:root{--ink:#f4f1e8;--muted:#8e9a8b;--line:#30402d;--panel:#182018;--panel2:#202b1e;--lime:#b7df78;--lime-dark:#172313;--orange:#ee9b5a;}
+*{box-sizing:border-box;-webkit-font-smoothing:antialiased;}
+html,body{margin:0;padding:0;}
+body{background:#0c100d;color:var(--ink);font-family:Manrope,sans-serif;overflow:hidden;}
+.grid-bg:before{content:"";position:fixed;inset:0;pointer-events:none;opacity:.16;
+  background-image:linear-gradient(rgba(183,223,120,.06) 1px,transparent 1px),linear-gradient(90deg,rgba(183,223,120,.06) 1px,transparent 1px);
+  background-size:56px 56px;mask-image:linear-gradient(to bottom,black,transparent 82%);}
+.eyebrow{font:500 clamp(11px,1.5vw,15px) 'DM Mono',monospace;letter-spacing:.18em;text-transform:uppercase;color:var(--lime);}
+.mono{font-family:'DM Mono',monospace;}
+
+html,body{width:1080px;height:1920px;}
+
+body:before{display:none;}
+.copy{position:absolute;left:76px;right:76px;top:112px;}
+.head{font-weight:800;line-height:1.04;letter-spacing:-.035em;color:#f4f1e8;}
+.head div{white-space:nowrap;}
+.head em{font-style:normal;color:#A7D46F;}
+.sub{margin-top:30px;font-weight:600;font-size:36px;line-height:1.36;color:#c9d2c4;letter-spacing:-.005em;}
+
+</style></head><body class="grid-bg">
+<div class="copy" style="position:relative;left:auto;right:auto;top:auto;width:928px;margin-left:76px;">
+  <div class="head" data-n="1"><div>The recipe.</div><div>Without the <em>noise.</em></div></div>
+</div>
+<div class="copy" style="position:relative;left:auto;right:auto;top:auto;width:928px;margin-left:76px;">
+  <div class="head" data-n="2"><div><em>Share</em> a link.</div><div>Get the recipe.</div></div>
+</div>
+<div class="copy" style="position:relative;left:auto;right:auto;top:auto;width:928px;margin-left:76px;">
+  <div class="head" data-n="3"><div><em>Search</em> the web.</div><div>Add in one tap.</div></div>
+</div>
+<div class="copy" style="position:relative;left:auto;right:auto;top:auto;width:928px;margin-left:76px;">
+  <div class="head" data-n="4"><div>Cook <em>step</em> by step.</div></div>
+</div>
+<div class="copy" style="position:relative;left:auto;right:auto;top:auto;width:928px;margin-left:76px;">
+  <div class="head" data-n="5"><div>Timers that <em>know</em></div><div>the recipe.</div></div>
+</div>
+<div class="copy" style="position:relative;left:auto;right:auto;top:auto;width:928px;margin-left:76px;">
+  <div class="head" data-n="6"><div><em>Scale</em> it for</div><div>any table.</div></div>
+</div>
+<div class="copy" style="position:relative;left:auto;right:auto;top:auto;width:928px;margin-left:76px;">
+  <div class="head" data-n="7"><div>Your recipe box,</div><div><em>organized.</em></div></div>
+</div>
+<div class="copy" style="position:relative;left:auto;right:auto;top:auto;width:928px;margin-left:76px;">
+  <div class="head" data-n="8"><div>No ads. No account.</div><div>No <em>tracking.</em></div></div>
+</div>
+<script>
+document.fonts.ready.then(() => {
+  const out = {};
+  for (const head of document.querySelectorAll('.head')) {
+    const w = head.parentElement.clientWidth;
+    let s = 100;
+    head.style.fontSize = s + 'px';
+    while ([...head.children].some((l) => l.scrollWidth > w) && s > 54) { s -= 1; head.style.fontSize = s + 'px'; }
+    out[head.dataset.n] = s;
+  }
+  document.body.setAttribute('data-fits', JSON.stringify(out));
+});
+</script></body></html>

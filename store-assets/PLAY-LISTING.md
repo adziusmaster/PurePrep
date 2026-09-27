@@ -668,7 +668,7 @@ then how you cook from it, then what makes it trustworthy.
 | 3 | *Search* the web. / Add in one tap. | Find a recipe without leaving PurePrep. | **In-app web search** on a recipe page, with the floating "Add to PurePrep" button visible |
 | 4 | Cook *step* by step. | Every step fits the screen, with what you'll need. | **Focus Mode**: a mid-recipe step with the "You'll need" chips and a timer chip |
 | 5 | Timers that *know* / the recipe. | "Fry onion · 10–12 min". Tap to start. Run several. | **Focus Mode with timers running**: the running-timers bar showing two named timers |
-| 6 | *Scale* it for / any table. | Serves − 6 +. Every amount follows. | **Recipe detail** after changing servings (for example 4 → 6), with the reset icon and scaled fractions visible |
+| 6 | *Scale* it for / any table. | Serves − 8 +. Every amount follows. | **Recipe detail** after changing servings (the sample serves 6; captured at 8), with the reset icon and scaled fractions visible |
 | 7 | Your recipe box, / *organized.* | Favorites, Want to cook, Cooked, notes. Offline. | **Library** with photos, the filter chips (All · Want to cook · Cooked · Favorites) and a ♥ on one card |
 | 8 | No ads. No account. / No *tracking.* | Your recipes stay on your phone. | **Add sheet**: Paste a link · From a photo · From text · type it in yourself (shows the free manual path) |
 
@@ -690,7 +690,7 @@ Same eight slots, same captures (recorded in each language's UI), same rule: two
 | 3 | Im Web *suchen*. / Mit einem Tipp speichern. | Rezepte finden, ohne PurePrep zu verlassen. |
 | 4 | Schritt für / *Schritt* kochen. | Jeder Schritt passt auf den Bildschirm, mit allem, was du brauchst. |
 | 5 | Timer, die das / Rezept *kennen*. | „Zwiebel anbraten · 10–12 Min.“ Antippen, fertig. Mehrere gleichzeitig. |
-| 6 | Für jeden Tisch / *skaliert*. | Für − 6 + Personen. Alle Mengen ziehen mit. |
+| 6 | Für jeden Tisch / *skaliert*. | Für − 8 + Personen. Alle Mengen ziehen mit. |
 | 7 | Dein Kochbuch, / *geordnet*. | Favoriten, Möchte ich kochen, Gekocht, Notizen. Offline. |
 | 8 | Keine Werbung. Kein Konto. / Kein *Tracking*. | Deine Rezepte bleiben auf deinem Handy. |
 
@@ -703,7 +703,7 @@ Same eight slots, same captures (recorded in each language's UI), same rule: two
 | 3 | *Cherchez* sur le web. / Ajoutez d'un geste. | Trouvez une recette sans quitter PurePrep. |
 | 4 | Cuisinez *étape* / par étape. | Chaque étape tient à l'écran, avec ce qu'il vous faut. |
 | 5 | Des minuteurs qui / *connaissent* la recette. | « Faire revenir l'oignon · 10–12 min ». Touchez, c'est parti. Plusieurs à la fois. |
-| 6 | *Adaptée* à / chaque tablée. | Pour − 6 + personnes. Chaque quantité suit. |
+| 6 | *Adaptée* à / chaque tablée. | Pour − 8 + personnes. Chaque quantité suit. |
 | 7 | Votre carnet de recettes, / *rangé.* | Favoris, À cuisiner, Cuisinées, notes. Hors ligne. |
 | 8 | Sans pub. Sans compte. / Sans *pistage.* | Vos recettes restent sur votre téléphone. |
 
@@ -716,7 +716,7 @@ Same eight slots, same captures (recorded in each language's UI), same rule: two
 | 3 | *Busca* en la web. / Añade con un toque. | Encuentra recetas sin salir de PurePrep. |
 | 4 | Cocina *paso* / a paso. | Cada paso cabe en la pantalla, con lo que necesitarás. |
 | 5 | Temporizadores que / *conocen* la receta. | «Sofríe la cebolla · 10–12 min». Toca y listo. Varios a la vez. |
-| 6 | Raciones *a medida* / para tu mesa. | Para − 6 + personas. Todas las cantidades se ajustan. |
+| 6 | Raciones *a medida* / para tu mesa. | Para − 8 + personas. Todas las cantidades se ajustan. |
 | 7 | Tu recetario, / *ordenado.* | Favoritas, Por cocinar, Cocinadas, notas. Sin conexión. |
 | 8 | Sin anuncios. Sin cuenta. / Sin *rastreo.* | Tus recetas se quedan en tu móvil. |
 
@@ -729,7 +729,7 @@ Same eight slots, same captures (recorded in each language's UI), same rule: two
 | 3 | *Cerca* sul web. / Aggiungi con un tocco. | Trova una ricetta senza uscire da PurePrep. |
 | 4 | Cucina *passo* / dopo passo. | Ogni passaggio sta nello schermo, con ciò che ti serve. |
 | 5 | Timer che *conoscono* / la ricetta. | «Soffriggi la cipolla · 10–12 min». Tocca e parte. Anche più insieme. |
-| 6 | Dosi *su misura* / per ogni tavola. | Per − 6 + persone. Tutte le quantità si adeguano. |
+| 6 | Dosi *su misura* / per ogni tavola. | Per − 8 + persone. Tutte le quantità si adeguano. |
 | 7 | Il tuo ricettario, / *in ordine.* | Preferite, Da cucinare, Cucinate, note. Offline. |
 | 8 | Niente pubblicità. / Niente account, niente *tracciamento.* | Le tue ricette restano sul tuo telefono. |
 
@@ -742,7 +742,7 @@ Same eight slots, same captures (recorded in each language's UI), same rule: two
 | 3 | *Zoek* op het web. / Voeg toe met één tik. | Vind een recept zonder PurePrep te verlaten. |
 | 4 | Kook *stap* / voor stap. | Elke stap past op het scherm, met wat je nodig hebt. |
 | 5 | Timers die het / recept *kennen*. | “Ui fruiten · 10–12 min”. Tik en hij loopt. Meerdere tegelijk. |
-| 6 | *Geschaald* voor / elke tafel. | Voor − 6 + personen. Alle hoeveelheden rekenen mee. |
+| 6 | *Geschaald* voor / elke tafel. | Voor − 8 + personen. Alle hoeveelheden rekenen mee. |
 | 7 | Je kookboek, / *op orde.* | Favorieten, Wil ik koken, Gekookt, notities. Offline. |
 | 8 | Geen reclame. Geen account. / Geen *tracking.* | Je recepten blijven op je telefoon. |
 

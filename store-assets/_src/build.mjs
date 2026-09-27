@@ -1,4 +1,4 @@
-import { writeFileSync, mkdirSync } from 'node:fs';
+import { writeFileSync, mkdirSync, readdirSync, rmSync } from 'node:fs';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
@@ -6,6 +6,7 @@ import { doc, T } from './theme.js';
 import { iconHtml } from './icon.js';
 import { unitToggle, creditPill, importBar, card, caption } from './parts.js';
 import { featureNew, iconOptions, iconComparison, dataUri } from './v14.js';
+import * as shots from './shots.js';
 
 // Targets:
 //   node store-assets/_src/build.mjs          → 1.4 proposals only (safe: never overwrites the
@@ -14,10 +15,15 @@ import { featureNew, iconOptions, iconComparison, dataUri } from './v14.js';
 //                                              (the shipped app icon since 1.4)
 //   node store-assets/_src/build.mjs legacy   → the pre-1.4 set (feature, mock screens; the pre-1.4
 //                                              icon is kept in icon.js but no longer rendered)
-//   node store-assets/_src/build.mjs all      → all of the above
+//   node store-assets/_src/build.mjs shots [lang|all]
+//                                           → 1.4 phone screenshots from real captures in _src/shots/<lang>/
+//                                              to phone/<lang>/phone-<n>-<slug>.png + _contact.png
+//                                              (lang defaults to en; "all" = every language with copy;
+//                                              --slot7=languages swaps slot 7 to the language list)
+//   node store-assets/_src/build.mjs all      → v14 + icon + legacy (not shots)
 const TARGET = process.argv[2] ?? 'v14';
-if (!['v14', 'icon', 'legacy', 'all'].includes(TARGET)) {
-  console.error(`unknown target "${TARGET}" — use v14 (default), icon, legacy or all`);
+if (!['v14', 'icon', 'legacy', 'shots', 'all'].includes(TARGET)) {
+  console.error(`unknown target "${TARGET}" — use v14 (default), icon, legacy, shots [lang] or all`);
   process.exit(2);
 }
 
@@ -190,11 +196,11 @@ const toRgba = (file) => {
 
 const legacyJobs = [
   ['feature.html', feature, 1024, 500, join(ROOT, 'feature-1024x500.png')],
-  ['p1.html', p1, PW, PH, join(ROOT, 'phone', 'phone-1-home.png')],
-  ['p2.html', p2, PW, PH, join(ROOT, 'phone', 'phone-2-library.png')],
-  ['p3.html', p3, PW, PH, join(ROOT, 'phone', 'phone-3-recipe.png')],
-  ['p4.html', p4, PW, PH, join(ROOT, 'phone', 'phone-4-units.png')],
-  ['p5.html', p5, PW, PH, join(ROOT, 'phone', 'phone-5-ai.png')],
+  ['p1.html', p1, PW, PH, join(ROOT, 'phone', 'legacy', 'phone-1-home.png')],
+  ['p2.html', p2, PW, PH, join(ROOT, 'phone', 'legacy', 'phone-2-library.png')],
+  ['p3.html', p3, PW, PH, join(ROOT, 'phone', 'legacy', 'phone-3-recipe.png')],
+  ['p4.html', p4, PW, PH, join(ROOT, 'phone', 'legacy', 'phone-4-units.png')],
+  ['p5.html', p5, PW, PH, join(ROOT, 'phone', 'legacy', 'phone-5-ai.png')],
   ['t7a.html', tabletHome(1200, 1920), 1200, 1920, join(ROOT, 'tablet7', 'tablet7-1-home.png')],
   ['t7b.html', tabletDetail(1200, 1920), 1200, 1920, join(ROOT, 'tablet7', 'tablet7-2-recipe.png')],
   ['t10a.html', tabletHome(1600, 2560), 1600, 2560, join(ROOT, 'tablet10', 'tablet10-1-home.png')],
@@ -235,7 +241,62 @@ const runIcon = () => {
   toRgba(out);
 };
 
-if (TARGET === 'legacy' || TARGET === 'all') for (const job of legacyJobs) render(...job);
+// ---------- 1.4 phone screenshots ----------
+const measure = (lang, copy) => {
+  const f = join(HTML, `shots-${lang}-measure.html`);
+  writeFileSync(f, shots.measurePage(copy));
+  const r = spawnSync(CHROME, ['--headless=new', '--disable-gpu', '--no-sandbox', '--force-device-scale-factor=1',
+    `--window-size=${shots.W},${shots.H}`, '--virtual-time-budget=6000', '--dump-dom', `file://${f}`],
+    { encoding: 'utf8', maxBuffer: 1 << 26 });
+  const m = r.stdout?.match(/data-fits="([^"]+)"/);
+  if (!m) { console.error(`ERR measuring ${lang} headlines`, r.stderr?.slice(-300)); process.exit(1); }
+  return JSON.parse(m[1].replace(/&quot;/g, '"'));
+};
+
+const runShots = (args) => {
+  const flag = args.find((a) => a.startsWith('--slot7='));
+  const slot7 = flag ? flag.split('=')[1] : shots.SLOT7_DEFAULT;
+  if (!(slot7 in shots.SLOT7)) { console.error(`unknown --slot7 "${slot7}" — use ${Object.keys(shots.SLOT7).join(' or ')}`); process.exit(2); }
+  const arg = args.find((a) => !a.startsWith('--')) ?? 'en';
+  const langs = arg === 'all' ? Object.keys(shots.LANGS) : [arg];
+  for (const lang of langs) {
+    if (!shots.LANGS[lang]) { console.error(`unknown language "${lang}" — use ${Object.keys(shots.LANGS).join(', ')} or all`); process.exit(2); }
+    const copy = shots.copyFor(lang);
+    const alt = shots.SLOT7[slot7];
+    if (copy && alt) {
+      if (alt.copy[lang]) copy[6] = { n: 7, ...alt.copy[lang] };
+      else { console.error(`SKIP ${lang}: no --slot7=${slot7} copy for it`); process.exitCode = 1; continue; }
+    }
+    if (!copy) { console.error(`SKIP ${lang}: no 8-row headline table for ${shots.LANGS[lang]} in PLAY-LISTING.md`); process.exitCode = 1; continue; }
+    const fits = measure(lang, copy);
+    const size = shots.languageSize(fits);
+    console.log(`${lang}: headline ${size}px (per-slot fit ${JSON.stringify(fits)})`);
+    const dir = join(ROOT, 'phone', lang);
+    mkdirSync(dir, { recursive: true });
+    const done = copy.map((c) => {
+      const useAlt = alt && c.n === 7;
+      const cap = shots.captureFor(lang, c.n, useAlt ? { 7: alt.capture } : {});
+      if (useAlt && !cap.file?.endsWith(alt.capture)) console.warn(`WARN ${lang} slot 7: ${alt.capture} missing`);
+      const slug = useAlt ? alt.slug : shots.SLUGS[c.n - 1];
+      if (!cap.real) console.warn(`WARN ${lang} slot ${c.n}: no capture in _src/shots/${lang}/ — placeholder used`);
+      else if (cap.w !== 1080 || cap.h !== 2424) console.warn(`WARN ${lang} slot ${c.n}: capture is ${cap.w}x${cap.h}, bar crop assumes 1080x2424`);
+      const out = join(dir, `phone-${c.n}-${slug}.png`);
+      // Only one slot-7 variant may sit in phone/<lang>/, or both would get uploaded.
+      if (c.n === 7) for (const f of readdirSync(dir)) if (/^phone-7-.*\.png$/.test(f) && f !== `phone-7-${slug}.png`) rmSync(join(dir, f));
+      render(`shots-${lang}-${c.n}.html`, shots.shotPage(c, cap, Math.min(size, fits[c.n]), useAlt ? alt.layout : undefined), shots.W, shots.H, out);
+      return { out, rel: `../../phone/${lang}/phone-${c.n}-${slug}.png`, real: cap.real, slug };
+    });
+    const real = done.filter((d) => d.real).length;
+    const sheet = shots.contactPage(lang, done, `${real} / 8 from real captures`);
+    render(`shots-${lang}-contact.html`, sheet.html, sheet.width, sheet.height, join(dir, '_contact.png'));
+  }
+};
+
+if (TARGET === 'legacy' || TARGET === 'all') {
+  mkdirSync(join(ROOT, 'phone', 'legacy'), { recursive: true });
+  for (const job of legacyJobs) render(...job);
+}
+if (TARGET === 'shots') runShots(process.argv.slice(3));
 if (TARGET === 'icon' || TARGET === 'all') runIcon();
 if (TARGET === 'v14' || TARGET === 'all') runV14();
 console.log('done');

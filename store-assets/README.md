@@ -156,7 +156,7 @@ first, and ask.
 
 ### Photo credits
 
-Six recipe photos in the library captures come from Unsplash under the
+Every recipe photo in the library captures comes from Unsplash under the
 [Unsplash License](https://unsplash.com/license), which allows free commercial use with no
 attribution required. They are credited here anyway.
 
@@ -168,10 +168,12 @@ attribution required. They are credited here anyway.
 | Eggless Banana Bread | Evangelina Silina | https://unsplash.com/photos/Dcrpmris9Yc |
 | Pierogi Ruskies - Polish Dumplings | Zoshua Colah | https://unsplash.com/photos/9zgj7soTsFg |
 | Parmesan Risotto | Luna Hu | https://unsplash.com/photos/7TaFlRyAhSQ |
+| Chicken Cacciatore | Sushmita Chatterjee | https://unsplash.com/photos/Xnb826JWdDI |
+| Blueberry Yogurt Muffins | Elena Taranukhina | https://unsplash.com/photos/5p6pM1LlLk4 |
 
-The Chicken Cacciatore and Blueberry Yogurt Muffins photos are **not** from Unsplash. They were
-imported with the recipes from their source websites (RecipeTin Eats and everyday-delicious), so
-they are the sites' own photos. Check before relying on them in a store screenshot.
+The sample Pierogi photo (Zoshua Colah, https://unsplash.com/photos/O8RSmmnv6eg) is bundled with
+the app. Slot 3 shows a public recipe page (kingarthurbaking.com) inside the in-app browser,
+scrolled past the site's sale banner.
 
 ## Release notes
 
